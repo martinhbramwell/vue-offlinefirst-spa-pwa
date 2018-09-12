@@ -1,0 +1,12 @@
+{
+  "name": "client",
+  "version": "0.0.1",
+  "description": "The Vue JS single page progressive web app of 'offspwa-vue'",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["vuejs", "spa", "pwa", "offline-first", "pouchdb"],
+  "author": "Martin H. J. Bramwell",
+  "license": "MIT"
+}

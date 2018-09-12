@@ -1,0 +1,8 @@
+{
+  "name": "offspwa-vue",
+  "author": "Martin H. J. Bramwell",
+  "private": true,
+  "devDependencies": {
+    "lerna": "^3.3.1"
+  }
+}
