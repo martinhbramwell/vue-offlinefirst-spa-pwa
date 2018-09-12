@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "@offspwa-vue/client",
   "version": "0.0.1",
   "description": "The Vue JS single page progressive web app of 'offspwa-vue'",
   "main": "index.js",
