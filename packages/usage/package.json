@@ -1,5 +1,5 @@
 {
-  "name": "@offspwa-vue/usage",
+  "name": "@offsppwa-vue/usage",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -7,10 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@offspwa-vue/client": "0.0.1",
-    "@offspwa-vue/database": "0.0.1",
-    "@offspwa-vue/lambdaAuth": "0.0.1",
-    "@offspwa-vue/lambdaSrv": "0.0.1"
+    "@offsppwa-vue/client": "0.0.1",
+    "@offsppwa-vue/database": "0.0.1",
+    "@offsppwa-vue/lambdaAuth": "0.0.1",
+    "@offsppwa-vue/lambdaSrv": "0.0.1"
   },
   "keywords": [],
   "author": "Martin H. J. Bramwell",
