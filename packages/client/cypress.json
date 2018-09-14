@@ -1,0 +1,9 @@
+{
+  "fixturesFolder": "test/e2e/cy/fixtures",
+  "integrationFolder": "test/e2e/cy/integration",
+  "pluginsFile": "test/e2e/cy/plugins",
+  "screenshotsFolder": "test/e2e/cy/screenshots",
+  "supportFile": "test/e2e/cy/support",
+  "baseUrl": "http://wtdev:8080/#/",
+  "chromeWebSecurity": false
+}

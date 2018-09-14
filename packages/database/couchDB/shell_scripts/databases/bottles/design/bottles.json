@@ -1,0 +1,8 @@
+{
+  "_id": "_design/bottles",
+  "views": {
+    "compact_bottle": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'bottle') { emit(doc.data.id    , { \"id\": doc.data.id, \"codigo\": doc.data.codigo, \"type\": doc.data.type, \"fechaCompra\": doc.data.fechaCompra, \"movements\": doc.data.movements, \"ultimo\": doc.data.ultimo }); } }"
+    }
+  }
+}

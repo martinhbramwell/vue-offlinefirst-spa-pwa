@@ -1,0 +1,1 @@
+{"_id":"_design/ddoc","_rev":"1-30aab27827e54bda77a5ac9ae6b72f6c","views":{"name":{"map":"function(doc) { emit(doc.name); }"}}}

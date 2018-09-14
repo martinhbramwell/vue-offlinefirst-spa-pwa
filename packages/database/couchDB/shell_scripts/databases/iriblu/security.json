@@ -1,0 +1,10 @@
+{
+  "admins": {
+    "names": [ "hasan","dlwild" ],
+    "roles": [ "admin" ]
+  },
+  "members": {
+    "names": [ "12345", "12354" ],
+    "roles": [ "read/write" ]
+  }
+}

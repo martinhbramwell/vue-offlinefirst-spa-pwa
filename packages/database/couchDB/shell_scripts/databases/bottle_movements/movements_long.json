@@ -1,0 +1,86 @@
+
+{
+  "docs": [
+    {
+      "_id": "Movement_1_180828121127012356",
+      "data": {
+        "id": "180828121127012356",
+        "inOut": "in",
+        "type": "movement",
+        "status": "new",
+        "bottles": [
+          100018,
+          100025,
+          100796
+        ],
+        "customer": 12362,
+        "inventory": 12356
+      }
+    },
+    {
+      "_id": "Movement_1_180828121137012354",
+      "data": {
+        "id": "180828121137012354",
+        "inOut": "out",
+        "type": "movement",
+        "status": "new",
+        "bottles": [
+          100018,
+          100025,
+          100796
+        ],
+        "customer": 12362,
+        "inventory": 12354
+      }
+    },
+    {
+      "_id": "Movement_1_180828121147012356",
+      "data": {
+        "id": "180828121147012356",
+        "inOut": "out",
+        "type": "movement",
+        "status": "new",
+        "bottles": [
+          100018,
+          100025,
+          100796
+        ],
+        "customer": 12362,
+        "inventory": 12356
+      }
+    },
+    {
+      "_id": "Movement_1_180828121157012354",
+      "data": {
+        "id": "180828121157012354",
+        "inOut": "in",
+        "type": "movement",
+        "status": "new",
+        "bottles": [
+          100018,
+          100025,
+          100796
+        ],
+        "customer": 12362,
+        "inventory": 12354
+      }
+    },
+    {
+      "_id": "Movement_1_180828121207012356",
+      "data": {
+        "id": "180828121207012356",
+        "inOut": "in",
+        "type": "movement",
+        "status": "new",
+        "bottles": [
+          100018,
+          100025,
+          100796
+        ],
+        "customer": 12362,
+        "inventory": 12356
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,14 @@
+{
+  "_id": "_design/visible",
+  "views": {
+    "compact_bottle": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'bottle') { emit(doc.data.id    , { \"id\": doc.data.id, \"codigo\": doc.data.codigo, \"type\": doc.data.type, \"fechaCompra\": doc.data.fechaCompra, \"movements\": doc.data.movements, \"ultimo\": doc.data.ultimo }); } }"
+    },
+    "compact_person": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'person') { emit(doc.data.nombre, { \"id\": doc.data.id, \"email\": doc.data.email, \"envases\": doc.data.bottles, \"distribuidor\": doc.data.distribuidor, \"direccion\": doc.data.direccion }); } }"
+    },
+    "compact_movement": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'movement') { emit(doc.data.id, { \"id\": doc.data.id, \"inventario\": doc.data.inventory, \"cliente\": doc.data.customer, \"envases\": doc.data.bottles, \"tipo\": doc.data.inOut }); } }"
+    }
+  }
+}

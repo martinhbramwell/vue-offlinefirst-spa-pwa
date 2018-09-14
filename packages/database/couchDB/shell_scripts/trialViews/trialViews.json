@@ -1,0 +1,1 @@
+{"views":{"trial1":{"map":"function (doc) { if (doc.type == \"person\") { emit(doc._id, {codigo: doc.codigo, nombre: doc.nombre});}}"}}}

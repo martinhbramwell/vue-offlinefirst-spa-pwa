@@ -1,0 +1,9 @@
+{
+  "_id": "_design/ddocs",
+  "filters": {
+    "this_ddoc": "function(doc, req) { return doc._id === '_design/ddocs' }",
+    "users": "function(doc, req) { return doc._id === '_design/user_specific' }",
+    "full": "function(doc, req) { return doc._id === '_design/full_range' }",
+    "moves": "function(doc, req) { return doc._id === '_design/post_processing' }"
+  }
+}

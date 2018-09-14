@@ -1,0 +1,8 @@
+{
+  "_id": "_design/persons",
+  "views": {
+    "compact_person": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'person') { emit(doc.data.nombre, { \"id\": doc.data.id, \"email\": doc.data.email, \"envases\": doc.data.bottles, \"distribuidor\": doc.data.distribuidor, \"direccion\": doc.data.direccion }); } }"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+
+{
+  "docs": [
+    {
+      "_id": "Movement_1_180828121207012356",
+      "data": {
+        "id": "180828121207012356",
+        "inOut": "in",
+        "type": "movement",
+        "status": "new",
+        "bottles": [
+          100018,
+          100025,
+          100796
+        ],
+        "customer": 12362,
+        "inventory": 12356
+      }
+    }
+  ]
+}
+

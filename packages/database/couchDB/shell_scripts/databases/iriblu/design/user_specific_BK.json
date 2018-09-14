@@ -1,0 +1,11 @@
+{
+  "_id": "_design/user_specific",
+  "filters": {
+    "this_ddoc": "function(doc, req) { return doc._id === '_design/user_specific' }",
+    "by_inventory_agent": "function(doc, req) { log('#################################'); log(req.userCtx.name);  log(req.query.agent); return true; if(!doc.data) { return false; } if(doc.data.type != 'movement') { return false; } if(doc.data.inventory == req.userCtx.name) { return true; } if(doc.data.inventory == req.query.agent) { return true; } return false; }",
+    "by_customer_agent": "function(doc, req) { if(doc.data && doc.data.customer == req.userCtx.name) { return true; } return false; }",
+    "by_vendor_agent": "function(doc, req) { if(doc.data && doc.data.vendor == req.userCtx.name) { return true; } return false; }",
+    "by_buyer_agent": "function(doc, req) { if(doc.data && doc.data.buyer == req.userCtx.name) { return true; } return false; }",
+    "personal_record": "function(doc, req) { if(doc.data && doc.data.type == 'person' && doc.data.id ==req.userCtx.name) { return true; } return false; }"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "_id": "_design/post_processing",
+  "filters": {
+    "by_new_inventory": "function(doc, req) { return doc.data && doc.data.type == 'movement' && doc.data.status == 'new' }",
+    "by_processed_inventory": "function(doc, req) { return doc.data && doc.data.type == 'movement' && doc.data.status == 'complete' }"
+  }
+}

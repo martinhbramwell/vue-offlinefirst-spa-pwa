@@ -7,10 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "client": "0.0.1",
-    "database": "0.0.1",
-    "lambdaAuth": "0.0.1",
-    "lambdaSrv": "0.0.1"
+    "@offspwa-vue/client": "0.0.1",
+    "@offspwa-vue/database": "0.0.1",
+    "@offspwa-vue/lambdaAuth": "0.0.1",
+    "@offspwa-vue/lambdaSrv": "0.0.1"
   },
   "keywords": [],
   "author": "Martin H. J. Bramwell",

@@ -1,0 +1,6 @@
+{
+  "_id": "_design/user_specific",
+  "filters": {
+    "by_inventory_agent": "function(doc, req) { if(doc.data && doc.data.inventory == req.query.agent) { return true; } }"
+  }
+}

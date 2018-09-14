@@ -1,0 +1,1 @@
+{"_id":"_design/trialViews","_rev":"23-e3dfd74202027334e5b44aae479c2851","views":{"trial1":{"map":"function (doc) { if (doc.type == \"person\") { emit(doc._id, {codigo: doc.codigo, nombre: doc.nombre});}}"}}}

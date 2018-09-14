@@ -1,0 +1,8 @@
+{
+  "_id": "_design/user_specific",
+  "_rev": "20-2aa218b08bbd0811366063eedd003eac",
+  "filters": {
+    "by_vendor_agent": "function(doc, req) { if(doc.data && doc.data.vendor == req.userCtx.name) { return true; } return false; }"
+  }
+}
+

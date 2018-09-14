@@ -1,0 +1,7 @@
+{
+  "_id": "_design/post_processing",
+  "filters": {
+    "by_new_inventory": "function(doc, req) { return true }",
+    "by_processed_movement": "function(doc, req) {if (doc.data) {if (['person', 'bottle', 'movement'].indexOf(doc.data.type) > -1) return true; if (doc._deleted && doc.data.type == 'exchange') return true; } }"
+  }
+}
