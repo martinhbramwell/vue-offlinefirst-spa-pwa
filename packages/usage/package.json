@@ -10,7 +10,8 @@
     "@offsppwa-vue/client": "0.0.1",
     "@offsppwa-vue/database": "0.0.1",
     "@offsppwa-vue/lambdaAuth": "0.0.1",
-    "@offsppwa-vue/lambdaSrv": "0.0.1"
+    "@offsppwa-vue/lambdaSrv": "0.0.1",
+    "@offsppwa-vue/tools": "0.0.1"
   },
   "keywords": [],
   "author": "Martin H. J. Bramwell",
