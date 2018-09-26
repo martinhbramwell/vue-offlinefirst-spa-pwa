@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 export COUCH_DATABASE=${1:-$COUCH_DATABASE};
-export CONFIG_FILE="${HOME}/.ssh/secrets/vuesppwa.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 
 function usage() {
   echo "Usage: ./DropCreateDatabase.sh \$COUCH_DATABASE";

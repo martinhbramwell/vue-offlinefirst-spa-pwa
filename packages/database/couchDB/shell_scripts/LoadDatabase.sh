@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 #
 
-export VERSION="30";
+export VERSION="31";
 export DOWNLOADS_DIR="${HOME}/Downloads";
 export SAFE_DIR="backup";
 export SOURCE_FILES_DIR="${DOWNLOADS_DIR}/${SAFE_DIR}";
 
 export COUCH_DATABASE_NAME='iriblu';
 export COUCH_DATABASE="${COUCH_DATABASE_NAME}_${VERSION}";
+
+export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+source ${CONFIG_FILE};
+
+if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
+  usage;
+fi;
 
 if [[ 1 == 0 ]]; then
   ./CleanSheetsFilenames.sh &>/dev/null;
@@ -28,6 +35,7 @@ if [[ 1 == 1 ]]; then
   ./DropCreateDatabase.sh;
   ./PutSecurity.sh;
   ./PutUsers.sh;
+
 
   export COUCH_COLLECTION_NAME='persons';
   ./UploadJsonFile.sh databases/${COUCH_COLLECTION_NAME}/${COUCH_COLLECTION_NAME};
@@ -53,7 +61,7 @@ if [[ 1 == 1 ]]; then
 
 fi;
 
-if [[ 1 == 1 ]]; then
+if [[ 0 == 1 ]]; then
 
   ./TestGet.sh;
 

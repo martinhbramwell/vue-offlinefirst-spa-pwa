@@ -3,7 +3,7 @@
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
 export COUCH_DATABASE=${1:-$COUCH_DATABASE};
-export CONFIG_FILE="${HOME}/.ssh/secrets/vuesppwa.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 
 function usage() {
   echo "Usage: ./TestGet.sh \$COUCH_DATABASE";
