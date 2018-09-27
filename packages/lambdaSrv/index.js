@@ -89,12 +89,12 @@ const processMovements = () => {
     }).then(function (rslt) {
       rslt.rows.forEach((row) => {
         if (!row.doc.data) return;
-        const excReq = row.doc;
-        const mvdt = excReq.data;
+        const exchangeRequest = row.doc;
+        const mvdt = exchangeRequest.data;
         if (mvdt.type !== 'exchange') return;
         if (mvdt.status !== NEW) return;
 
-        LG(`Row ${JSON.stringify(excReq, null, 2)}`);
+        LG(`Row ${JSON.stringify(exchangeRequest, null, 2)}`);
         LG(`Process ${mvdt.id} ${mvdt.bottles.length}`);
 
 
@@ -107,22 +107,20 @@ const processMovements = () => {
 
         mvdt.status = PROCESSING;
         // mvdt.status = COMPLETE;
-        mvdt.rev = excReq._rev;
+        mvdt.rev = exchangeRequest._rev;
         mvdt.id = parseInt(mvdt.id);
-        LG(`
-
-          excReq ${JSON.stringify(excReq, null, 2)}`);
+        LG(`ExchangeRequest ${JSON.stringify(exchangeRequest, null, 2)}`);
         // LG(mvdt);
-        movesDatabaseLocal.put(excReq)
+        movesDatabaseLocal.put(exchangeRequest)
           .then((mvmnt) => {
             LG(`SAVED MOVEMENT BEFORE PROCESSING
               ${JSON.stringify(mvmnt, null, 2)}
             `);
 
-            excReq._rev = mvmnt.rev;
+            exchangeRequest._rev = mvmnt.rev;
 
-            const findingPromises = [];
-            findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.customer)
+            const aryMarshallerPromises = [];
+            aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.customer)
               .then((person) => {
                 LG('CUSTOMER');
                 customer = person;
@@ -131,7 +129,7 @@ const processMovements = () => {
                 LG(customer.allPersons[0]);
               }));
 
-            findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.inventory)
+            aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.inventory)
               .then((person) => {
                 LG('INVENTORY');
                 inventory = person;
@@ -140,14 +138,14 @@ const processMovements = () => {
                 LG(inventory.allPersons[0]);
               }));
 
-            findingPromises.push(movesDatabaseLocal.rel.find('aBottle', mvdt.bottles)
+            aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aBottle', mvdt.bottles)
               .then((btls) => {
                 aryBottles = btls.allBottles;
                 LG(`MOV.BOTTLES  : ${JSON.stringify(mvdt.bottles, null, 2)}`);
                 LG(`BOTTLEs  : ${JSON.stringify(aryBottles, null, 2)}`);
               }));
 
-            const collectedBottles = Promise.all(findingPromises)
+            const collectedBottles = Promise.all(aryMarshallerPromises)
               .then(() => {
                 // LG('BOTTLES');
                 // LG(aryBottles);
@@ -218,9 +216,9 @@ const processMovements = () => {
                 Promise.all(savingPromises)
                   .then((values) => {
                     LG(`PROMISE LIST \n${JSON.stringify(values, null, 2)}`);
-                    excReq._deleted = true;
-                    LG(`EXCHANGE \n${JSON.stringify(excReq, null, 2)}`);
-                    movesDatabaseLocal.put(excReq)
+                    exchangeRequest._deleted = true;
+                    LG(`EXCHANGE \n${JSON.stringify(exchangeRequest, null, 2)}`);
+                    movesDatabaseLocal.put(exchangeRequest)
                       .then((exrq) => {
                         LG(`MARKED EXCHANGE REQUEST DELETED :: ${JSON.stringify(exrq, null, 2)}`);
                         mvdt.status = COMPLETE;
@@ -237,9 +235,9 @@ const processMovements = () => {
 
 
           }).catch(err => LG(`Error: ${JSON.stringify(err, null, 2)}`));
-        // LG(movesDatabaseLocal.rel.makeDocID({ 'type': 'ExchangeRequest', 'id': parseInt(excReq.data.id)}));
-        // movesDatabaseLocal.rel.find('ExchangeRequest', parseInt(excReq.data.id)).then(function (req) {
-        // movesDatabaseLocal.get(excReq._id).then((doc) => {
+        // LG(movesDatabaseLocal.rel.makeDocID({ 'type': 'ExchangeRequest', 'id': parseInt(exchangeRequest.data.id)}));
+        // movesDatabaseLocal.rel.find('ExchangeRequest', parseInt(exchangeRequest.data.id)).then(function (req) {
+        // movesDatabaseLocal.get(exchangeRequest._id).then((doc) => {
         //     LG(`
         //     Deleting :: ${JSON.stringify(doc, null, 2)}`);
         //     doc._deleted = true;
@@ -252,7 +250,7 @@ const processMovements = () => {
         //   });
 
 
-      //   movesDatabaseLocal.rel.save('Movement', excReq.data)
+      //   movesDatabaseLocal.rel.save('Movement', exchangeRequest.data)
       //     .then((mvmnt) => {
       //       // LG(mvmnt);
       //       // LG(mvmnt.Movements[0]);
@@ -266,8 +264,8 @@ const processMovements = () => {
       });
 
       // const movs = result.rows.filter((row) => row.doc.data && row.doc.data.type === 'movement');
-      // movs.forEach((excReq) => {
-      //   LG(`${excReq.id} -- ${excReq.doc.data.status}`);
+      // movs.forEach((exchangeRequest) => {
+      //   LG(`${exchangeRequest.id} -- ${exchangeRequest.doc.data.status}`);
       // });
     }).catch(function (err) {
       console.log(err);
@@ -475,8 +473,8 @@ app.get('/test', (req, res) => {
       LG('SAVED MOVEMENT BEFORE PROCESSING');
       LG(mvmnt);
 
-      const findingPromises = [];
-      findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.customer)
+      const aryMarshallerPromises = [];
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.customer)
         .then((person) => {
           LG('CUSTOMER');
           customer = person;
@@ -485,7 +483,7 @@ app.get('/test', (req, res) => {
           LG(customer.allPersons[0]);
         }));
 
-      findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.inventory)
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.inventory)
         .then((person) => {
           LG('INVENTORY');
           inventory = person;
@@ -494,14 +492,14 @@ app.get('/test', (req, res) => {
           LG(inventory.allPersons[0]);
         }));
 
-      findingPromises.push(movesDatabaseLocal.rel.find('aBottle', mov.bottles)
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aBottle', mov.bottles)
         .then((btls) => {
-          aryBottles = btls.allBottles;
+          aryBottles = btls.allBottles.filter(btle => mov.bottles.includes(btle.id));;
           LG(`MOV.BOTTLES  : ${JSON.stringify(mov.bottles, null, 2)}`);
           LG(`BOTTLEs  : ${JSON.stringify(aryBottles, null, 2)}`);
         }));
 
-      const collectedBottles = Promise.all(findingPromises)
+      const collectedBottles = Promise.all(aryMarshallerPromises)
         .then(() => {
           // LG('BOTTLES');
           // LG(aryBottles);

@@ -61,10 +61,9 @@ if [[ 1 == 1 ]]; then
 
 fi;
 
-if [[ 0 == 1 ]]; then
+if [[ 1 == 0 ]]; then
 
-  ./TestGet.sh;
+  # ./TestGet.sh;
+  ./tests/ResetForExchangeRequestTest.sh;
 
 fi;
-
-
