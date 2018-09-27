@@ -195,8 +195,8 @@ const tightDate = () => {
 };
 
 export const generateMovementId = (user, incr) => {
-  const tddt = (incr + tightDate()).toString();
-  return parseInt(`${user}0${tddt}`, 10);
+  const tddt = tightDate().toString();
+  return parseInt(`${user}${incr}${tddt}`, 10);
 };
 
 export default {

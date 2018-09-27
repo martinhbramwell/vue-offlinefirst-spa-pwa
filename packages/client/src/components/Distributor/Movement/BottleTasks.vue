@@ -293,8 +293,10 @@
           <a href="#" class="card-footer-item">Edit</a>
           <a href="#" class="card-footer-item">Delete</a>
         </footer>
-        <p>currentUser: {{ currentUser.id }} Bottles: {{ currentUser.bottles.length }} </p>
-        <p>personChosen: {{ personChosen.id }} Bottles: {{ personChosen.bottles.length }} </p>
+        <p>currentUser: {{ currentUser.id }}
+               Bottles: {{ currentUser.bottles && currentUser.bottles.length }} </p>
+        <p>personChosen: {{ personChosen.id }}
+                Bottles: {{ personChosen.bottles && personChosen.bottles.length }} </p>
       </div>
     </div>
   </div>
@@ -415,8 +417,9 @@
     class: 'button is-small is-info is-outlined',
     text: 'Esconder QR',
   };
+  const ID_BOTTLEPLACEHOLDER = 99999999;
   const BOTTLEPLACEHOLDER = {
-    id: 99999999,
+    id: ID_BOTTLEPLACEHOLDER,
     data: `Rastrear envases aqui
     `,
     src: '',
@@ -431,6 +434,14 @@
         textAlign: 'center',
       },
     },
+  };
+
+  const clearExchangeArea = (area, codes) => {
+    area
+      .map((b, ix) => (codes.includes(b.id) ? ix : -1))
+      .sort((a, b) => (a - b) * -1)
+      .forEach(idx => area.splice(idx, 1));
+    if (area.findIndex(tag => tag.id === ID_BOTTLEPLACEHOLDER) < 0) area.push(BOTTLEPLACEHOLDER);
   };
 
   const UNKNOWN_BOTTLE_ERROR = 'Error: Envase desconocido!';
@@ -610,6 +621,9 @@
           this.$pouch.put(moveIn)
             .then((mvmnt) => {
               LG('---------- Saved movement IN --------');
+              // LG(this.exchange);
+              // LG(incoming);
+              clearExchangeArea(this.exchange, incoming);
               LG(mvmnt);
             });
         }
@@ -633,6 +647,9 @@
           this.$pouch.put(moveOut)
             .then((mvmnt) => {
               LG('---------- Saved movement OUT --------');
+              // LG(outgoing);
+              // LG(this.exchange);
+              clearExchangeArea(this.exchange, outgoing);
               LG(mvmnt);
             });
         }
@@ -831,8 +848,14 @@
             pos = this.personPicker.list.findIndex(itm => itm.value === cod);
             // LG(`pos= ${pos}`);
             // this.personPicker.list[pos - 1].pos = pos;
-            this.personPicker.list[pos - 1].value = cod;
-            this.personPicker.list[pos - 1].label = data.nombre;
+            try {
+              this.personPicker.list[pos - 1].value = cod;
+              this.personPicker.list[pos - 1].label = data.nombre;
+            } catch (err) {
+              LG(`Unexpected missing list item in personPicker
+                pouchData.doc.data.codigo :: ${cod}
+                personPicker.list :: ${pos}`);
+            }
 
             break;
           default:
