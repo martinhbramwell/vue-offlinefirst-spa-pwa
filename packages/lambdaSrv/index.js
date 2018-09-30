@@ -77,199 +77,178 @@ movesDatabaseLocal.setSchema([
 
 LG(`REMOTE_DB  :  ${process.env.REMOTE_DB}`);
 
-const processMovements = () => {
+const EXCHANGE_RECORD = 'exchange';
+const MOVEMENT_RECORD = 'movement';
+
+const processExchangeRequest = (row) => {
+  if (!row.doc.data) return;
+  const exchangeRequest = row.doc;
+  const mvdt = exchangeRequest.data;
+  if (mvdt.type !== EXCHANGE_RECORD) return;
+  if (mvdt.status !== NEW) return;
+
+  LG(`Row ${JSON.stringify(exchangeRequest, null, 2)}`);
+  LG(`Process ${mvdt.id} ${mvdt.bottles.length}`);
+
+
+  let customer = null;
+  let customerID = null;
+  let inventory = null;
+  let inventoryID = null;
+  let aryBottles = [];
+  let aryBottleIDs = [];
+
+  mvdt.status = PROCESSING;
+  mvdt.rev = exchangeRequest._rev;
+  mvdt.id = parseInt(mvdt.id);
+  LG(`ExchangeRequest status ${PROCESSING} :: ${JSON.stringify(exchangeRequest, null, 2)}`);
+
+  movesDatabaseLocal.put(exchangeRequest)
+    .then((mvmnt) => {
+      LG(`SAVED UPDATED EXCHANGE REQUEST BEFORE PROCESSING
+        ${JSON.stringify(mvmnt, null, 2)}
+      `);
+
+      exchangeRequest._rev = mvmnt.rev;
+
+      const aryMarshallerPromises = [];
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.customer)
+        .then((person) => {
+          LG('CUSTOMER');
+          customer = person;
+          customerID = customer.allPersons[0].id;
+          LG(customerID);
+          LG(customer.allPersons[0]);
+        }));
+
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.inventory)
+        .then((person) => {
+          LG('INVENTORY');
+          inventory = person;
+          inventoryID = inventory.allPersons[0].id;
+          LG(inventoryID);
+          LG(inventory.allPersons[0]);
+        }));
+
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aBottle', mvdt.bottles)
+        .then((btls) => {
+          aryBottles = btls.allBottles.filter(bottle => mvdt.bottles.includes(bottle.id));
+          LG(`MOV.BOTTLES  : ${JSON.stringify(mvdt.bottles, null, 2)}`);
+          LG(`BOTTLEs  : ${JSON.stringify(aryBottles, null, 2)}`);
+        }));
+
+      const collectedBottles = Promise.all(aryMarshallerPromises)
+        .then(() => {
+          // LG('BOTTLES');
+          // LG(aryBottles);
+          aryBottleIDs = aryBottles.map(btl => btl.id);
+          LG(`customer bottles length = ${customer.allBottles  ?  customer.allBottles.length  :  0}`);
+          LG(`inventory bottles length = ${inventory.allBottles  ?  inventory.allBottles.length : 0}`);
+
+          let srce = customer;
+          let dest = inventory;
+          let destID = inventoryID;
+          let location = 'planta';
+          if (mvdt.inOut === 'out') {
+            srce = inventory;
+            dest = customer;
+            destID = customerID;
+            location = 'cliente';
+          }
+
+          const savingPromises = [];
+          /* eslint-disable no-param-reassign */
+          // LG(`Source person before : ${JSON.stringify(srce, null, 2)}`);
+          LG(`Source person before : ${JSON.stringify(srce.allPersons[0], null, 2)}`);
+
+          LG(`Bottle IDs : ${JSON.stringify(aryBottleIDs, null, 2)}`);
+
+          let saveSrc = {
+            _rev: srce.allPersons[0].rev,
+            _id: movesDatabaseLocal.rel.makeDocID({ type: 'aPerson', id: srce.allPersons[0].id })
+          };
+          delete srce.allPersons[0].rev;
+          saveSrc.data = srce.allPersons[0];
+
+          saveSrc.data.bottles = saveSrc.data.bottles.filter((btl) => {
+            return !aryBottleIDs.includes(btl);
+          });
+          saveSrc.data.movements.push(mvdt.id);
+
+          LG(`Source person after : ${JSON.stringify(saveSrc, null, 2)}`);
+
+          LG(`Destination person before : ${JSON.stringify(dest.allPersons[0], null, 2)}`);
+          let saveDst = {
+            _rev: dest.allPersons[0].rev,
+            _id: movesDatabaseLocal.rel.makeDocID({ type: 'aPerson', id: dest.allPersons[0].id })
+          };
+          delete dest.allPersons[0].rev;
+          saveDst.data = dest.allPersons[0];
+
+          saveDst.data.movements.push(mvdt.id);
+          aryBottles.forEach((btl) => {
+              LG(`bottle  : ${JSON.stringify(btl, null, 2)}`);
+              btl.ultimo = destID;
+              btl.ubicacion = location;
+              btl.movements.push(mvdt.id);
+              saveDst.data.bottles.push(btl.id);
+
+              savingPromises.push(movesDatabaseLocal.rel.save('aBottle', btl));
+            });
+          LG(`Destination person after : ${JSON.stringify(saveDst, null, 2)}`);
+
+          // LG(`customer bottles length = ${customer.allBottles.length}`);
+          // LG(`inventory bottles length = ${inventory.allBottles.length}`);
+
+
+          savingPromises.push(movesDatabaseLocal.put(saveSrc).then((res) => { LG(`SRCE ${JSON.stringify(res, null, 2)}`) }));
+
+          savingPromises.push(movesDatabaseLocal.put(saveDst).then((res) => { LG(`DEST ${JSON.stringify(res, null, 2)}`) }));
+
+          Promise.all(savingPromises)
+            .then((values) => {
+              LG(`PROMISE LIST \n${JSON.stringify(values, null, 2)}`);
+              exchangeRequest._deleted = true;
+              LG(`EXCHANGE \n${JSON.stringify(exchangeRequest, null, 2)}`);
+              movesDatabaseLocal.put(exchangeRequest)
+                .then((exrq) => {
+                  LG(`MARKED EXCHANGE REQUEST DELETED :: ${JSON.stringify(exrq, null, 2)}`);
+                  mvdt.status = COMPLETE;
+                  mvdt.type = MOVEMENT_RECORD;
+                  delete mvdt.rev;
+                  movesDatabaseLocal.rel.save('Movement', mvdt)
+                    .then(mvmnt => {
+                      LG(`MOVEMENT RECORDED :: ${JSON.stringify(mvmnt, null, 2)}`);
+                      processExchangeRequests();
+                    })
+                    .catch(err => LG(`MOVEMENT RECORDING ERROR :: ${JSON.stringify(err, null, 2)}`));
+                })
+                .catch(err => LG(`EXCHANGE REQUEST DELETION ERROR :: ${JSON.stringify(err, null, 2)}`));
+            })
+            .catch(err => LG(`PROMISES RESOLUTION ERROR :: ${JSON.stringify(err, null, 2)}`));
+        });
+
+
+    }).catch(err => LG(`Error: ${JSON.stringify(err, null, 2)}`));
+};
+
+const processExchangeRequests = () => {
   LG(`
 
-    PROCESS MOVEMENTS
+    PROCESS EXCHANGE REQUESTS
     `);
     movesDatabaseLocal.allDocs({
       include_docs: true,
-      // startkey: 'Movement',
-      // endkey: 'Movement\ufff0',
-    }).then(function (rslt) {
-      rslt.rows.forEach((row) => {
-        if (!row.doc.data) return;
-        const excReq = row.doc;
-        const mvdt = excReq.data;
-        if (mvdt.type !== 'exchange') return;
-        if (mvdt.status !== NEW) return;
-
-        LG(`Row ${JSON.stringify(excReq, null, 2)}`);
-        LG(`Process ${mvdt.id} ${mvdt.bottles.length}`);
-
-
-        let customer = null;
-        let customerID = null;
-        let inventory = null;
-        let inventoryID = null;
-        let aryBottles = [];
-        let aryBottleIDs = [];
-
-        mvdt.status = PROCESSING;
-        // mvdt.status = COMPLETE;
-        mvdt.rev = excReq._rev;
-        mvdt.id = parseInt(mvdt.id);
-        LG(`
-
-          excReq ${JSON.stringify(excReq, null, 2)}`);
-        // LG(mvdt);
-        movesDatabaseLocal.put(excReq)
-          .then((mvmnt) => {
-            LG(`SAVED MOVEMENT BEFORE PROCESSING
-              ${JSON.stringify(mvmnt, null, 2)}
-            `);
-
-            excReq._rev = mvmnt.rev;
-
-            const findingPromises = [];
-            findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.customer)
-              .then((person) => {
-                LG('CUSTOMER');
-                customer = person;
-                customerID = customer.allPersons[0].id;
-                LG(customerID);
-                LG(customer.allPersons[0]);
-              }));
-
-            findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mvdt.inventory)
-              .then((person) => {
-                LG('INVENTORY');
-                inventory = person;
-                inventoryID = inventory.allPersons[0].id;
-                LG(inventoryID);
-                LG(inventory.allPersons[0]);
-              }));
-
-            findingPromises.push(movesDatabaseLocal.rel.find('aBottle', mvdt.bottles)
-              .then((btls) => {
-                aryBottles = btls.allBottles;
-                LG(`MOV.BOTTLES  : ${JSON.stringify(mvdt.bottles, null, 2)}`);
-                LG(`BOTTLEs  : ${JSON.stringify(aryBottles, null, 2)}`);
-              }));
-
-            const collectedBottles = Promise.all(findingPromises)
-              .then(() => {
-                // LG('BOTTLES');
-                // LG(aryBottles);
-                aryBottleIDs = aryBottles.map(btl => btl.id);
-                LG(`customer bottles length = ${customer.allBottles  ?  customer.allBottles.length  :  0}`);
-                LG(`inventory bottles length = ${inventory.allBottles  ?  inventory.allBottles.length : 0}`);
-
-                let srce = customer;
-                let dest = inventory;
-                let destID = inventoryID;
-                let location = 'planta';
-                if (mvdt.inOut === 'out') {
-                  srce = inventory;
-                  dest = customer;
-                  destID = customerID;
-                  location = 'cliente';
-                }
-
-                const savingPromises = [];
-                /* eslint-disable no-param-reassign */
-                // LG(`Source person before : ${JSON.stringify(srce, null, 2)}`);
-                LG(`Source person before : ${JSON.stringify(srce.allPersons[0], null, 2)}`);
-
-                LG(`Bottle IDs : ${JSON.stringify(aryBottleIDs, null, 2)}`);
-
-                let saveSrc = {
-                  _rev: srce.allPersons[0].rev,
-                  _id: movesDatabaseLocal.rel.makeDocID({ type: 'aPerson', id: srce.allPersons[0].id })
-                };
-                delete srce.allPersons[0].rev;
-                saveSrc.data = srce.allPersons[0];
-
-                saveSrc.data.bottles = saveSrc.data.bottles.filter((btl) => {
-                  return !aryBottleIDs.includes(btl);
-                });
-                saveSrc.data.movements.push(mvdt.id);
-
-                LG(`Source person after : ${JSON.stringify(saveSrc, null, 2)}`);
-
-                LG(`Destination person before : ${JSON.stringify(dest.allPersons[0], null, 2)}`);
-                let saveDst = {
-                  _rev: dest.allPersons[0].rev,
-                  _id: movesDatabaseLocal.rel.makeDocID({ type: 'aPerson', id: dest.allPersons[0].id })
-                };
-                delete dest.allPersons[0].rev;
-                saveDst.data = dest.allPersons[0];
-
-                saveDst.data.movements.push(mvdt.id);
-                aryBottles.forEach((btl) => {
-                    LG(`bottle  : ${JSON.stringify(btl, null, 2)}`);
-                    btl.ultimo = destID;
-                    btl.ubicacion = location;
-                    btl.movements.push(mvdt.id);
-                    saveDst.data.bottles.push(btl.id);
-
-                    savingPromises.push(movesDatabaseLocal.rel.save('aBottle', btl));
-                  });
-                LG(`Destination person after : ${JSON.stringify(saveDst, null, 2)}`);
-
-                // LG(`customer bottles length = ${customer.allBottles.length}`);
-                // LG(`inventory bottles length = ${inventory.allBottles.length}`);
-
-
-                savingPromises.push(movesDatabaseLocal.put(saveSrc).then((res) => { LG(`SRCE ${JSON.stringify(res, null, 2)}`) }));
-
-                savingPromises.push(movesDatabaseLocal.put(saveDst).then((res) => { LG(`DEST ${JSON.stringify(res, null, 2)}`) }));
-
-                Promise.all(savingPromises)
-                  .then((values) => {
-                    LG(`PROMISE LIST \n${JSON.stringify(values, null, 2)}`);
-                    excReq._deleted = true;
-                    LG(`EXCHANGE \n${JSON.stringify(excReq, null, 2)}`);
-                    movesDatabaseLocal.put(excReq)
-                      .then((exrq) => {
-                        LG(`MARKED EXCHANGE REQUEST DELETED :: ${JSON.stringify(exrq, null, 2)}`);
-                        mvdt.status = COMPLETE;
-                        mvdt.type = 'movement';
-                        delete mvdt.rev;
-                        movesDatabaseLocal.rel.save('Movement', mvdt)
-                          .then(mvmnt => LG(`MOVEMENT RECORDED :: ${JSON.stringify(mvmnt, null, 2)}`))
-                          .catch(err => LG(`MOVEMENT RECORDING ERROR :: ${JSON.stringify(err, null, 2)}`));
-                      })
-                      .catch(err => LG(`EXCHANGE REQUEST DELETION ERROR :: ${JSON.stringify(err, null, 2)}`));
-                  })
-                  .catch(err => LG(`PROMISES RESOLUTION ERROR :: ${JSON.stringify(err, null, 2)}`));
-              });
-
-
-          }).catch(err => LG(`Error: ${JSON.stringify(err, null, 2)}`));
-        // LG(movesDatabaseLocal.rel.makeDocID({ 'type': 'ExchangeRequest', 'id': parseInt(excReq.data.id)}));
-        // movesDatabaseLocal.rel.find('ExchangeRequest', parseInt(excReq.data.id)).then(function (req) {
-        // movesDatabaseLocal.get(excReq._id).then((doc) => {
-        //     LG(`
-        //     Deleting :: ${JSON.stringify(doc, null, 2)}`);
-        //     doc._deleted = true;
-        //     movesDatabaseLocal.put(doc).then((result) => {
-        //       LG(`
-        //         Deletion result :: ${JSON.stringify(result, null, 2)}`);
-        //     }).catch((err) => {
-        //       LG(err);
-        //     });
-        //   });
-
-
-      //   movesDatabaseLocal.rel.save('Movement', excReq.data)
-      //     .then((mvmnt) => {
-      //       // LG(mvmnt);
-      //       // LG(mvmnt.Movements[0]);
-      //       // LG(mvmnt.Movements[0]);
-      //       LG(`Status :: ${mvmnt.Movements[0].status}`);
-      //       LG('SAVED');
-      //     }).catch((err) => {
-      //       LG('ERR');
-      //       LG(err);
-      //     });
-      });
-
-      // const movs = result.rows.filter((row) => row.doc.data && row.doc.data.type === 'movement');
-      // movs.forEach((excReq) => {
-      //   LG(`${excReq.id} -- ${excReq.doc.data.status}`);
-      // });
-    }).catch(function (err) {
+    }).then((rslt) => {
+      if (rslt.rows.length > 0 && rslt.rows[0].doc.data.type && rslt.rows[0].doc.data.type === EXCHANGE_RECORD) {
+      LG(`
+        PROCESS ONE EXCHANGE REQUEST ::
+        ${JSON.stringify(rslt.rows[0], null, 2)}`)
+        // rslt.rows.forEach(processExchangeRequest);
+        processExchangeRequest(rslt.rows[0]);
+      }
+})
+    .catch(function (err) {
       console.log(err);
     });
 };
@@ -309,7 +288,7 @@ movesDatabaseLocal.replicate.from(movesDatabaseRemote, {
   // query_params: { 'agent': userId },
 })
   .on('change', (response) => {
-    LG(`${movesDB} ${repFromFilter} **********  NEW MOVEMENT DELTA ********* `);
+    LG(`${movesDB} ${repFromFilter} **********  NEW EXCHANGE REQUEST DELTA ********* `);
     LG(`Database replication from: ${response.docs.length} records.`);
     response.docs.forEach((doc) => {
       if (!repFromCounts[doc.data.type]) repFromCounts[doc.data.type] = 0;
@@ -318,14 +297,14 @@ movesDatabaseLocal.replicate.from(movesDatabaseRemote, {
     LG(repFromCounts);
   })
   .on('active', () => {
-    LG(`${movesDB} ${repFromFilter} **********  NEW MOVEMENT REPLICATION RESUMED ********* `);
+    LG(`${movesDB} ${repFromFilter} **********  NEW EXCHANGE REQUEST REPLICATION RESUMED ********* `);
   })
   .on('paused', () => {
-    LG(`${movesDB} ${repFromFilter}  ************  NEW MOVEMENT REPLICATION ON HOLD *********** `);
-    processMovements(); // ????????????????????????????????????????????????????????????????????????????????????????????????????????
+    LG(`${movesDB} ${repFromFilter}  ************  NEW EXCHANGE REQUEST REPLICATION ON HOLD *********** `);
+    processExchangeRequests(); // ????????????????????????????????????????????????????????????????????????????????????????????????????????
   })
   .on('denied', (info) => {
-    LG(`${movesDB}/${repFromFilter} **********  NEW MOVEMENT REPLICATION DENIED ********* ${info}`);
+    LG(`${movesDB}/${repFromFilter} **********  NEW EXCHANGE REQUEST REPLICATION DENIED ********* ${info}`);
   })
 
   .on('error', err => LG(`Database error ${err}`));
@@ -389,7 +368,7 @@ movesDatabaseLocal.replicate.to(movesDatabaseRemote, {
 
 movesDatabaseLocal.changes({
   include_docs: true,
-  filter: doc => doc.data && doc.data.type === 'movement' && doc.data.status !== COMPLETE,
+  filter: doc => doc.data && doc.data.type === MOVEMENT_RECORD && doc.data.status !== COMPLETE,
 }).then((chng) => {
   LG(`Changes ===========
     `);
@@ -401,7 +380,7 @@ movesDatabaseLocal.changes({
     MOVEMENT PROCESSING ON INTERNAL CHANGE HAS BEEN DISABLED
 
     `);
-  // processMovements();
+  // processExchangeRequests();
 
 }).catch((err) => {
   LG(err);
@@ -438,7 +417,7 @@ app.get('/test', (req, res) => {
   ];
 
   const id = generateMovementId(testSets[testNumber].customer, 1);
-  const data = { id, type: 'movement', status: NEW };
+  const data = { id, type: MOVEMENT_RECORD, status: NEW };
   const movement = {
     _id: `Movement_1_${id}`,
     _rev: '1-19058b1d37d9fba888cddf4092de74fe',
@@ -451,7 +430,7 @@ app.get('/test', (req, res) => {
 
   data:
    { id: '000000180902155434012349',
-     type: 'movement',
+     type: ${MOVEMENT_RECORD},
      status: 'new',
      inventory: 12345,
      customer: 12349,
@@ -475,8 +454,8 @@ app.get('/test', (req, res) => {
       LG('SAVED MOVEMENT BEFORE PROCESSING');
       LG(mvmnt);
 
-      const findingPromises = [];
-      findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.customer)
+      const aryMarshallerPromises = [];
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.customer)
         .then((person) => {
           LG('CUSTOMER');
           customer = person;
@@ -485,7 +464,7 @@ app.get('/test', (req, res) => {
           LG(customer.allPersons[0]);
         }));
 
-      findingPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.inventory)
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aPerson', mov.inventory)
         .then((person) => {
           LG('INVENTORY');
           inventory = person;
@@ -494,14 +473,14 @@ app.get('/test', (req, res) => {
           LG(inventory.allPersons[0]);
         }));
 
-      findingPromises.push(movesDatabaseLocal.rel.find('aBottle', mov.bottles)
+      aryMarshallerPromises.push(movesDatabaseLocal.rel.find('aBottle', mov.bottles)
         .then((btls) => {
-          aryBottles = btls.allBottles;
+          aryBottles = btls.allBottles.filter(btle => mov.bottles.includes(btle.id));;
           LG(`MOV.BOTTLES  : ${JSON.stringify(mov.bottles, null, 2)}`);
           LG(`BOTTLEs  : ${JSON.stringify(aryBottles, null, 2)}`);
         }));
 
-      const collectedBottles = Promise.all(findingPromises)
+      const collectedBottles = Promise.all(aryMarshallerPromises)
         .then(() => {
           // LG('BOTTLES');
           // LG(aryBottles);
@@ -601,7 +580,7 @@ app.get('/fakemove', (req, res) => {
     _id: `Movement_1_${id}`,
     data: {
       id,
-      type: 'movement',
+      type: MOVEMENT_RECORD,
       inOut: 'in',
       bottles: [100023],
       customer,
@@ -622,7 +601,7 @@ app.get('/fakemove', (req, res) => {
         include_docs: true,
       }).then((result) => {
         // LG(`filtered ${JSON.stringify(result.rows[0].doc, null, 2)}`);
-        const filt = result.rows.filter(rec => rec.doc.data && rec.doc.data.type === 'movement');
+        const filt = result.rows.filter(rec => rec.doc.data && rec.doc.data.type === MOVEMENT_RECORD);
         filt.forEach((f) => {
           LG(`filtered ${JSON.stringify(f.doc.data.id, null, 2)}`);
         });
