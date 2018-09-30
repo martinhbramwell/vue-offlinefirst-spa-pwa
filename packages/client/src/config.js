@@ -25,7 +25,7 @@ export default {
     // optional: defaults to false if not specified
     showConsoleColors: true,
   },
-  version: '0.0.89',
+  version: '0.0.94',
   dbServerProtocol: 'https',
   dbServerURI: 'yourdb.yourpublic.work',
   databaseName: 'iriblu_31',

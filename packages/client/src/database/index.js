@@ -86,11 +86,11 @@ const actions = {
       options[ddoc.type] = ddoc.name;
       dbMgr.replicate.from(dbMaster, options)
         .on('change', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  DDOCS REPLICATION DELTA ********* ${info}`);
+          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DELTA ********* ${info}`);
           if (ddoc.name === 'ddocs/this_ddoc') LG(info);
         })
         .on('paused', () => {
-          LG(`${dbName}/${ddoc.name} **********  DDOCS REPLICATION ON HOLD *********`);
+          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION ON HOLD *********`);
           dbMgr.allDocs({
             include_docs: true,
             attachments: true,
@@ -102,12 +102,12 @@ const actions = {
           });
         })
         .on('active', () => {
-          LG(`${dbName}/${ddoc.name} **********  DDOCS REPLICATION RESUMED *********`);
+          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION RESUMED *********`);
         })
         .on('denied', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  DDOCS REPLICATION DENIED ********* ${info}`);
+          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DENIED ********* ${info}`);
         })
-        .on('error', err => LG(`${dbName}/${ddoc.name} DDOCS REPLICATION FAILURE ************ ${err}`));
+        .on('error', err => LG(`${dbName}/${ddoc.name} INCOMING REPLICATION FAILURE ************ ${err}`));
     });
 
     // const filter = 'post_processing/by_new_inventory';
@@ -121,14 +121,14 @@ const actions = {
     };
     dbMgr.replicate.to(dbMaster, options)
       .on('change', (info) => {
-        LG(`${dbName}/${filterText} **********  FILTER REPLICATION DELTA ********* `);
+        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION DELTA ********* `);
         const shortList = info.change.docs.filter(doc => (!doc.data) || (doc.data.type !== 'person' && doc.data.type !== 'bottle'));
         shortList.forEach((doc) => {
           LG(`DOC :: ${JSON.stringify(doc, null, 2)}`);
         });
       })
       .on('paused', () => {
-        LG(`${dbName}/${filterText} **********  FILTER REPLICATION ON HOLD ********* ${user.name}`);
+        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION ON HOLD ********* ${user.name}`);
         dbMgr.allDocs({
           include_docs: true,
           attachments: true,
@@ -140,12 +140,12 @@ const actions = {
         });
       })
       .on('active', () => {
-        LG(`${dbName}/${filterText} **********  FILTER REPLICATION RESUMED *********`);
+        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION RESUMED *********`);
       })
       .on('denied', (info) => {
-        LG(`${dbName}/${filterText} **********  FILTER REPLICATION DENIED ********* ${info}`);
+        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION DENIED ********* ${info}`);
       })
-      .on('error', err => LG(`${dbName}/${filterText} FILTER REPLICATION FAILURE ************ ${err}`));
+      .on('error', err => LG(`${dbName}/${filterText} OUTGOING REPLICATION FAILURE ************ ${err}`));
 
     // const filter = 'user_specific/by_vendor_agent';
     // dbMgr.sync(dbMaster, {
@@ -182,22 +182,46 @@ const actions = {
 
 const padVal = (pad, val) => (pad + val).substring(val.length);
 
+// const tightDate = (rand) => {
 const tightDate = () => {
   const d = new Date();
   let dt = '';
   dt += d.getYear() - 100;
   dt += padVal('00', (1 + d.getMonth()).toString());
   dt += padVal('00', d.getDate().toString());
+
+
   dt += padVal('00', d.getHours().toString());
   dt += padVal('00', d.getMinutes().toString());
   dt += padVal('00', d.getSeconds().toString());
-  return parseInt(`${dt}`, 10);
+  // dt += padVal('00', rand.toString());
+
+  const ret = parseInt(`${dt}`, 10);
+  return ret;
 };
 
-export const generateMovementId = (user, incr) => {
-  const tddt = tightDate().toString();
-  return parseInt(`${user}${incr}${tddt}`, 10);
-};
+function unique() {
+  const number = tightDate();
+  unique.old = (number > unique.old) ? number : unique.old += 1;
+  return unique.old;
+}
+unique.old = 0;
+
+
+function ID() {
+  return unique();
+}
+
+export const generateMovementId = user => `${user}${ID()}`;
+
+// export const generateMovementId = (user, rand) => {
+//   const tddt = tightDate(rand).toString();
+//   LG(`ID request :: ${parseInt(`${user}${tddt}`, 10)}`);
+//   LG(`Max safe integer :: ${Number.MAX_SAFE_INTEGER}`);
+//   LG(`Unique :: ${ID()}`);
+//   // return parseInt(`${user}${tddt}`, 10);
+//   return `${user}${ID()}`;
+// };
 
 export default {
   namespaced: true,

@@ -588,7 +588,6 @@
       },
       saveMovements() {
         LG('%%%%%%%%%%%%%%%% save movements %%%%%%%%%%%%%%%%%% ');
-        let incr = 0;
         const customer = parseInt(this.personChosen.id, 10);
         const inventory = parseInt(this.currentUser.id, 10);
         const type = 'exchange';
@@ -602,7 +601,10 @@
         // LG(`bottles coming in ${JSON.stringify(incoming, null, 2)}`);
         // LG(`bottles going out ${JSON.stringify(outgoing, null, 2)}`);
         if (incoming.length > 0) {
-          const pouchId = this.$pouch.rel.makeDocID({ type: 'ExchangeRequest', id: generateMovementId(customer, incr += 1) });
+          const pouchId = this.$pouch.rel.makeDocID({
+            type: 'ExchangeRequest',
+            id: generateMovementId(customer),
+          });
           const pchid = this.$pouch.rel.parseDocID(pouchId);
 
           const moveIn = {
@@ -629,7 +631,10 @@
         }
 
         if (outgoing.length > 0) {
-          const pouchId = this.$pouch.rel.makeDocID({ type: 'ExchangeRequest', id: generateMovementId(customer, incr += 1) });
+          const pouchId = this.$pouch.rel.makeDocID({
+            type: 'ExchangeRequest',
+            id: generateMovementId(customer),
+          });
           const pchid = this.$pouch.rel.parseDocID(pouchId);
           const moveOut = {
             _id: pouchId,
@@ -791,8 +796,8 @@
                 `);
               LG(persons);
               if (persons.allBottles) {
-                this.personChosen.bottles = persons.allBottles;
-                this.customer = this.personChosen.bottles
+                this.customer = persons.allBottles
+                  .filter(bottle => persons.allPersons[0].bottles.includes(bottle.id))
                   .map(bottle => ({
                     id: bottle.id,
                     data: bottle.codigo,
@@ -903,18 +908,22 @@
           LG(persons.allPersons);
           LG(persons.allPersons.length);
           if (persons.allPersons && persons.allPersons.length > 0) {
-            this.currentUser.bottles = persons.allBottles;
+            this.currentUser.bottles = persons.allBottles
+              .filter(bottle => persons.allPersons[0].bottles.includes(bottle.id));
             this.currentUser.nombre = persons.allPersons[0].nombre;
             this.inventory = this.currentUser.bottles
-              .map(bottle => ({
-                id: bottle.id,
-                data: bottle.codigo,
-                src: 'I',
-                props: {
-                  className: 'draggable-item draggable-inventory ',
-                  style: { backgroundColor: '#c0ebfd', textAlign: 'center' },
-                },
-              }));
+              .map((bottle) => {
+                const drgBottle = {
+                  id: bottle.id,
+                  data: bottle.codigo,
+                  src: 'I',
+                  props: {
+                    className: 'draggable-item draggable-inventory ',
+                    style: { backgroundColor: '#c0ebfd', textAlign: 'center' },
+                  },
+                };
+                return drgBottle;
+              });
             LG(this.currentUser);
           }
         });
