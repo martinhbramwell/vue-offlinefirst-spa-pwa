@@ -240,7 +240,7 @@ const processExchangeRequests = () => {
     movesDatabaseLocal.allDocs({
       include_docs: true,
     }).then((rslt) => {
-      if (rslt.rows.length > 0 && rslt.rows[0].doc.data.type && rslt.rows[0].doc.data.type === EXCHANGE_RECORD) {
+      if (rslt.rows.length > 0 && rslt.rows[0].doc.data && rslt.rows[0].doc.data.type && rslt.rows[0].doc.data.type === EXCHANGE_RECORD) {
       LG(`
         PROCESS ONE EXCHANGE REQUEST ::
         ${JSON.stringify(rslt.rows[0], null, 2)}`)
