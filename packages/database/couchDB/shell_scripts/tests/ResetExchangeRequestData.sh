@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 #
-export COUCH_DATABASE=${1:-$COUCH_DATABASE};
 export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
-
 function usage() {
-  echo "Usage: ./DropCreateDatabase.sh \$COUCH_DATABASE";
-  echo "       ALSO: 'COUCH_URL' must be specified in ${CONFIG_FILE}";
+  echo "Usage: 'COUCH_URL', 'COUCH_DATABASE_NAME' and 'VERSION' must be specified in ${CONFIG_FILE}";
   exit 1;
 }
 
@@ -16,7 +13,9 @@ fi;
 
 source ${CONFIG_FILE};
 
-if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
+export COUCH_DATABASE="${COUCH_DATABASE_NAME}_${VERSION}";
+
+if [[ -z "$COUCH_URL" || -z "$COUCH_DATABASE_NAME" || -z "$VERSION" ]]; then
   usage;
 fi;
 
@@ -24,12 +23,12 @@ fi;
 # echo -e "
 # Resetting persons and bottles for exchange request test: ${COUCH_DATABASE}";
 
-export BottleFile="./tests/SixBottles.json";
-export PersonFile="./tests/TwoPersons.json";
+export BottleFile="${TEST_FILES_DIR}/bottles/bottles.json";
+export PersonFile="${TEST_FILES_DIR}/persons/persons.json";
 export HOST="${COUCH_URL}/${COUCH_DATABASE}";
 
+echo -e "\nBottles...............";
 export BottleList=$(cat ${BottleFile} | jq -r '.docs[] | ._id');
-
 while read -r bottle; do
   export rev=$(curl -s -H "Content-type: application/json" "${HOST}/${bottle}" | jq -r '._rev');
   echo -e "Bottle query: ${HOST}/${bottle} has Rev: '${rev}'";
@@ -40,8 +39,8 @@ while read -r bottle; do
   fi
 done <<< "$BottleList"
 
-export PersonList=$(cat ./tests/TwoPersons.json | jq -r '.docs[] | ._id');
-
+echo -e "\nPersons...............";
+export PersonList=$(cat ${PersonFile} | jq -r '.docs[] | ._id');
 while read -r person; do
   export rev=$(curl -s -H "Content-type: application/json" "${HOST}/${person}" | jq -r '._rev');
   echo -e "Person query: ${HOST}/${person} has Rev: '${rev}'";
@@ -51,6 +50,7 @@ while read -r person; do
     curl -H "Content-type: application/json" -X DELETE "${HOST}/${person}?rev=${rev}";
   fi
 done <<< "$PersonList"
+
 
 echo -e "
 Sending file: ${BottleFile} to ${HOST}";

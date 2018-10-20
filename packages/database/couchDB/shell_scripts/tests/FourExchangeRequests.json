@@ -1,0 +1,62 @@
+{
+  "docs": [
+    {
+      "_id": "ExchangeRequest_2_20181017093843_12355",
+      "data": {
+        "id": "20181017093843_12355",
+        "type": "ExchangeRequest",
+        "status": "new",
+        "inOut": "out",
+        "bottles": [
+          100003,
+          100002
+        ],
+        "customer": 12351,
+        "inventory": 12345
+      }
+    },
+    {
+      "_id": "ExchangeRequest_2_20181017093842_12355",
+      "data": {
+        "id": "20181017093842_12355",
+        "type": "ExchangeRequest",
+        "inOut": "in",
+        "status": "new",
+        "bottles": [
+          100005,
+          100006
+        ],
+        "customer": 12351,
+        "inventory": 12345
+      }
+    },
+    {
+      "_id": "ExchangeRequest_2_20181017094137_12355",
+      "data": {
+        "id": "20181017094137_12355",
+        "type": "ExchangeRequest",
+        "inOut": "in",
+        "status": "new",
+        "bottles": [
+          100004
+        ],
+        "customer": 12351,
+        "inventory": 12345
+      }
+    },
+    {
+      "_id": "ExchangeRequest_2_20181017094138_12355",
+      "data": {
+        "id": "20181017094138_12355",
+        "type": "ExchangeRequest",
+        "status": "new",
+        "inOut": "out",
+        "bottles": [
+          100001
+        ],
+        "customer": 12351,
+        "inventory": 12345
+      }
+    }
+  ]
+}

@@ -32,7 +32,7 @@ if [[ 1 == 0 ]]; then
   fi;
 fi;
 
-if [[ 1 == 1 ]]; then
+if [[ 1 == 0 ]]; then
   ./DropCreateDatabase.sh;
   ./PutSecurity.sh;
   ./PutUsers.sh;
@@ -62,9 +62,10 @@ if [[ 1 == 1 ]]; then
 
 fi;
 
-if [[ 1 == 0 ]]; then
+if [[ 1 == 1 ]]; then
 
   # ./TestGet.sh;
-  ./tests/ResetForExchangeRequestTest.sh;
+  ./tests/ResetExchangeRequestData.sh;
+  ./tests/ResetExchangeRequests.sh;
 
 fi;

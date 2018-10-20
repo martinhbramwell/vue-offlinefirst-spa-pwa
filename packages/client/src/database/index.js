@@ -186,7 +186,7 @@ const padVal = (pad, val) => (pad + val).substring(val.length);
 const tightDate = () => {
   const d = new Date();
   let dt = '';
-  dt += d.getYear() - 100;
+  dt += d.getFullYear();
   dt += padVal('00', (1 + d.getMonth()).toString());
   dt += padVal('00', d.getDate().toString());
 
@@ -212,7 +212,7 @@ function ID() {
   return unique();
 }
 
-export const generateMovementId = user => `${user}${ID()}`;
+export const generateMovementId = user => `${ID()}_${user}`;
 
 // export const generateMovementId = (user, rand) => {
 //   const tddt = tightDate(rand).toString();

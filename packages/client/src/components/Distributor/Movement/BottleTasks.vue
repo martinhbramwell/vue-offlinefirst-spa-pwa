@@ -840,7 +840,7 @@
             break;
           case 'UPDATE':
             idToUpdate = this.$pouch.rel.parseDocID(pouchData.id).id.toString();
-            idx = this.items.findIndex(item => item.data.id == idToUpdate); // eslint-disable-line eqeqeq, max-len
+            idx = this.items.findIndex(item => item.data.idIB == idToUpdate); // eslint-disable-line eqeqeq, max-len
             LG('###############   LiveFind update   ##############');
             // LG(idx);
             // LG(this.items[idx].data.nombre);

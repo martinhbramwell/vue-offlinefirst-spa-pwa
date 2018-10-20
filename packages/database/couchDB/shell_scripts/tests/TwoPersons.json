@@ -1,14 +1,44 @@
 {
   "docs": [
-    {"_id": "aPerson_1_0000000000012345", "data": {
-      "id": "12345", "type": "person", "codigo": "100", "ruc_cedula": "1713931416001",
-      "nombre": "Logichem", "direccion": "Km 11 Cumbaya", "telefono": "237-2748", "distribuidor": "hq",
-      "movements": [], "retencion": "no", "email": "dlwild@gmail.com",
-      "bottles": [100001, 100002, 100003, 100037, 100038, 100039, 100040, 100041, 100042, 100043, 100044, 100045, 100046, 100047, 100048, 100049, 100050, 100051, 100052, 100053, 100054, 100055, 100056, 100057]}},
-    {"_id": "aPerson_1_0000000000012376", "data": {
-      "id": "12376", "type": "person", "codigo": "153", "ruc_cedula": "1702959840",
-      "nombre": "Abner Victor Manuel Galarza Sosa", "direccion": "9 de Octubre 17-70 y Av. Eloy Alfaro", "telefono": "02 2521 958 ", "distribuidor": "no",
-      "movements": [], "retencion": "no", "email": "falta",
-      "bottles": [100004, 100005, 100006]}}
+    {
+      "_id": "aPerson_1_0000000000012345",
+      "data": {
+        "idIB": "12345",
+        "type": "person",
+        "codigo": "100",
+        "ruc_cedula": "1713931416001",
+        "nombre": "Logichem",
+        "direccion": "Km 11 Cumbaya",
+        "telefono": "237-2748",
+        "distribuidor": "hq",
+        "retencion": "no",
+        "email": "dlwild@gmail.com",
+        "bottles": [
+            100001,
+            100002,
+            100003
+        ]
+      }
+    },
+    {
+      "_id": "aPerson_1_0000000000012351",
+      "data": {
+        "idIB": "12351",
+        "type": "person",
+        "codigo": "128",
+        "ruc_cedula": "1708217086001",
+        "nombre": "Alvaro Tapia Aguilar",
+        "direccion": "García Moreno 215 y Juan Montalvo ",
+        "telefono": "099-803-5058",
+        "distribuidor": "no",
+        "retencion": "no",
+        "email": "falta",
+        "bottles": [
+            100004,
+            100005,
+            100006
+        ]
+      }
+    }
   ]
 }
