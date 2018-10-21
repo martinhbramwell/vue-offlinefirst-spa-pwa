@@ -32,20 +32,37 @@ if [[ 1 == 0 ]]; then
   fi;
 fi;
 
-if [[ 1 == 0 ]]; then
+if [[ 1 == 1 ]]; then
   ./DropCreateDatabase.sh;
   ./PutSecurity.sh;
   ./PutUsers.sh;
 
 
-  export COUCH_COLLECTION_NAME='persons';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_COLLECTION_NAME}/${COUCH_COLLECTION_NAME};
+  export COUCH_GROUP_NAME='persons';
+  export COUCH_COLLECTION_NAME='person';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  export COUCH_COLLECTION_NAME='address';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  export COUCH_COLLECTION_NAME='profile';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 
-  export COUCH_COLLECTION_NAME='bottles';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_COLLECTION_NAME}/${COUCH_COLLECTION_NAME};
 
-  export COUCH_COLLECTION_NAME='bottle_movements';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_COLLECTION_NAME}/movements;
+  export COUCH_GROUP_NAME='bottles';
+  export COUCH_COLLECTION_NAME='bottle';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+
+
+  export COUCH_GROUP_NAME='movements';
+  export COUCH_COLLECTION_NAME='movementsIn';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  export COUCH_COLLECTION_NAME='movementsOut';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+fi;
+
+if [[ 1 == 1 ]]; then
+
+  exit 0;
+
   export SPEC_NAME='post_processing';
   ./PutDesignDocument.sh;
 
@@ -62,7 +79,7 @@ if [[ 1 == 0 ]]; then
 
 fi;
 
-if [[ 1 == 1 ]]; then
+if [[ 1 == 0 ]]; then
 
   # ./TestGet.sh;
   ./tests/ResetExchangeRequestData.sh;

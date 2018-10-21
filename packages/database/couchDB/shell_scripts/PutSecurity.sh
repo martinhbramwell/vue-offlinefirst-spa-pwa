@@ -26,4 +26,4 @@ fi;
 echo -e "
 Setting database security for database :: ${COUCH_DATABASE}";
 
-curl -H "Content-type: application/json" -X PUT "${COUCH_URL}/${COUCH_DATABASE}/_security" -d @${SCRIPT_DIR}/databases/${COUCH_DATABASE_NAME}/security.json;
+curl -H "Content-type: application/json" -X PUT "${COUCH_URL}/${COUCH_DATABASE}/_security" -d @${TEST_FILES_DIR}/${COUCH_DATABASE_NAME}/security.json;
