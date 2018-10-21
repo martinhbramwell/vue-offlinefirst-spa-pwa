@@ -33,7 +33,7 @@ const plugIn = (plugin) => {
 const install = (VueJs) => {
   const Vue = VueJs;
   if (!databaseName) throw new Error('VuePouchDB Error → a main database name is expected !');
-
+  LG(`database is :: ${databaseName}`);
   // const dbMasterURI = `${options.dbServerProtocol}://${user.name}:${user.password}@${options.dbServerURI}/${options.databaseName}`;
   // LG('dbMasterURI');
   // LG(dbMasterURI);
@@ -71,7 +71,7 @@ const install = (VueJs) => {
       plural: 'allBottles',
       relations: {
         ultimo: { belongsTo: 'aPerson' },
-        movements: { hasMany: 'Movement' },
+        // movements: { hasMany: 'Movement' },
       },
     },
     {
@@ -79,7 +79,7 @@ const install = (VueJs) => {
       plural: 'allPersons',
       relations: {
         bottles: { hasMany: 'aBottle' },
-        movements: { hasMany: 'Movement' },
+        // movements: { hasMany: 'Movement' },
       },
     },
     {
