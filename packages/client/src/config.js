@@ -28,5 +28,5 @@ export default {
   version: '0.0.94',
   dbServerProtocol: 'https',
   dbServerURI: 'yourdb.yourpublic.work',
-  databaseName: 'iriblu_31',
+  databaseName: 'iriblu_34',
 };

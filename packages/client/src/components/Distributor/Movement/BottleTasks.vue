@@ -516,7 +516,7 @@
       clearAutoComplete() {
         this.autocompleteDirty = false;
         this.thoseChosen.forEach((idx) => {
-          LG(idx);
+          // LG(idx);
           this.items[idx].type = 'person';
         });
         this.$refs.prsnPckr.$el.value = '';
@@ -588,9 +588,11 @@
       },
       saveMovements() {
         LG('%%%%%%%%%%%%%%%% save movements %%%%%%%%%%%%%%%%%% ');
-        const customer = parseInt(this.personChosen.id, 10);
+
+        const customer = parseInt(this.personChosen.idIB, 10);
         const inventory = parseInt(this.currentUser.id, 10);
-        const type = 'exchange';
+        const type = 'ExchangeRequest';
+
         // LG(`MOVEMENT ID ${moveId}`);
 
         // LG(`Customer Id ${this.personChosen.id}`);
@@ -602,8 +604,7 @@
         // LG(`bottles going out ${JSON.stringify(outgoing, null, 2)}`);
         if (incoming.length > 0) {
           const pouchId = this.$pouch.rel.makeDocID({
-            type: 'ExchangeRequest',
-            id: generateMovementId(customer),
+            type, id: generateMovementId(customer),
           });
           const pchid = this.$pouch.rel.parseDocID(pouchId);
 
@@ -632,8 +633,7 @@
 
         if (outgoing.length > 0) {
           const pouchId = this.$pouch.rel.makeDocID({
-            type: 'ExchangeRequest',
-            id: generateMovementId(customer),
+            type, id: generateMovementId(customer),
           });
           const pchid = this.$pouch.rel.parseDocID(pouchId);
           const moveOut = {
@@ -775,14 +775,14 @@
           this.openShutPersons('open');
         } else {
           this.thoseChosen.forEach((idx) => {
-            LG(idx);
+            // LG(idx);
             this.items[idx].type = 'person';
           });
           this.thoseChosen.push(val.itemIndex);
           this.items[val.itemIndex].type = 'chosen';
           this.personChosen = them.data;
           this.$refs.prsnPckr.$el.value = this.personChosen.nombre;
-          const personChosenId = parseInt(this.personChosen.id, 10);
+          const personChosenId = parseInt(this.personChosen.idIB, 10);
           const PersonId = this.$pouch.rel.makeDocID({ type: 'aPerson', id: personChosenId });
           LG(PersonId);
           this.$pouch.liveFind({
@@ -846,7 +846,13 @@
             // LG(this.items[idx].data.nombre);
             data = pouchData.doc.data; // eslint-disable-line prefer-destructuring
             // LG(data);
-            this.items[idx].data = data;
+            if (this.items[idx]) {
+              this.items[idx].data = data;
+            } else {
+              LG(`?????????????????????????????????????????????????????????????????????
+                What is wrong with ${JSON.stringify(this.items, null, 2)}
+                ?????????????????????????????????????????????????????????????????????`);
+            }
             // this.items = this.items.slice().sort();
             // LG(this.personPicker.list);
             cod = data.codigo;
