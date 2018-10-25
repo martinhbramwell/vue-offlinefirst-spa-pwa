@@ -36,11 +36,43 @@ FROM
     tb_entregas e INNER JOIN tb_entregas_lines l ON l.entrega_id = e.entrega_id
   INNER JOIN tb_envases v ON v.cod = l.cod
 WHERE
-      IFNULL(e.date_entrega, NOW()) > "2017-12-31 23:59:59"
-  AND IFNULL(v.receptions_quantity, 0) > 20
+      e.partner_id in (
+     select distinct partner
+       from short_list
+      where envase_id < 600
+        and direction = "O"
+        and partner != 1
+    )
+  and v.envases_id in (
+     select distinct envase_id
+       from short_list
+      where envase_id < 600
+        and direction = "O"
+        and partner != 1
+    )
+  and e.entrega_id in  (
+     select distinct movement
+       from short_list
+      where envase_id < 600
+        and direction = "O"
+        and partner != 1
+    )
 GROUP BY e.entrega_id
--- LIMIT 10
 ;
+
+-- WHERE
+--       IFNULL(e.date_entrega, NOW()) > "2018-08-31 23:59:59"
+--   AND e.partner_id IN ( 294, 10, 339, 561, 410, 481, 189, 16, 335 )
+
+--  --  AND v.envases_id IN (
+--  --        778, 1251, 501, 1460, 1475, 453, 1451, 1559, 408, 518, 519, 925, 1102
+--  --      , 731, 1160, 709, 1245, 651, 575, 1640, 1711, 2480, 63, 2839, 2701, 2692
+--  --      , 2863, 2907, 2164, 2849, 206, 1737, 330, 723, 23, 1867, 293, 284
+--  -- )
+--   -- AND IFNULL(v.receptions_quantity, 0) > 20
+-- GROUP BY e.entrega_id
+-- -- LIMIT 10
+-- ;
 
 -- SELECT * FROM debug;
 -- CALL debug_off('JSON_ARRAYAGG');

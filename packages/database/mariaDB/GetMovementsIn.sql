@@ -32,8 +32,38 @@ FROM
   tb_recepciones r INNER JOIN tb_recepciones_lines l ON l.recepciones_id = r.recepcion_id
   INNER JOIN tb_envases v ON v.cod = l.cod
 WHERE
-  IFNULL(r.date_recepcion, NOW()) > "2017-12-31 23:59:59"
-  AND IFNULL(v.receptions_quantity, 0) > 20
+      r.partner_id in (
+     select distinct partner
+       from short_list
+      where envase_id < 600
+        and direction = "I"
+        and partner != 1
+    )
+  and v.envases_id in (
+     select distinct envase_id
+       from short_list
+      where envase_id < 600
+        and direction = "I"
+        and partner != 1
+    )
+  and r.recepcion_id in  (
+     select distinct movement
+       from short_list
+      where envase_id < 600
+        and direction = "I"
+        and partner != 1
+    )
+
+
+
+ --      IFNULL(r.date_recepcion, NOW()) > "2018-03-31 23:59:59"
+ --  AND IFNULL(r.partner_id, 0) != 1
+ --  AND v.envases_id IN (
+ --        778, 1251, 501, 1460, 1475, 453, 1451, 1559, 408, 518, 519, 925, 1102
+ --      , 731, 1160, 709, 1245, 651, 575, 1640, 1711, 2480, 63, 2839, 2701, 2692
+ --      , 2863, 2907, 2164, 2849, 206, 1737, 330, 723, 23, 1867, 293, 284
+ -- )
+ --  -- AND IFNULL(v.receptions_quantity, 0) > 20
 GROUP BY r.recepcion_id
 -- LIMIT 10
 ;

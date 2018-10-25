@@ -9,5 +9,6 @@ sed -i 's/VÃƒÂ.a/Vía a/g; s/ã./á/g;' temp.txt
 sed -i '$ s/.$//' temp.txt;
 cat prefix.txt temp.txt suffix.txt > rslt.json
 
-cat rslt.json
-# cat rslt.json | jq .
+# cat rslt.json
+cat rslt.json | jq .
+

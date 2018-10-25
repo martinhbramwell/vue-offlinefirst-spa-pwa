@@ -13,6 +13,13 @@ fi;
 HOST="https://${UZR}:${PSS}@yourdb.yourpublic.work";
 
 echo -e "
+Getting design doc ${SPEC_NAME}.json";
+export REV=$(curl -H "Content-type: application/json" -sX GET "${HOST}/${DB}/_design/${SPEC_NAME}/" | jq -r ._rev);
+
+echo -e "
+Deleting design doc ${SPEC_NAME}.json";
+curl -H "Content-type: application/json" -sX DELETE "${HOST}/${DB}/_design/${SPEC_NAME}?rev=${REV}";
+
+echo -e "
 Putting design doc ${SPEC_NAME}.json";
 curl -H "Content-type: application/json" -X PUT "${HOST}/${DB}/_design/${SPEC_NAME}/" -d @${SCRIPT_DIR}/views/${SPEC_NAME}.json;
-

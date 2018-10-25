@@ -1,4 +1,4 @@
-./EnvVars_ManualInit.sh x
+./Initialize.sh
 
 export TARGET="${HOME}/temp/databases"
 rm -fr  ${TARGET};

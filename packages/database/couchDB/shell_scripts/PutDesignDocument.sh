@@ -22,4 +22,4 @@ curl -H "Content-type: application/json" -sX DELETE "${HOST}/${DB}/_design/${SPE
 
 echo -e "
 Putting design doc ${SPEC_NAME}.json";
-curl -H "Content-type: application/json" -X PUT "${HOST}/${DB}/_design/${SPEC_NAME}/" -d @${SCRIPT_DIR}/databases/${COUCH_COLLECTION_NAME}/design/${SPEC_NAME}.json;
+curl -H "Content-type: application/json" -X PUT "${HOST}/${DB}/_design/${SPEC_NAME}/" -d @${SCRIPT_DIR}/databases/${COUCH_GROUP_NAME}/design/${SPEC_NAME}.json;

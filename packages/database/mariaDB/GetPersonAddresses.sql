@@ -27,7 +27,9 @@ SELECT DISTINCT
 FROM
   tb_partners p LEFT JOIN tb_envases e ON p.partner_id = e.last_partner_id
 WHERE
-  p.partner_id = 1 OR IFNULL(e.receptions_quantity, 0) > 20
+      p.partner_id in (select distinct partner from short_list where envase_id < 600)
+  and e.envases_id in  (select distinct envase_id from short_list where envase_id < 600)
+GROUP BY p.partner_id
 ;
 
 

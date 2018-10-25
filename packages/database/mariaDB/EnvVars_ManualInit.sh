@@ -1,3 +1,11 @@
+#!/usr/bin/env bash
+
+if [[ "$_" = "$0" ]]; then
+ # && echo "Script is being sourced" ||
+ echo "This script is meant to be sourced not executed."
+ exit 1;
+fi;
+
 export DBPRMS=" --defaults-file=${HOME}/.ssh/secrets/mysql-opts ib2018 -u root --silent"
 export DBPRMST=" --defaults-file=${HOME}/.ssh/secrets/mysql-opts ib2018 -u root --table"
 

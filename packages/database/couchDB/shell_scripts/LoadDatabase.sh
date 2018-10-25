@@ -57,16 +57,16 @@ if [[ 1 == 1 ]]; then
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
   export COUCH_COLLECTION_NAME='movementsOut';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+
 fi;
 
 if [[ 1 == 1 ]]; then
 
-  exit 0;
-
+  export COUCH_GROUP_NAME='movements';
   export SPEC_NAME='post_processing';
   ./PutDesignDocument.sh;
 
-  export COUCH_COLLECTION_NAME='iriblu';
+  export COUCH_GROUP_NAME='iriblu';
   export SPEC_NAME='ddocs';
   ./PutDesignDocument.sh;
   export SPEC_NAME='full_range';
