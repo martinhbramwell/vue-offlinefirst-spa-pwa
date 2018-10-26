@@ -1,3 +1,11 @@
+const {
+  VERSION: version = '02'
+  COUCH_HOST: dbServerURI = 'ib2018'
+  COUCH_PROTOCOL: dbServerProtocol = 'https'
+  COUCH_DATABASE_NAME: databaseName = 'yourdb.yourpublic.work'
+} = process.env;
+
+
 export default {
   // NODE 4 server: 'https://wt-a0a68818c7b34a465e865e888dc419c9-0.run.webtask.io/webtasksso',
   server: 'https://wt-a0a68818c7b34a465e865e888dc419c9-0.sandbox.auth0-extend.com/webtasksso',
@@ -25,8 +33,8 @@ export default {
     // optional: defaults to false if not specified
     showConsoleColors: true,
   },
-  version: '0.0.94',
-  dbServerProtocol: 'https',
-  dbServerURI: 'yourdb.yourpublic.work',
-  databaseName: 'iriblu_34',
+  version,
+  dbServerProtocol,
+  dbServerURI,
+  databaseName,
 };

@@ -45,10 +45,14 @@ if [[ 1 == 1 ]]; then
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
   export COUCH_COLLECTION_NAME='profile';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  export COUCH_COLLECTION_NAME='person_bottle_move';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 
 
   export COUCH_GROUP_NAME='bottles';
   export COUCH_COLLECTION_NAME='bottle';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  export COUCH_COLLECTION_NAME='bottle_move';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 
 
