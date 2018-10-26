@@ -86,7 +86,7 @@ const actions = {
       options[ddoc.type] = ddoc.name;
       dbMgr.replicate.from(dbMaster, options)
         .on('change', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DELTA ********* ${info}`);
+          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DELTA ********* ${JSON.stringify(info, null, 2)}`);
           if (ddoc.name === 'ddocs/this_ddoc') LG(info);
         })
         .on('paused', () => {

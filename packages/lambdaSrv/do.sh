@@ -1,4 +1,4 @@
-source ${HOME}/.ssh/secrets/srvcoupou.config;
+source ${HOME}/.ssh/secrets/offsppwa-vue.config;
 
 ###
 # rm -fr /opt/pouchdb/iriblu_34; echo -e "Ready\n"> /tmp/pouchLog; ./do.sh
