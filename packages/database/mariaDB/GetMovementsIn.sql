@@ -3,6 +3,7 @@
 
 
 SELECT
+  -- r.recepcion_id, count(*)
   CONCAT(
     JSON_OBJECT(
         "_id", concat("Movement_2_", CONCAT(
@@ -25,12 +26,14 @@ SELECT
         , "notes", IFNULL(r.notes, "")
         , "bottles_quantity", IFNULL(r.bottles_quantity, 0)
         , "recepcion_responsable", IFNULL(r.recepcion_responsable, 0)
+        , "recepcion_id", IFNULL(r.recepcion_id, 0)
       )
     ), ","
   )
 FROM
-  tb_recepciones r INNER JOIN tb_recepciones_lines l ON l.recepciones_id = r.recepcion_id
-  INNER JOIN tb_envases v ON v.cod = l.cod
+  tb_recepciones r
+    JOIN tb_recepciones_lines l ON l.recepciones_id = r.recepcion_id
+    JOIN tb_envases v ON v.cod = l.cod
 WHERE
       r.partner_id in (
      select distinct partner
@@ -65,6 +68,7 @@ WHERE
  -- )
  --  -- AND IFNULL(v.receptions_quantity, 0) > 20
 GROUP BY r.recepcion_id
+ORDER BY r.partner_id
 -- LIMIT 10
 ;
 

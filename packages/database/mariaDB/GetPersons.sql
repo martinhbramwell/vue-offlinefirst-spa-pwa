@@ -3,6 +3,9 @@
 
 
 SELECT
+  -- e.envases_id
+  -- e.envases_id, s.direction, JSON_ARRAYAGG(IFNULL(s.movement, 0))
+  -- count(*)
   CONCAT(
     JSON_OBJECT(
         "_id", concat("aPerson_1_", lpad(p.partner_id, 16, 0))
@@ -25,16 +28,24 @@ SELECT
         , "bottle_movements", p.partner_id
         , "admin_details", p.partner_id
         , "bottles", JSON_ARRAYAGG(IFNULL(e.envases_id, 0))
-        -- , "bottles", JSON_ARRAYAGG(IFNULL(e.envases_id, 0))
       )
     ), ","
   )
+
 FROM
-  tb_partners p LEFT JOIN tb_envases e ON p.partner_id = e.last_partner_id
+  tb_partners p
+    JOIN tb_envases e ON p.partner_id = e.last_partner_id
+    JOIN short_list s ON
+          s.partner = e.last_partner_id
+      AND s.partner = p.partner_id
+      AND e.envases_id = s.envase_id
 WHERE
       p.partner_id in (select distinct partner from short_list where envase_id < 600)
   and e.envases_id in  (select distinct envase_id from short_list where envase_id < 600)
+  and s.envase_id < 600
+
 GROUP BY p.partner_id
+ORDER BY p.partner_id
 ;
 
 -- from short_list s, tb_partners p

@@ -21,13 +21,17 @@ if [ -z $1 ]; then
 
     mysql \${DBPRMST} <  xyz.sql
 
+  To get raw results for piping to other operations do
+
+    mysql \${DBPRMS} <  abc.sql
+
   To get tabular results from a single MariaDB Command do
 
     mysql \${DBPRMST} --execute  \"show tables\"
 
-  To get raw results for piping to other operations do
+  To get JSON results from a specially prepared MariaDB query do
 
-    mysql \${DBPRMS} <  abc.sql
+    ./RunAScript.sh  > Get<JSONresult>.sql
 
 
 

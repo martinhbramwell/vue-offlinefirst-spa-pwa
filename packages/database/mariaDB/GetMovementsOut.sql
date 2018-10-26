@@ -27,14 +27,15 @@ SELECT
           , "notes", IFNULL(e.notes, "")
           , "bottles_quantity", IFNULL(e.bottles_quantity, 0)
           , "invoice_nr", IFNULL(e.invoice_nr, 0)
-          , "recepcion_responsable", IFNULL(e.user_id, 0)
+          , "entrega_responsable", IFNULL(e.user_id, 0)
           , "entrega_id", IFNULL(e.entrega_id, 0)
         )
       ), ","
     )
 FROM
-    tb_entregas e INNER JOIN tb_entregas_lines l ON l.entrega_id = e.entrega_id
-  INNER JOIN tb_envases v ON v.cod = l.cod
+  tb_entregas e
+    JOIN tb_entregas_lines l ON l.entrega_id = e.entrega_id
+    JOIN tb_envases v ON v.cod = l.cod
 WHERE
       e.partner_id in (
      select distinct partner
@@ -58,6 +59,7 @@ WHERE
         and partner != 1
     )
 GROUP BY e.entrega_id
+ORDER BY e.partner_id
 ;
 
 -- WHERE

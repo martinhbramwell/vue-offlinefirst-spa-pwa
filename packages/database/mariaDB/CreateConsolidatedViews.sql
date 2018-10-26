@@ -10,6 +10,11 @@ CREATE VIEW IN2018 AS
 SELECT
     v.envases_id as envase_id
   , IFNULL(m.recepcion_id, 0) AS movement
+  , CONCAT(
+        DATE_FORMAT(IFNULL(m.date_recepcion, NOW()), "%Y%m%d%H%i%S")
+      , "I"
+      , LPAD(CAST(IFNULL(m.partner_id, 0) as CHAR(5)), 5, "0")
+    ) AS movement_id
   , v.cod
   , IFNULL(m.partner_id, 0) AS partner
   , 1 as inventory
@@ -56,6 +61,11 @@ CREATE VIEW OUT2018 AS
 SELECT
     v.envases_id as envase_id
   , IFNULL(m.entrega_id, 0) AS movement
+  , CONCAT(
+        DATE_FORMAT(IFNULL(m.date_entrega, NOW()), "%Y%m%d%H%i%S")
+      , "O"
+      , LPAD(CAST(IFNULL(m.partner_id, 0) as CHAR(5)), 5, "0")
+    ) AS movement_id
   , v.cod as cod
   , IFNULL(m.partner_id, 0) AS partner
   , 1 as inventory
@@ -173,7 +183,7 @@ DROP VIEW IF EXISTS short_list;
 CREATE VIEW short_list AS
 
 -- SELECT i.envase_id, count(*)
-SELECT i.envase_id, i.cod, i.movement, i.partner, i.ubicacion, i.direction, i.move_date, i.last_partner_id
+SELECT i.envase_id, i.cod, i.movement, i.movement_id, i.partner, i.ubicacion, i.direction, i.move_date, i.last_partner_id
 -- SELECT *
 -- SELECT count(*)
 FROM all_moves o, all_moves i
@@ -191,7 +201,7 @@ WHERE i.envase_id = o.envase_id
 UNION ALL
 
 -- SELECT *
-SELECT i.envase_id, i.cod, o.movement, o.partner, i.ubicacion, o.direction, o.move_date, i.last_partner_id
+SELECT i.envase_id, i.cod, o.movement, o.movement_id, o.partner, i.ubicacion, o.direction, o.move_date, i.last_partner_id
 -- -- SELECT count(*)
 FROM all_moves o, all_moves i
 WHERE i.envase_id = o.envase_id
@@ -204,11 +214,23 @@ WHERE i.envase_id = o.envase_id
 ;
 
 
+-- select distinct partner, envase_id, movement, cod
+--   from short_list
+--  where envase_id < 600
+--    and direction = "O"
+--    and partner != 1
+-- -- order by partner
+-- -- order by envase_id
+-- order by envase_id
+
 select *
 from short_list
 where envase_id < 600
-  order by envase_id
+  order by partner
 ;
+
+-- select * from tb_entregas_lines limit 2;
+-- select * from tb_entregas_lines where cod = 'IBAA598';
 
 -- select distinct envase_id
 -- from short_list
@@ -220,15 +242,6 @@ where envase_id < 600
 -- where envase_id < 600
 --   and p.partner_id = s.partner
 -- ;
-
-  select distinct partner, envase_id, movement, cod
-    from short_list
-   where envase_id < 600
-     and direction = "O"
-     and partner != 1
-  -- order by partner
-  -- order by envase_id
-  order by envase_id
 
 -- select distinct partner, envase_id, movement, ubicacion, direction
 -- from short_list
