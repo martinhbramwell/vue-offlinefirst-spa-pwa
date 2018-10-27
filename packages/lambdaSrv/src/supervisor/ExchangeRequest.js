@@ -36,6 +36,8 @@ class ExchangeRequest {
     this.customer = person;
     if (person.allPersons && person.allPersons[0] && person.allPersons[0].id) {
       this.customerID = person.allPersons[0].id;
+      // LG.verbose(`Request : ${JSON.stringify(this.request, null, 2)}`);
+      // LG.verbose(`Customer : ${JSON.stringify(this.customer, null, 2)}`);
       // LG.verbose(this.customerID);
       // LG.verbose(this.customer.allPersons[0]);
     } else {
@@ -151,6 +153,17 @@ class ExchangeRequest {
 
             LG.verbose(`Source person after : ${JSON.stringify(saveSrc, null, 2)}`);
 
+
+            this.lclDB.rel
+              .find('PersonBottleMovement', saveSrc.data.bottle_movements)
+              .then((res) => {
+                const perBoMo = res.allPersonBottleMovements.filter(mo => mo.id === srce.allPersons[0].id)[0];
+                perBoMo.bottle_movements.push(exchangeRequest.data.id);
+                LG.debug(`\n========= Person Bottle Movement : ${JSON.stringify(perBoMo, null, 2)}`);
+                savingPromises.push(this.lclDB.rel.save('PersonBottleMovement', perBoMo));
+              });
+
+
             LG.debug(`Destination person before : ${JSON.stringify(dest.allPersons[0], null, 2)}`);
             const saveDst = {
               _rev: dest.allPersons[0].rev,
@@ -164,13 +177,20 @@ class ExchangeRequest {
               const bottle = btl;
               bottle.ultimo = destID;
               bottle.ubicacion = location;
-              bottle.movements.push(mvdt.id);
+              // bottle.movements.push(mvdt.id);
               saveDst.data.bottles.push(bottle.id);
               const newId = this.lclDB.rel.makeDocID({ "type": "aBottle", "id": bottle.id });
-              LG.debug(`${newId} \n============================== bottle  : ${JSON.stringify(bottle, null, 2)}`);
+              LG.debug(`${newId}  bottle  : ${JSON.stringify(bottle, null, 2)}`);
               savingPromises.push(this.lclDB.rel.save('aBottle', bottle));
             });
             LG.verbose(`Destination person after : ${JSON.stringify(saveDst, null, 2)}`);
+
+
+
+
+
+
+
 
             savingPromises.push(this.lclDB.put(saveSrc).then((rslt) => { LG.debug(`SRCE save result :: ${JSON.stringify(rslt, null, 2)}`); }));
 

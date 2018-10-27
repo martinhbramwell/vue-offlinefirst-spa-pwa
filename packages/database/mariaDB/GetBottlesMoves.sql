@@ -4,9 +4,9 @@ SELECT DISTINCT
   -- count(*)
     CONCAT(
       JSON_OBJECT(
-          "_id", concat("aBottleMovement_1_", lpad(v.envases_id, 16, 0))
+          "_id", concat("BottleMovement_1_", lpad(v.envases_id, 16, 0))
         , "data", JSON_OBJECT(
-            "idIB", v.envases_id
+            "bottle", v.envases_id
           , "codigo", IFNULL(v.cod, "FALTA")
           , "type", "bottle_move"
           , "movements", JSON_ARRAYAGG(IFNULL(s.movement_id, 0))

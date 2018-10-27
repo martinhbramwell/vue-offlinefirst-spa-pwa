@@ -1,9 +1,9 @@
 SELECT
   CONCAT(
     JSON_OBJECT(
-        "_id", concat("aPerson_1_", lpad(p.partner_id, 16, 0))
+        "_id", concat("PersonBottleMovement_1_", lpad(p.partner_id, 16, 0))
       , "data", JSON_OBJECT(
-          "idIB", p.partner_id
+          "person", p.partner_id
         , "type", "person_bottle_move"
         , "bottle_movements", JSON_ARRAYAGG(IFNULL(s.movement_id, 0))
       )

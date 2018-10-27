@@ -31,6 +31,14 @@ export default () => {
       plural: 'allBottles',
       relations: {
         ultimo: { belongsTo: 'aPerson' },
+        movements: { belongsTo: 'BottleMovement' },
+      },
+    },
+    {
+      singular: 'BottleMovement',
+      plural: 'allBottleMovements',
+      relations: {
+        bottle: { belongsTo: 'aBottle' },
         movements: { hasMany: 'Movement' },
       },
     },
@@ -39,6 +47,14 @@ export default () => {
       plural: 'allPersons',
       relations: {
         bottles: { hasMany: 'aBottle' },
+        bottle_movements: { belongsTo: 'PersonBottleMovement' },
+      },
+    },
+    {
+      singular: 'PersonBottleMovement',
+      plural: 'allPersonBottleMovements',
+      relations: {
+        person: { belongsTo: 'aPerson' },
         movements: { hasMany: 'Movement' },
       },
     },
