@@ -33,7 +33,7 @@ const plugIn = (plugin) => {
 const install = (VueJs) => {
   const Vue = VueJs;
   if (!databaseName) throw new Error('VuePouchDB Error → a main database name is expected !');
-  LG(`database is :: ${databaseName}`);
+  // LG(`database is :: ${databaseName}`);
   // const dbMasterURI = `${options.dbServerProtocol}://${user.name}:${user.password}@${options.dbServerURI}/${options.databaseName}`;
   // LG('dbMasterURI');
   // LG(dbMasterURI);

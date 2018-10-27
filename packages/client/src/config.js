@@ -1,10 +1,4 @@
-const {
-  COUCH_PROTOCOL: dbServerProtocol = 'https',
-  COUCH_HOST: dbServerURI = 'yourdb.yourpublic.work',
-  COUCH_DATABASE_NAME: databaseName = 'ib2018',
-  VERSION: dbVersion = '02',
-} = process.env;
-
+const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 
 export default {
   // NODE 4 server: 'https://wt-a0a68818c7b34a465e865e888dc419c9-0.run.webtask.io/webtasksso',
@@ -34,7 +28,8 @@ export default {
     showConsoleColors: true,
   },
   version: '0.0.94',
-  dbServerProtocol,
-  dbServerURI,
-  databaseName: `${databaseName}_${dbVersion}`,
+  dbServerProtocol: 'https',
+  dbServerURI: 'yourdb.yourpublic.work',
+  databaseName: 'ib2018_103',
+
 };

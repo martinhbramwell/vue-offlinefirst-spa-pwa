@@ -604,7 +604,7 @@
         // LG(`bottles going out ${JSON.stringify(outgoing, null, 2)}`);
         if (incoming.length > 0) {
           const pouchId = this.$pouch.rel.makeDocID({
-            type, id: generateMovementId(customer),
+            type, id: generateMovementId(customer, 'I'),
           });
           const pchid = this.$pouch.rel.parseDocID(pouchId);
 
@@ -633,7 +633,7 @@
 
         if (outgoing.length > 0) {
           const pouchId = this.$pouch.rel.makeDocID({
-            type, id: generateMovementId(customer),
+            type, id: generateMovementId(customer, 'O'),
           });
           const pchid = this.$pouch.rel.parseDocID(pouchId);
           const moveOut = {

@@ -8,12 +8,9 @@ const { dbServerProtocol, dbServerURI, databaseName } = config;
 const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 const LGERR = console.error; // eslint-disable-line no-console, no-unused-vars
 
-LG(`
-
-config
-
-  `);
-LG(config);
+LG(`PouchDb configuration...
+${JSON.stringify(config, null, 2)}
+`);
 
 if (!dbServerProtocol) throw new Error('VuePouchDB Error → remote database server protocol is required!');
 if (!dbServerURI) throw new Error('VuePouchDB Error → remote database server URI is required!');
@@ -52,10 +49,12 @@ const mutations = {
 
 const actions = {
   setUserCredentials(vx, pyld) {
-    const user = pyld.payload.couchdb;
-    window.lgr.info(`Database (action) :: recording new user credentials > ${user.name}`);
-    LG(user);
-    vx.commit('setUserCredentials', user);
+    if (pyld.payload.couchdb) {
+      const user = pyld.payload.couchdb;
+      window.lgr.info(`Database (action) :: recording new user credentials > ${JSON.stringify(pyld.payload, null, 2)}`);
+      LG(user);
+      vx.commit('setUserCredentials', user);
+    }
   },
   connectToRemoteService(vx, args) {
     LG(`
@@ -212,7 +211,7 @@ function ID() {
   return unique();
 }
 
-export const generateMovementId = user => `${ID()}_${user}`;
+export const generateMovementId = (user, spacer = '_') => `${ID()}${spacer}${user.toString().padStart(5, '0')}`;
 
 // export const generateMovementId = (user, rand) => {
 //   const tddt = tightDate(rand).toString();
