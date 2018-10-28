@@ -1,6 +1,12 @@
 import fs from 'fs';
 import { createLogger, format, transports } from 'winston';
-const { combine, timestamp, label, printf } = format;
+
+const {
+  combine,
+  timestamp,
+  label,
+  printf,
+} = format;
 
 
 const padVal = (pad, val) => (pad + val).substring(val.length);
@@ -45,18 +51,16 @@ stream.on('error', () => stream.end());
 
 // export const logger = msg => (stream.write(`${msg}
 // `));
-const myFormat = printf(info => {
-  return `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`;
-});
+const myFormat = printf(info => `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`);
 
 export const logger = createLogger({
   format: combine(
     label({ label: 'CouchDB Supervisor' }),
     timestamp(),
-    myFormat
+    myFormat,
   ),
   transports: [
     new transports.Console({ level: 'info' }),
-    new transports.File({ filename: logDir, level: 'debug' })
-  ]
+    new transports.File({ filename: logDir, level: 'debug' }),
+  ],
 });

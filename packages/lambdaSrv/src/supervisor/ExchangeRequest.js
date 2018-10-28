@@ -1,7 +1,4 @@
-import EventEmitter from 'events';
 import { logger } from '../utils';
-
-import queue from 'queue';
 
 export const EXCHANGE_RECORD = 'ExchangeRequest';
 export const MOVEMENT_RECORD = 'movement';
@@ -135,8 +132,6 @@ class ExchangeRequest {
 
             LG.debug(`Source person before : ${JSON.stringify(srce.allPersons[0], null, 2)}`);
 
-            if (srce.allPersons[0].idIB === '12351')  throw 'TEST PERSON :: 12351 Alvaro Tapia Aguilar';
-
             LG.debug(`Bottle IDs : ${JSON.stringify(this.aryBottleIDs, null, 2)}`);
 
             const saveSrc = {
@@ -157,9 +152,10 @@ class ExchangeRequest {
             this.lclDB.rel
               .find('PersonBottleMovement', saveSrc.data.bottle_movements)
               .then((res) => {
-                const perBoMo = res.allPersonBottleMovements.filter(mo => mo.id === srce.allPersons[0].id)[0];
+                const perBoMo = res.allPersonBottleMovements
+                  .filter(mo => mo.id === srce.allPersons[0].id)[0];
                 perBoMo.bottle_movements.push(exchangeRequest.data.id);
-                LG.debug(`\n========= Person Bottle Movement : ${JSON.stringify(perBoMo, null, 2)}`);
+                LG.debug(`\n========= Source Person Bottle Movement : ${JSON.stringify(perBoMo, null, 2)}`);
                 savingPromises.push(this.lclDB.rel.save('PersonBottleMovement', perBoMo));
               });
 
@@ -179,17 +175,35 @@ class ExchangeRequest {
               bottle.ubicacion = location;
               // bottle.movements.push(mvdt.id);
               saveDst.data.bottles.push(bottle.id);
-              const newId = this.lclDB.rel.makeDocID({ "type": "aBottle", "id": bottle.id });
+              const newId = this.lclDB.rel.makeDocID({ type: 'aBottle', id: bottle.id });
               LG.debug(`${newId}  bottle  : ${JSON.stringify(bottle, null, 2)}`);
+
+              this.lclDB.rel
+                .find('BottleMovement', bottle.id)
+                .then((res) => {
+                  const boMo = res.allBottleMovements
+                    .filter(mo => mo.id === bottle.id)[0];
+                  LG.debug(`\n========= Bottle Movement : ${JSON.stringify(boMo, null, 2)}`);
+                  boMo.movements.push(exchangeRequest.data.id);
+                  savingPromises.push(this.lclDB.rel.save('BottleMovement', boMo));
+                });
+
               savingPromises.push(this.lclDB.rel.save('aBottle', bottle));
             });
+
+
             LG.verbose(`Destination person after : ${JSON.stringify(saveDst, null, 2)}`);
 
 
-
-
-
-
+            this.lclDB.rel
+              .find('PersonBottleMovement', saveDst.data.bottle_movements)
+              .then((res) => {
+                const perBoMo = res.allPersonBottleMovements
+                  .filter(mo => mo.id === dest.allPersons[0].id)[0];
+                perBoMo.bottle_movements.push(exchangeRequest.data.id);
+                LG.debug(`\n========= Destination Person Bottle Movement : ${JSON.stringify(perBoMo, null, 2)}`);
+                savingPromises.push(this.lclDB.rel.save('PersonBottleMovement', perBoMo));
+              });
 
 
             savingPromises.push(this.lclDB.put(saveSrc).then((rslt) => { LG.debug(`SRCE save result :: ${JSON.stringify(rslt, null, 2)}`); }));
@@ -203,7 +217,7 @@ class ExchangeRequest {
                 LG.debug(`EXCHANGE \n${JSON.stringify(exchangeRequest, null, 2)}`);
                 this.lclDB.put(exchangeRequest)
                   .then((exrq) => {
-                    LG.verbose(`Marked Exchange Request Deleted`);
+                    LG.verbose('Marked Exchange Request Deleted');
                     LG.debug(`Deletion :: ${JSON.stringify(exrq, null, 2)}`);
                     mvdt.status = COMPLETE;
                     mvdt.type = MOVEMENT_RECORD;
@@ -266,8 +280,8 @@ const processExchangeRequests = (database) => {
     endkey: 'ExchangeRequest\ufff0',
   }).then((rslt) => {
     let numOfRequests = 0;
-    const newRequests = rslt.rows.filter((exchangeRequest) => {
-      let idER = exchangeRequest.doc.data.id;
+    rslt.rows.filter((exchangeRequest) => {
+      const idER = exchangeRequest.doc.data.id;
       LG.debug(`Getting only new Exchange Requests :: ${idER}`);
       if (ignoreList.includes(idER)) return false;
       ignoreList.push(idER);
@@ -278,23 +292,21 @@ const processExchangeRequests = (database) => {
     LG.debug(`Ignore list contains ... \n${JSON.stringify(ignoreList, null, 2)}`);
 
     if (numOfRequests > 0) {
-      const jobStackExcReq = new Array();
+      const jobStackExcReq = [];
       rslt.rows.forEach((exchangeRequest) => {
-
         LG.info(`Stacking Exchange Request :: ${JSON.stringify(exchangeRequest.id, null, 2)}`);
         jobStackExcReq.push(new ExchangeRequest(exchangeRequest, database, jobStackExcReq));
-
       });
       LG.verbose('Processing exchange request stack...');
       const tmpExchReq = jobStackExcReq.pop();
       tmpExchReq.process();
     }
-  })
+  });
 };
 
-/***
+/* *****
 This code works but excludes legitimate requests
-***/
+***** */
 // let lastProcessedExchangeRequest = 'ExchangeRequest_1_10000010101010101'
 // const processExchangeRequests = (database) => {
 //   LG.debug(`
@@ -316,7 +328,8 @@ This code works but excludes legitimate requests
 //       numOfRequests += 1;
 //     });
 //     lastIdER += 1;
-//     lastProcessedExchangeRequest = database.rel.makeDocID({ type: 'ExchangeRequest', id: lastIdER })
+//     lastProcessedExchangeRequest = database.rel
+//          .makeDocID({ type: 'ExchangeRequest', id: lastIdER })
 //     LG.info(`ExchangeRequests starting from  :: ${lastProcessedExchangeRequest}`);
 
 //     if (numOfRequests > 0) {

@@ -4,8 +4,10 @@ import logger from 'morgan';
 import bodyParser from 'body-parser';
 import routes from './routes';
 
-import dbMonitor from './database'; // eslint-disable-line no-unused-vars
+/* eslint-disable no-unused-vars */
+import dbMonitor from './database';
 import validations from './validations';
+/* eslint-enable no-unused-vars */
 
 
 import { logger as LG } from './utils'; // eslint-disable-line no-unused-vars
