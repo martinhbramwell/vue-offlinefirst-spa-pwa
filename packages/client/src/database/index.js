@@ -1,7 +1,13 @@
 import PouchDB from 'pouchdb-browser';
+import base64 from 'base-64'; // eslint-disable-line no-unused-vars
 
 // import { dbServerProtocol, dbServerURI, databaseName } from '@/config';
 import config from '@/config';
+import test from '@/assets/tst';
+
+import replicationIn from './replicationIn'; // eslint-disable-line no-unused-vars
+import replicationOut from './replicationOut'; // eslint-disable-line no-unused-vars
+
 
 const { dbServerProtocol, dbServerURI, databaseName } = config;
 
@@ -39,6 +45,7 @@ const mutations = {
     window.lgr.debug(`Database (mutation) :: recording new user credentials "${user.name}"`);
     vx.user = user; // eslint-disable-line no-param-reassign
   },
+
   setDbMgr(vx, pyld) {
     window.lgr.info('Database (mutation) :: recording datbase manager');
     LG(vx.dbMgr);
@@ -56,6 +63,7 @@ const actions = {
       vx.commit('setUserCredentials', user);
     }
   },
+
   connectToRemoteService(vx, args) {
     LG(`
 
@@ -67,108 +75,66 @@ const actions = {
     const { user, srvr, dbMgr } = vx.state;
     dbMgr.setMaxListeners(30);
 
+    /* eslint-disable no-unused-vars */
     const dbName = srvr.databaseName;
     const dbMasterURI = `${srvr.dbServerProtocol}://${user.name}:${user.password}@${srvr.dbServerURI}/${srvr.databaseName}`;
+    const dbBulkLoadURI = 'https://yourdb.yourpublic.work/cdb/201810291221.json';
 
     const dbMaster = new PouchDB(dbMasterURI, { skip_setup: true });
+    /* eslint-enable no-unused-vars */
 
-    const ddocsFromServer = [
-      { type: 'view', name: 'visible/compact_bottle' },
-      { type: 'view', name: 'visible/compact_person' },
-      { type: 'filter', name: 'ddocs/this_ddoc' },
-    ];
-    ddocsFromServer.forEach((ddoc) => {
-      const options = {
-        live: true,
-        retry: true,
-      };
-      options[ddoc.type] = ddoc.name;
-      dbMgr.replicate.from(dbMaster, options)
-        .on('change', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DELTA ********* ${JSON.stringify(info, null, 2)}`);
-          if (ddoc.name === 'ddocs/this_ddoc') LG(info);
-        })
-        .on('paused', () => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION ON HOLD *********`);
-          dbMgr.allDocs({
-            include_docs: true,
-            attachments: true,
-          }).then((result) => {
-            LG('allDocs fetch result');
-            LG(result);
-          }).catch((err) => {
-            LGERR(`allDocs fetch failure ${err}`);
-          });
-        })
-        .on('active', () => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION RESUMED *********`);
-        })
-        .on('denied', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DENIED ********* ${info}`);
-        })
-        .on('error', err => LG(`${dbName}/${ddoc.name} INCOMING REPLICATION FAILURE ************ ${err}`));
-    });
+    // const username = 'hasan';
+    // const password = '34erDFCV';
+    // const creds = base64.encode(`${username}:${password}`);
 
-    // const filter = 'post_processing/by_new_inventory';
-    const filterText = 'ExchangeRequest';
-    const filter = doc => doc._id.substring(0, 15) === filterText; // eslint-disable-line max-len, no-underscore-dangle
-    const options = {
-      live: true,
-      retry: true,
-      filter,
-      // query_params: { agent: user.name },
-    };
-    dbMgr.replicate.to(dbMaster, options)
-      .on('change', (info) => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION DELTA ********* `);
-        const shortList = info.change.docs.filter(doc => (!doc.data) || (doc.data.type !== 'person' && doc.data.type !== 'bottle'));
-        shortList.forEach((doc) => {
-          LG(`DOC :: ${JSON.stringify(doc, null, 2)}`);
-        });
-      })
-      .on('paused', () => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION ON HOLD ********* ${user.name}`);
-        dbMgr.allDocs({
-          include_docs: true,
-          attachments: true,
-        }).then((result) => {
-          LG('allDocs fetch result');
-          LG(result);
-        }).catch((err) => {
-          LGERR(`allDocs fetch failure ${err}`);
-        });
-      })
-      .on('active', () => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION RESUMED *********`);
-      })
-      .on('denied', (info) => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION DENIED ********* ${info}`);
-      })
-      .on('error', err => LG(`${dbName}/${filterText} OUTGOING REPLICATION FAILURE ************ ${err}`));
+    // const headers = new Headers();
+    // headers.set('Authorization', `Basic ${creds}`);
 
-    // const filter = 'user_specific/by_vendor_agent';
-    // dbMgr.sync(dbMaster, {
-    //   live: true,
-    //   retry: true,
-    //   filter,
+    // fetch(dbBulkLoadURI, {
+    //   method: 'GET',
+    //   credentials: 'include',
+    //   headers,
     // })
-    //   .on('change', (repl) => {
-    //     LG(`${dbName}/${filter} **********  SYNCING DELTA ********* `);
-    //     LG(`Database replication: ${repl.direction} ${repl.change.docs.length} records.`);
-    //     LG(repl.change.docs[0].data);
-    //     LG(repl);
-    //     LG(this);
-    //   })
-    //   .on('active', () => {
-    //     LG(`${dbName}/${filter} **********  SYNCING RESUMED ********* `);
-    //   })
-    //   .on('paused', () => {
-    //     LG(`${dbName}/${filter}  ************  SYNCING ON HOLD *********** `);
-    //   })
-    //   .on('error', err => LG(`Database error ${err}`));
+    //   .then((response) => {
+    //     LG(response);
+    //     return response.json();
+    //   });
+    // // .then((json) => {
+    // //   LG('*************************************************');
+    // //   LG(JSON.stringify(json, null, 2));
+    // //   LG('*************************************************');
+    // // });
 
-    // const view = 'persons/minimal_person';
+    test();
+
+
+    LG(`
+
+      Loading from ${dbBulkLoadURI}
+      Ready for ${dbMasterURI}
+    `);
+
+
+    dbMaster.load(dbBulkLoadURI, {
+      proxy: dbMasterURI,
+      // // fetch: (url, opts) => {
+      // //   opts.headers.set('Authorization', `Basic ${creds}`);
+      // //   return PouchDB.fetch(url, opts);
+      // // },
+    }).then(() => {
+      LG(`
+        Ready for more.
+      `);
+
+      // replicationIn(dbMgr, dbMaster, dbName);
+      // replicationOut(dbMgr, dbMaster, dbName);
+    }).catch((err) => {
+      LG(`
+        Awwww FUCK! ${err}
+      `);
+    });
   },
+
   rememberDbMgr(vx, args) {
     LG(`
 
