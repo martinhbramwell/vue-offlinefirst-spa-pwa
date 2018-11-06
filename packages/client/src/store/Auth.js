@@ -163,7 +163,7 @@ const actions = {
     dispatch('authenticate');
   },
   authenticate: ({ commit, dispatch }) => {
-    const mode = process.env.STATIC_MODE;
+    const mode = process.env.VUE_APP_STATIC_MODE;
     let url = '';
     window.lgr.info(`Auth(action) :: Authenticating... ${mode}`);
     url = `${cfg.server}${cfg.authPath}?mode=${mode}`;

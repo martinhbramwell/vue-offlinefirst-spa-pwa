@@ -18,7 +18,7 @@ import formulate from 'vue-formulate';
 import { sync } from 'vuex-router-sync';
 
 import Buefy from 'buefy';
-import 'buefy/lib/buefy.css';
+import 'buefy/dist/buefy.css';
 
 // import { setupCalendar, DatePicker } from 'v-calendar';
 import VCalendar from 'v-calendar';
@@ -30,6 +30,11 @@ import _ from 'lodash';
 
 import VueVirtualScroller from 'vue-virtual-scroller';
 
+/* *********************************** o/
+                                     * */
+import './registerServiceWorker'; /* * o/
+                                     * o/
+************************************** */
 
 import App from './App';
 import { store } from './store';

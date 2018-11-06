@@ -2,7 +2,7 @@ import Vue from 'vue';
 import axios from 'axios'; // eslint-disable-line no-unused-vars
 import Router from 'vue-router';
 
-import Header from '@/components/Attic/Header';
+// import Header from '@/components/Attic/Header';
 
 import { routes as mainLayout } from '@/components/MainLayout';
 
@@ -10,15 +10,15 @@ import { beforeEach as beforeEachTaskAcl } from '@/accessControl';
 
 // import { routes as example } from '@/components/Tests/Component';
 
-import OldHomeView from '@/components/Attic/OldHomeView';
-import DetailView from '@/components/Attic/DetailView';
-import PostView from '@/components/Attic/PostView';
-import DumbA from '@/components/Attic/DumbA';
-import DumbB from '@/components/Attic/DumbB';
-import Form from '@/components/Attic/Form';
+// import OldHomeView from '@/components/Attic/OldHomeView';
+// import DetailView from '@/components/Attic/DetailView';
+// import PostView from '@/components/Attic/PostView';
+// import DumbA from '@/components/Attic/DumbA';
+// import DumbB from '@/components/Attic/DumbB';
+// import Form from '@/components/Attic/Form';
 
 // import { Blog, Article } from '@/components/Blog';
-import { routes as blog } from '@/components/Attic/Blog';
+// import { routes as blog } from '@/components/Attic/Blog';
 // import { routes as poison } from '@/components/Attic/Poison';
 
 import cfg from '../config';
@@ -32,50 +32,50 @@ const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 
 const baseRoutes = [
 
-  {
-    path: '/ohv',
-    name: 'ohv',
-    components: { default: OldHomeView, hdr: Header },
-    // meta: { permission: 'visitor' },
-  },
-  {
-    path: '/post',
-    name: 'post',
-    components: { default: PostView, hdr: Header },
-    // meta: { permission: 'visitor' },
-  },
-  {
-    path: '/detail/:id',
-    name: 'detail',
-    components: { default: DetailView, hdr: Header },
-    // meta: { permission: 'visitor' },
-  },
-  {
-    path: '/dc',
-    name: 'DA',
-    components: { default: DumbA, hdr: Header },
-    // meta: { permission: 'visitor' },
-  },
-  {
-    path: '/db',
-    name: 'DB',
-    components: { default: DumbB, hdr: Header },
-    // meta: { permission: 'visitor' },
-  },
-  {
-    path: '/form',
-    name: 'form',
-    components: { default: Form, hdr: Header },
-    // meta: { permission: 'visitor' },
-  },
+  // {
+  //   path: '/ohv',
+  //   name: 'ohv',
+  //   components: { default: OldHomeView, hdr: Header },
+  //   // meta: { permission: 'visitor' },
+  // },
+  // {
+  //   path: '/post',
+  //   name: 'post',
+  //   components: { default: PostView, hdr: Header },
+  //   // meta: { permission: 'visitor' },
+  // },
+  // {
+  //   path: '/detail/:id',
+  //   name: 'detail',
+  //   components: { default: DetailView, hdr: Header },
+  //   // meta: { permission: 'visitor' },
+  // },
+  // {
+  //   path: '/dc',
+  //   name: 'DA',
+  //   components: { default: DumbA, hdr: Header },
+  //   // meta: { permission: 'visitor' },
+  // },
+  // {
+  //   path: '/db',
+  //   name: 'DB',
+  //   components: { default: DumbB, hdr: Header },
+  //   // meta: { permission: 'visitor' },
+  // },
+  // {
+  //   path: '/form',
+  //   name: 'form',
+  //   components: { default: Form, hdr: Header },
+  //   // meta: { permission: 'visitor' },
+  // },
 ];
 
 const routes = baseRoutes
-  .concat(mainLayout)
   // .concat(person)
   // .concat(example)
+  // .concat(blog)
   // .concat(poison)
-  .concat(blog);
+  .concat(mainLayout);
 
 const processServerSideChanges = (t, f, n) => { // eslint-disable-line no-unused-vars
   if (window.lgr) {

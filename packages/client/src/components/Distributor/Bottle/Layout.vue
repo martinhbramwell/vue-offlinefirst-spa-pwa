@@ -24,7 +24,7 @@
 
   import { store } from '@/store';
 
-  import Create from './Create';
+  import Create from './CreateBottle';
 
   const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 

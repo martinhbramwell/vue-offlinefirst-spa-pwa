@@ -3,7 +3,7 @@
     <div class="navbar-brand">
       <router-link v-bind:to="{name: 'home'}">
         <img
-          src="static/img/WaterDrop_50.png"
+          :src="logo"
           alt="Iridium Blue Logo">
         <span data-cyp="appTitle" style="font-family: 'Advent Pro'; font-size: 48px;">iridium blue</span>
       </router-link>
@@ -57,6 +57,7 @@
     data() {
       return {
         activeTab: 0,
+        logo: `${process.env.BASE_URL}img/WaterDrop_50.png`,
       };
     },
     methods: {

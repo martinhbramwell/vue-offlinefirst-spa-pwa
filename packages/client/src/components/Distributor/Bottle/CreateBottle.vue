@@ -4,7 +4,7 @@
     <formulate
       class="my-form"
       @submit="commitForm"
-      name="createInvoice"
+      name="createBottle"
     >
       <formulate-element
         name="summation"
@@ -19,7 +19,7 @@
       />
 
         <article class="tile is-child box">
-          <h3 class="title">Invoice</h3>
+          <h3 class="title">Bottle</h3>
 
           <div class="columns">
             <div class="column is-centered">
@@ -29,13 +29,13 @@
                 <formulate-element
                   name="Persona"
                   validation="required"
-                  element-classes="nameInput"
                 >
+
                   <autocomplete-input
                     v-model="Persona"
-                    :items="personsId || null"
-                    @selection-made="setPersona"
+                    :options="personsId || null"
                   />
+
                 </formulate-element>
               </div>
 
@@ -45,11 +45,11 @@
               <div class="control">
                 <label class="label">Fecha</label>
                 <formulate-element
-                  name="InvoiceDate"
+                  name="BottleDate"
                   validation="required"
                 >
                   <dateselect-input
-                    v-model="InvoiceDate"
+                    v-model="BottleDate"
                   />
                 </formulate-element>
               </div>
@@ -236,6 +236,7 @@ import format from '@/utils/format';
 import Details from './Details';
 
 const LG = console.log; // eslint-disable-line no-unused-vars, no-console
+const LGERR = console.error; // eslint-disable-line no-unused-vars, no-console
 
 // const SUBTOTALIVA0 = 0;
 // const SUBTOTALIVA12 = SUBTOTALIVA0 + 1;
@@ -283,7 +284,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters('invoice', {
+    ...mapGetters('bottle', {
       enums: 'getEnums',
     }),
     ...mapGetters('product', {
@@ -294,21 +295,21 @@ export default {
       persons: 'list',
       getPerson: 'getPerson',
     }),
-    ...mapState('invoice', {
+    ...mapState('bottle', {
       isCreating: 'isCreating',
       formRows: 'formRows',
     }),
     ...mapModels({
-      Persona: 'createInvoice/Persona',
-      InvoiceDate: 'createInvoice/InvoiceDate',
+      Persona: 'createBottle/Persona',
+      BottleDate: 'createBottle/BottleDate',
     }),
     tableData() {
       const rows = [];
       const { state } = this.$store;
-      if (state.values.createInvoice) {
-        const accum = state.values.createInvoice;
+      if (state.values.createBottle) {
+        const accum = state.values.createBottle;
         accum.Persona = accum.Persona || '(0) no one';
-        accum.InvoiceDate = accum.InvoiceDate || new Date();
+        accum.BottleDate = accum.BottleDate || new Date();
         const dummy = [{
           codigo: 'codigo',
           nombre: 'nombre',
@@ -464,12 +465,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions('invoice', {
+    ...mapActions('bottle', {
       saveForm: 'saveForm',
     }),
-    setPersona: function (persona) { // eslint-disable-line func-names, object-shorthand
-      LG(`persona ${JSON.stringify(persona, null, 2)}`);
-    },
     openModal: function (event) { // eslint-disable-line func-names, object-shorthand
       event.preventDefault();
       this.isComponentModalActive = true;
@@ -494,9 +492,9 @@ export default {
       // LG('Commit form');
       // LG(this);
       // LG(_form);
-      // LG(this.$store.state.values.createInvoice);
-      // LG(this.$store.state.values.createInvoice.InvoiceDate);
-      // LG(this.$store.state.values.createInvoice.Persona);
+      // LG(this.$store.state.values.createBottle);
+      // LG(this.$store.state.values.createBottle.BottleDate);
+      // LG(this.$store.state.values.createBottle.Persona);
       this.saveForm(_form);
     },
     setItem(item) {
@@ -508,15 +506,8 @@ export default {
 </script>
 
 <style scoped>
-  .resizedTextbox { width: 140px; padding: 1px; text-align: right; }
-
-  input[type="text"] {
-    width: 140px !important;
-    padding: 1px;
-  }
-
+  .resizedTextbox { width: 40px; padding: 1px; text-align: right; }
   div.text-right { margin-left:auto; margin-right:0; }
-
   div.push-down {
       padding-top: 50px;
   }
@@ -525,7 +516,11 @@ export default {
   }
   div.strike-out {
     background-color: transparent;
-    background-image: -webkit-gradient(linear, 19.1% -7.9%, 81% 107.9%,#fff),
+    background-image: -webkit-gradient(
+      linear,
+      19.1% -7.9%,
+      81% 107.9%,
+      color-stop(0, #fff),
       color-stop(.48, #fff),
       color-stop(.5, #000),
       color-stop(.52, #fff),
@@ -547,7 +542,6 @@ export default {
       #fff 52%,
       #fff 100%
     );
-     // eslint-disable-next-line
     background-image: -ms-repeating-linear-gradient(
       287deg,
       #fff 0%,

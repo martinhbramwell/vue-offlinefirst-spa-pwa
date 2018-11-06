@@ -43,7 +43,7 @@
     border: 2px solid white;
     padding-right: 10px;
     padding-left: 10px;
-    background-image: url('../static/img/BodyBgnd.jpg'); background-repeat: repeat;
+    background-image: url('../public/img/BodyBgnd.jpg'); background-repeat: repeat;
     /* Only 'BodyBgnd.jpg' can be used, due to tricks in /build/build.js  */
   }
 </style>

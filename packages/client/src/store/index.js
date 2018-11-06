@@ -6,7 +6,7 @@ import { formulateState, formulateGetters, formulateMutations } from 'vue-formul
 import { store as person } from '@/components/Admin/Person';
 import { store as product } from '@/components/Sales/Product';
 import { store as invoice } from '@/components/Sales/Invoice';
-import { store as articles } from '@/components/Attic/Blog';
+// import { store as articles } from '@/components/Attic/Blog';
 import { store as bottle } from '@/components/Distributor/Bottle';
 import { store as movement } from '@/components/Distributor/Movement';
 
@@ -116,7 +116,7 @@ export const store = new Vuex.Store({ // eslint-disable-line new-cap
     Auth,
     a12n,
     dbmgr,
-    articles,
+    // articles,
     person,
     product,
     invoice,
