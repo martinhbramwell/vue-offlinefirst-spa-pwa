@@ -33,3 +33,8 @@ export SUBTARGET="${TARGET}/invoices"
 mkdir -p ${SUBTARGET}
 echo -e ${SUBTARGET}/invoice.json
 ./RunAScript.sh ./GetInvoices.sql > ${SUBTARGET}/invoice.json
+
+export SUBTARGET="${TARGET}/products"
+mkdir -p ${SUBTARGET}
+echo -e ${SUBTARGET}/product.json
+./RunAScript.sh ./GetProducts.sql > ${SUBTARGET}/product.json

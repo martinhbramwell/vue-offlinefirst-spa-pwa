@@ -65,6 +65,10 @@ if [[ 1 == 1 ]]; then
   export COUCH_GROUP_NAME='invoices';
   export COUCH_COLLECTION_NAME='invoice';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+
+  export COUCH_GROUP_NAME='products';
+  export COUCH_COLLECTION_NAME='product';
+  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 fi;
 
 if [[ 1 == 1 ]]; then

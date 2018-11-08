@@ -11,3 +11,5 @@ HOST="https://${UZR}:${PSS}@yourdb.yourpublic.work";
 echo -e "
 sending file: ${FILE} to ${HOST}";
 curl -H "Content-type: application/json" -X POST "${HOST}/${DB}/_bulk_docs"  -d @${FILE};
+echo -e "
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
