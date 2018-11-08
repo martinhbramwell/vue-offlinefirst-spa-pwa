@@ -12,3 +12,6 @@ scp -r ${SRCE}/${COUCH_GROUP_NAME} ${TEST_FILES_DIR}
 
 export COUCH_GROUP_NAME="movements";
 scp -r ${SRCE}/${COUCH_GROUP_NAME} ${TEST_FILES_DIR}
+
+export COUCH_GROUP_NAME="invoices";
+scp -r ${SRCE}/${COUCH_GROUP_NAME} ${TEST_FILES_DIR}

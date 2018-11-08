@@ -29,3 +29,7 @@ echo -e ${SUBTARGET}/profile.json
 echo -e ${SUBTARGET}/address.json
 ./RunAScript.sh ./GetPersonAddresses.sql > ${SUBTARGET}/address.json
 
+export SUBTARGET="${TARGET}/invoices"
+mkdir -p ${SUBTARGET}
+echo -e ${SUBTARGET}/invoice.json
+./RunAScript.sh ./GetInvoices.sql > ${SUBTARGET}/invoice.json

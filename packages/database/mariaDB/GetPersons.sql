@@ -46,6 +46,7 @@ WHERE
 
 GROUP BY p.partner_id
 ORDER BY p.partner_id
+-- limit 3
 ;
 
 -- from short_list s, tb_partners p
