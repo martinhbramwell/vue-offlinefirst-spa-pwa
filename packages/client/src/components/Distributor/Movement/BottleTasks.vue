@@ -648,11 +648,13 @@ const vm = {
       // LG(`Customer Id ${this.personChosen.id}`);
       // LG(`Inventory Id ${this.currentUser.id}`);
       // LG(`exchange ${JSON.stringify(this.exchange, null, 2)}`);
-      const incoming = this.exchange.filter(btle => btle.src.match(/C/)).map(btle => btle.id);
-      const outgoing = this.exchange.filter(btle => btle.src.match(/I/)).map(btle => btle.id);
-      // LG(`bottles coming in ${JSON.stringify(incoming, null, 2)}`);
-      // LG(`bottles going out ${JSON.stringify(outgoing, null, 2)}`);
-      if (incoming.length > 0) {
+      const incoming = this.exchange.filter(btle => btle.src.match(/C/));
+      const incomingIds = incoming.map(btle => btle.id);
+      const outgoing = this.exchange.filter(btle => btle.src.match(/I/));
+      const outgoingIds = outgoing.map(btle => btle.id);
+      // LG(`bottles coming in ${JSON.stringify(incomingIds, null, 2)}`);
+      // LG(`bottles going out ${JSON.stringify(outgoingIds, null, 2)}`);
+      if (incomingIds.length > 0) {
         const pouchId = this.$pouch.rel.makeDocID({
           type, id: generateMovementId(customer, 'I'),
         });
@@ -665,7 +667,7 @@ const vm = {
             type,
             inOut: 'in',
             status: 'new',
-            bottles: incoming,
+            bottles: incomingIds,
             customer,
             inventory,
           },
@@ -675,13 +677,15 @@ const vm = {
           .then((mvmnt) => {
             LG('---------- Saved movement IN --------');
             // LG(this.exchange);
-            // LG(incoming);
-            clearExchangeArea(this.exchange, incoming);
+            // LG(incomingIds);
+            clearExchangeArea(this.exchange, incomingIds);
+            incoming.forEach(btl => this.inventory.push(btl));
+            incoming = [];
             LG(mvmnt);
           });
       }
 
-      if (outgoing.length > 0) {
+      if (outgoingIds.length > 0) {
         const pouchId = this.$pouch.rel.makeDocID({
           type, id: generateMovementId(customer, 'O'),
         });
@@ -693,7 +697,7 @@ const vm = {
             type,
             status: 'new',
             inOut: 'out',
-            bottles: outgoing,
+            bottles: outgoingIds,
             customer,
             inventory,
           },
@@ -702,9 +706,11 @@ const vm = {
         this.$pouch.put(moveOut)
           .then((mvmnt) => {
             LG('---------- Saved movement OUT --------');
-            // LG(outgoing);
+            // LG(outgoingIds);
             // LG(this.exchange);
-            clearExchangeArea(this.exchange, outgoing);
+            clearExchangeArea(this.exchange, outgoingIds);
+            outgoing.forEach(btl => this.customer.push(btl));
+            outgoing = [];
             LG(mvmnt);
           });
       }

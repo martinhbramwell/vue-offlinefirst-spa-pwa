@@ -1,6 +1,8 @@
 module.exports = {
   devServer: {
-    host: 'tstv',
-    port: 3030,
+    host: '0.0.0.0',
+    port: 8080,
+    public: 'tstvm01:8080',
+    disableHostCheck: true,
   },
 };
