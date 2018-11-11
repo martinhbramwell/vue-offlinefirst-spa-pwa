@@ -1,13 +1,4 @@
 <template>
-<!--
-  <main id="person">
-    <p class="back">
-      <router-link :to="{ name: 'persons' }">Back to Persons</router-link>
-    </p>
-    <person-record v-if="currentPerson" :person="currentPerson" />
-  </main>
--->
-
   <div>
     <nav class="level">
       <div class="level-item has-text-centered" v-for="col in columns">
@@ -21,7 +12,6 @@
 </template>
 
 <script>
-
   import { mapGetters } from 'vuex';
 
   const LG = console.log; // eslint-disable-line no-console, no-unused-vars
@@ -52,7 +42,6 @@
       }),
     },
   };
-
 </script>
 
 <style scoped>

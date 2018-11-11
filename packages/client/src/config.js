@@ -1,5 +1,9 @@
 const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 
+const dbServerProtocol = process.env.VUE_APP_COUCH_PROTOCOL;
+const dbServerURI = process.env.VUE_APP_COUCH_URI;
+const databaseName = process.env.VUE_APP_COUCH_NAME;
+
 export default {
   // NODE 4 server: 'https://wt-a0a68818c7b34a465e865e888dc419c9-0.run.webtask.io/webtasksso',
   server: 'https://wt-a0a68818c7b34a465e865e888dc419c9-0.sandbox.auth0-extend.com/webtasksso',
@@ -28,8 +32,11 @@ export default {
     showConsoleColors: true,
   },
   version: '0.0.99',
-  dbServerProtocol: 'https',
-  dbServerURI: 'yourdb.yourpublic.work',
-  databaseName: 'ib2018_103',
+  //  dbServerProtocol: 'https',
+  //  dbServerURI: 'yourdb.yourpublic.work',
+  //  databaseName: 'ib2018_103',
+  dbServerProtocol,
+  dbServerURI,
+  databaseName,
 
 };

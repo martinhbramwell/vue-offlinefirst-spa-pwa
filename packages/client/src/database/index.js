@@ -9,7 +9,7 @@ const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 const LGERR = console.error; // eslint-disable-line no-console, no-unused-vars
 
 LG(`PouchDb configuration...
-${JSON.stringify(config, null, 2)}
+  ${JSON.stringify(config, null, 2)}
 `);
 
 if (!dbServerProtocol) throw new Error('VuePouchDB Error → remote database server protocol is required!');
@@ -75,6 +75,7 @@ const actions = {
     const ddocsFromServer = [
       { type: 'view', name: 'visible/compact_bottle' },
       { type: 'view', name: 'visible/compact_person' },
+      { type: 'view', name: 'visible/compact_product' },
       { type: 'filter', name: 'ddocs/this_ddoc' },
     ];
     ddocsFromServer.forEach((ddoc) => {

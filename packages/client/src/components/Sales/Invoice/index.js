@@ -19,7 +19,9 @@ import Invoice from './Layout';
 import Retrieve from './Retrieve';
 import columns from './column_specs';
 
-import { INVOICES, INVOICE, INVOICES_LIST } from './accessGroups';
+import {
+  INVOICES, INVOICE, INVOICES_LIST,
+} from './accessGroups';
 
 const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 
@@ -118,7 +120,7 @@ export const store = createCrudModule({
   actions: {
     /* eslint-disable no-unused-vars */
     fetchAll: ({ dispatch }) => {
-      LG('<<<<<< fetchAll >>>>>>');
+      LG('<<<<<< fetchAll invoices >>>>>>');
       dispatch('fetchList', { customUrlFnArgs: store.state.paginator })
         .then((resp) => {
           LG(' * * Fetched invoices * *');

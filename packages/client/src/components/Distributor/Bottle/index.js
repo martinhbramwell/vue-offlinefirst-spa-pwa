@@ -20,7 +20,9 @@ import Bottle from './Layout';
 import Retrieve from './Retrieve';
 import columns from './column_specs';
 
-import { BOTTLES, BOTTLE, BOTTLES_LIST, BOTTLES_TEST } from './accessGroups';
+import {
+  BOTTLES, BOTTLE, BOTTLES_LIST, BOTTLES_TEST,
+} from './accessGroups';
 
 const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 

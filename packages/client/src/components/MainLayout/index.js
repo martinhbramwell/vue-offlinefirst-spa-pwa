@@ -59,4 +59,3 @@ export const routes = [ // eslint-disable-line import/prefer-default-export
     children,
   },
 ];
-

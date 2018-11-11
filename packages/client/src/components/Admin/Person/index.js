@@ -85,7 +85,7 @@ export const store = createCrudModule({
   actions: {
     /* eslint-disable no-unused-vars */
     fetchAll: ({ dispatch }) => {
-      LG('<<<<<< fetchAll >>>>>>');
+      LG('<<<<<< fetchAll persons >>>>>>');
       dispatch('fetchList', { customUrlFnArgs: store.state.paginator })
         .then((resp) => {
           LG(' * * Fetched persons * *');
