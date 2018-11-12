@@ -68,7 +68,6 @@
     "eslint-watch": "^3.1.3",
     "jest": "^23.6.0",
     "nodemon": "^1.18.4",
-    "pouchdb-dump-cli": "^2.0.6",
     "reload": "^2.3.1",
     "supertest": "^3.0.0"
   },
