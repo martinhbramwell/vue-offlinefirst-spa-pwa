@@ -680,7 +680,7 @@ const vm = {
             // LG(incomingIds);
             clearExchangeArea(this.exchange, incomingIds);
             incoming.forEach(btl => this.inventory.push(btl));
-            incoming = [];
+            incoming.length = 0;
             LG(mvmnt);
           });
       }
@@ -710,7 +710,7 @@ const vm = {
             // LG(this.exchange);
             clearExchangeArea(this.exchange, outgoingIds);
             outgoing.forEach(btl => this.customer.push(btl));
-            outgoing = [];
+            outgoing.length = 0;
             LG(mvmnt);
           });
       }
@@ -1104,7 +1104,6 @@ const vm = {
 };
 
 export default vm;
-
 </script>
 
 <style>

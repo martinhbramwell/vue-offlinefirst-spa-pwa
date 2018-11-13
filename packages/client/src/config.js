@@ -21,7 +21,7 @@ export default {
     // logLevel: 'debug',
     logLevel: 'info',
     // optional: defaults to false if not specified
-    stringifyArguments: true,
+    stringifyArguments: false,
     // optional: defaults to false if not specified
     showLogLevel: true,
     // optional: defaults to false if not specified

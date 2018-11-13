@@ -22,28 +22,57 @@ if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
   usage;
 fi;
 
-##
-# export QUERY="_security";
-# export QUERY="_design/persons/_view/minimal_person";
-export QUERY="_design/visible/_view/compact_person";
+# ##
+# # export QUERY="_security";
+# # export QUERY="_design/persons/_view/minimal_person";
+# export QUERY="_design/visible/_view/compact_person";
+# echo -e "
+# Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+
+# curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}?since=0&limit=10";
+# # curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}";
+
+
+# export QUERY="_design/visible/_view/compact_bottle";
+# echo -e "
+# Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+
+# curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}?since=0&limit=10";
+
+
+# export QUERY="_design/visible/_view/compact_movement";
+# echo -e "
+# Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+
+# curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}?since=0&limit=10";
+
+
+export dataset="bottles";
+export QUERY="_design/visible/_view/count_${dataset}";
 echo -e "
 Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";
 
-curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}?since=0&limit=10";
-# curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}";
-
-
-export QUERY="_design/visible/_view/compact_bottle";
-# export QUERY="_design";
+export dataset="persons";
+export QUERY="_design/visible/_view/count_${dataset}";
 echo -e "
 Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";
 
-curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}?since=0&limit=10";
-
-
-export QUERY="_design/visible/_view/compact_movement";
-# export QUERY="_design";
+export dataset="products";
+export QUERY="_design/visible/_view/count_${dataset}";
 echo -e "
 Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";
 
-curl -H "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}?since=0&limit=10";
+export dataset="invoices";
+export QUERY="_design/visible/_view/count_${dataset}";
+echo -e "
+Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";
+
+export dataset="movements";
+export QUERY="_design/visible/_view/count_${dataset}";
+echo -e "
+Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
+echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";

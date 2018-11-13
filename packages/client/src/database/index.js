@@ -1,4 +1,5 @@
 import PouchDB from 'pouchdb-browser';
+import axios from 'axios'; // eslint-disable-line no-unused-vars
 
 // import { dbServerProtocol, dbServerURI, databaseName } from '@/config';
 import config from '@/config';
@@ -16,12 +17,119 @@ if (!dbServerProtocol) throw new Error('VuePouchDB Error → remote database ser
 if (!dbServerURI) throw new Error('VuePouchDB Error → remote database server URI is required!');
 if (!databaseName) throw new Error('VuePouchDB Error → a main database name is required!');
 
+
+const getCtgryLoadLevels = (vx) => {
+  const { categoryCounts } = vx.state;
+  const categories = Object.keys(categoryCounts);
+
+  let haveLoadedCategories = true;
+  categories.forEach((key) => {
+    window.lgr.debug(`Category ${key} ${categoryCounts[key].total} ${categoryCounts[key].loaded}`);
+    if (categoryCounts[key].total > categoryCounts[key].loaded) haveLoadedCategories = false;
+  });
+  window.lgr.info(`Category load levels available? - ${haveLoadedCategories}`);
+  if (haveLoadedCategories) {
+    window.lgr.debug(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
+    return;
+  }
+
+  window.lgr.info('Getting category loads state');
+
+  const db = vx.getters.getDbMgr;
+  const counts = {};
+  db.allDocs({ include_docs: true }).then((result) => {
+    result.rows.forEach((row) => {
+      if (row.doc.data) {
+        const { data } = row.doc;
+        if (categories.includes(data.type)) {
+          counts[data.type] = counts[data.type] ? counts[data.type] += 1 : 1;
+          window.lgr.debug(`Counts values :: ${JSON.stringify(counts, null, 2)}`);
+        }
+      }
+    });
+    window.lgr.debug(`Counts values :: ${JSON.stringify(counts, null, 2)}`);
+
+    Object.keys(counts).forEach((count) => {
+      window.lgr.debug(`Count ${count} ${counts[count]} `);
+      vx.commit('setCategoryLoadedCount',
+        { key: count, value: counts[count] });
+    });
+
+    window.lgr.info(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
+  }).catch((err) => {
+    window.lgr.error(`${err}
+      QQQQQQQQQQQQQQQQQQQQ got nothing QQQQQQQQQQQQQQQQQQQQ`);
+  });
+};
+
+const getCtgryTotals = (vx) => {
+  const { user, srvr, categoryCounts } = vx.state;
+  const categories = Object.keys(categoryCounts);
+
+  let haveCategoryTotals = true;
+  categories.forEach((key) => {
+    window.lgr.debug(`Category ${key} ${categoryCounts[key].total} ${categoryCounts[key].loaded}`);
+    if (categoryCounts[key].total < 1) haveCategoryTotals = false;
+  });
+  window.lgr.info(`Category totals available? - ${haveCategoryTotals}`);
+
+  if (haveCategoryTotals) {
+    getCtgryLoadLevels(vx);
+    return;
+  }
+
+  const dbName = srvr.databaseName;
+  const baseURL = `${srvr.dbServerProtocol}://${srvr.dbServerURI}/`;
+  const url = `${dbName}/_design/visible/_view`;
+
+  window.lgr.info(`Getting category totals :: ${user.name} ${baseURL}${url}`);
+
+  const promises = [];
+  categories.forEach((category) => {
+    promises.push(
+      axios.get(`${baseURL}${url}/count_${category}`, {
+        auth: { username: user.name, password: user.password },
+        method: 'get',
+      }).then((response) => {
+        if (response.status === 200) {
+          const count = response.data.rows[0].value;
+          window.lgr.debug(`Got '${category}' category count ${JSON.stringify(count, null, 2)}`);
+          return { key: category, value: count };
+        }
+        window.lgr.error(`* ERROR COUNTING PRODUCTS * ${JSON.stringify(response, null, 2)}}`);
+        return null;
+      }),
+    );
+  });
+
+  Promise.all(promises).then((results) => {
+    window.lgr.debug(`CATEGORIES: ${JSON.stringify(results, null, 2)}}`);
+    const counts = {};
+    results.forEach((result) => {
+      counts[result.key] = { total: result.value, loaded: 0 };
+    });
+
+    window.lgr.debug(`Items per category : ${JSON.stringify(counts, null, 2)}}`);
+    vx.commit('setCategoryCounts', counts);
+    window.lgr.debug(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
+
+    getCtgryLoadLevels(vx);
+  });
+};
+
+
 const state = {
   user: {
     name: null,
     password: null,
   },
   dbMgr: 'asdf',
+  categoryCounts: {
+    product: { total: 0, loaded: 0 },
+    person: { total: 0, loaded: 0 },
+    bottle: { total: 0, loaded: 0 },
+    invoice: { total: 0, loaded: 0 },
+  },
   srvr: {
     dbServerProtocol,
     dbServerURI,
@@ -32,6 +140,8 @@ const state = {
 const getters = {
   getUserCredentials: vx => vx.user,
   getDbMgr: vx => vx.dbMgr,
+  getCategoryCounts: vx => vx.categoryCounts,
+  getCategoryCounters: vx => vx.categoryCounters,
 };
 
 const mutations = {
@@ -40,10 +150,19 @@ const mutations = {
     vx.user = user; // eslint-disable-line no-param-reassign
   },
   setDbMgr(vx, pyld) {
-    window.lgr.info('Database (mutation) :: recording datbase manager');
+    window.lgr.info('Database (mutation) :: recording database manager');
     LG(vx.dbMgr);
     vx.dbMgr = pyld; // eslint-disable-line no-param-reassign
     LG(vx.dbMgr);
+  },
+  setCategoryCounts(vx, pyld) {
+    window.lgr.debug(`Database (mutation) :: recording categoryCounts "${JSON.stringify(pyld, null, 2)}"`);
+    vx.categoryCounts = pyld; // eslint-disable-line no-param-reassign
+  },
+  setCategoryLoadedCount(vx, pyld) {
+    window.lgr.debug(`Database (mutation) :: recording categoryCount "${JSON.stringify(pyld, null, 2)}"`);
+    vx.categoryCounts[pyld.key].loaded = pyld.value; // eslint-disable-line no-param-reassign
+    window.lgr.debug(`Database (mutation) :: recorded "${JSON.stringify(vx.categoryCounts, null, 2)}"`);
   },
 };
 
@@ -65,18 +184,21 @@ const actions = {
     LG(vx);
 
     const { user, srvr, dbMgr } = vx.state;
-    dbMgr.setMaxListeners(30);
+    dbMgr.setMaxListeners(20);
 
     const dbName = srvr.databaseName;
     const dbMasterURI = `${srvr.dbServerProtocol}://${user.name}:${user.password}@${srvr.dbServerURI}/${srvr.databaseName}`;
 
     const dbMaster = new PouchDB(dbMasterURI, { skip_setup: true });
 
+    const repFromCounts = {};
     const ddocsFromServer = [
+      { type: 'view', name: 'visible/compact_invoice' },
       { type: 'view', name: 'visible/compact_bottle' },
       { type: 'view', name: 'visible/compact_person' },
       { type: 'view', name: 'visible/compact_product' },
-      { type: 'filter', name: 'ddocs/this_ddoc' },
+
+      // { type: 'filter', name: 'ddocs/this_ddoc' },
     ];
     ddocsFromServer.forEach((ddoc) => {
       const options = {
@@ -86,28 +208,46 @@ const actions = {
       options[ddoc.type] = ddoc.name;
       dbMgr.replicate.from(dbMaster, options)
         .on('change', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DELTA ********* ${JSON.stringify(info, null, 2)}`);
+          window.lgr.info(`${dbName}/${ddoc.name} ***  INCOMING REPLICATION DELTA **** read: ${info.docs_read} wrote: ${info.docs_written}`);
           if (ddoc.name === 'ddocs/this_ddoc') LG(info);
+
+          window.lgr.info(`Replication from: ${info.docs.length} records.`);
+          info.docs.forEach((doc) => {
+            if (!repFromCounts[doc.data.type]) repFromCounts[doc.data.type] = 0;
+            repFromCounts[doc.data.type] += 1;
+          });
+
+          Object.keys(repFromCounts).forEach((count) => {
+            window.lgr.debug(`Count ${count} ${repFromCounts[count]} `);
+            vx.commit('setCategoryLoadedCount',
+              { key: count, value: repFromCounts[count] });
+          });
+
+
+          // vx.commit('setCategoryLoadedCount',
+          //   { key: doc.data.type, value: repFromCounts[doc.data.type] });
+
+          window.lgr.debug(`'from' counts by type : ${JSON.stringify(repFromCounts, null, 2)}`);
         })
         .on('paused', () => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION ON HOLD *********`);
-          dbMgr.allDocs({
-            include_docs: true,
-            attachments: true,
-          }).then((result) => {
-            LG('allDocs fetch result');
-            LG(result);
-          }).catch((err) => {
-            LGERR(`allDocs fetch failure ${err}`);
-          });
+          window.lgr.info(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION ON HOLD *********`);
+          vx.dispatch('collectCategoryCounts');
+          // dbMgr.allDocs({
+          //   include_docs: true,
+          //   attachments: true,
+          // }).then((result) => {
+          //   window.lgr.debug(`allDocs fetch result ${JSON.stringify(result, null, 2)}`);
+          // }).catch((err) => {
+          //   window.lgr.error(`allDocs fetch failure ${err}`);
+          // });
         })
         .on('active', () => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION RESUMED *********`);
+          window.lgr.info(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION RESUMED *********`);
         })
         .on('denied', (info) => {
-          LG(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DENIED ********* ${info}`);
+          window.lgr.info(`${dbName}/${ddoc.name} **********  INCOMING REPLICATION DENIED ********* ${info}`);
         })
-        .on('error', err => LG(`${dbName}/${ddoc.name} INCOMING REPLICATION FAILURE ************ ${err}`));
+        .on('error', err => window.lgr.error(`${dbName}/${ddoc.name} INCOMING REPLICATION FAILURE ************ ${err}`));
     });
 
     // const filter = 'post_processing/by_new_inventory';
@@ -121,31 +261,30 @@ const actions = {
     };
     dbMgr.replicate.to(dbMaster, options)
       .on('change', (info) => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION DELTA ********* `);
+        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION DELTA ********* `);
         const shortList = info.change.docs.filter(doc => (!doc.data) || (doc.data.type !== 'person' && doc.data.type !== 'bottle'));
         shortList.forEach((doc) => {
           LG(`DOC :: ${JSON.stringify(doc, null, 2)}`);
         });
       })
       .on('paused', () => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION ON HOLD ********* ${user.name}`);
+        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION ON HOLD ********* ${user.name}`);
         dbMgr.allDocs({
           include_docs: true,
           attachments: true,
         }).then((result) => {
-          LG('allDocs fetch result');
-          LG(result);
+          window.lgr.debug(`allDocs fetch result ${JSON.stringify(result, null, 2)}`);
         }).catch((err) => {
-          LGERR(`allDocs fetch failure ${err}`);
+          window.lgr.error(`allDocs fetch failure ${err}`);
         });
       })
       .on('active', () => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION RESUMED *********`);
+        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION RESUMED *********`);
       })
       .on('denied', (info) => {
-        LG(`${dbName}/${filterText} **********  OUTGOING REPLICATION DENIED ********* ${info}`);
+        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION DENIED ********* ${info}`);
       })
-      .on('error', err => LG(`${dbName}/${filterText} OUTGOING REPLICATION FAILURE ************ ${err}`));
+      .on('error', err => window.lgr.error(`${dbName}/${filterText} OUTGOING REPLICATION FAILURE ************ ${err}`));
 
     // const filter = 'user_specific/by_vendor_agent';
     // dbMgr.sync(dbMaster, {
@@ -169,6 +308,9 @@ const actions = {
     //   .on('error', err => LG(`Database error ${err}`));
 
     // const view = 'persons/minimal_person';
+  },
+  collectCategoryCounts(vx) {
+    getCtgryTotals(vx);
   },
   rememberDbMgr(vx, args) {
     LG(`

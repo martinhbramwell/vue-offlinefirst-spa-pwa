@@ -1,11 +1,45 @@
 {
   "_id": "_design/visible",
   "views": {
+
+    "count_bottle": {
+      "map": "function(doc) { if (doc.data && doc.data.type === 'bottle')  emit(doc.data.type, 1) }", "reduce": "_count"
+    },
     "compact_bottle": {
-      "map": "function (doc) { if (doc.data && doc.data.type === 'bottle') { emit(doc.data.id    , { \"id\": doc.data.id, \"codigo\": doc.data.codigo, \"type\": doc.data.type, \"fechaCompra\": doc.data.fechaCompra, \"movements\": doc.data.movements, \"ultimo\": doc.data.ultimo }); } }"
+      "map": "function (doc) { if (doc.data && doc.data.type === 'bottle') { emit(doc.data.codigo, { \"id\": doc.data.id, \"codigo\": doc.data.codigo, \"type\": doc.data.type, \"fechaCompra\": doc.data.fechaCompra, \"movements\": doc.data.movements, \"ultimo\": doc.data.ultimo }); } }"
+    },
+
+
+
+    "count_person": {
+      "map": "function(doc) { if (doc.data && doc.data.type === 'person')  emit(doc.data.type, 1) }", "reduce": "_count"
     },
     "compact_person": {
       "map": "function (doc) { if (doc.data && doc.data.type === 'person') { emit(doc.data.nombre, { \"id\": doc.data.id, \"email\": doc.data.email, \"envases\": doc.data.bottles, \"distribuidor\": doc.data.distribuidor, \"direccion\": doc.data.direccion }); } }"
+    },
+
+
+
+    "count_product": {
+      "map": "function(doc) { if (doc.data && doc.data.type === 'product')  emit(doc.data.type, 1) }", "reduce": "_count"
+    },
+    "compact_product": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'product') { emit(doc.data.nombre, { \"idIB\": doc.data.idIB, \"nombre\": doc.data.nombre, \"descripcion\": doc.data.descripcion, \"precioActual\": doc.data.precioActual }); } }"
+    },
+
+
+
+    "count_invoice": {
+      "map": "function(doc) { if (doc.data && doc.data.type === 'invoice' && doc.data.fecha > '2018-09-09 23:59:59')  emit(doc.data.type, 1) }", "reduce": "_count"
+    },
+    "compact_invoice": {
+      "map": "function (doc) { if (doc.data && doc.data.type === 'invoice' && doc.data.fecha > '2018-09-09 23:59:59') { emit(doc.data.codigo, {  \"idIB\": doc.data.idIB, \"codigo\": doc.data.codigo, \"fecha\": doc.data.fecha, \"idCliente\": doc.data.idCliente, \"nombreCliente\": doc.data.nombreCliente, \"estado\": doc.data.estado, \"total\": doc.data.total, \"count\": doc.data.count  }); } }"
+    },
+
+
+
+    "count_movement": {
+      "map": "function(doc) { if (doc.data && doc.data.type === 'movement')  emit(doc.data.type, 1) }", "reduce": "_count"
     },
     "compact_movement": {
       "map": "function (doc) { if (doc.data && doc.data.type === 'movement') { emit(doc.data.id, { \"id\": doc.data.id, \"inventario\": doc.data.inventory, \"cliente\": doc.data.customer, \"envases\": doc.data.bottles, \"tipo\": doc.data.inOut }); } }"

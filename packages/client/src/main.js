@@ -51,7 +51,11 @@ import { currentUser, abilities } from './accessControl'; // eslint-disable-line
 
 import router from './router';
 
+// import PouchRESTclient from './database/pouchRESTclient';
+
 const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+
+Vue.use(VuePouchDB);
 
 Vue.use(abilitiesPlugin, abilities);
 Vue.component('Can', Can);
@@ -87,8 +91,6 @@ Vue.use(formulate, {
     isPct: ({ value }) => (_.inRange(value || 0, 0, 101) ? false : `Value ${value} is not in range 0 to 100.`),
   },
 });
-
-Vue.use(VuePouchDB);
 
 Vue.use(VueVirtualScroller);
 
@@ -127,8 +129,11 @@ const mainVue = new Vue({
     LG('<<<<<<<<<< keeping token >>>>>>>>>>>');
     this.$store.dispatch('keepTkn', { token, ability: this.$ability });
 
-    this.$store.dispatch('person/fetchAll');
-    this.$store.dispatch('product/fetchAll');
+
+    // this.$store.dispatch('person/fetchAll');
+    // this.$store.dispatch('product/fetchAll');
+
+    this.$store.dispatch('dbmgr/collectCategoryCounts');
   },
   created() {
     LG('<<<<<<<<<< created >>>>>>>>>>>');
