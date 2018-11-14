@@ -51,8 +51,6 @@ import { currentUser, abilities } from './accessControl'; // eslint-disable-line
 
 import router from './router';
 
-// import PouchRESTclient from './database/pouchRESTclient';
-
 const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 
 Vue.use(VuePouchDB);

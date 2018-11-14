@@ -129,26 +129,10 @@ localDatabase.createIndex({
     ddoc: 'indexes',
   },
 }).then((result) => {
-  LG(`New index ${PRODUCT_INDEXNAME} :: ${result}`);
-  LG(result);
+  window.lgr.debug(`New index ${PRODUCT_INDEXNAME} :: ${JSON.stringify(result, null, 2)}`);
 }).catch((err) => {
-  LG(`Failed to create index ${PRODUCT_INDEXNAME} :: ${err}`);
-  LG(err);
+  window.lgr.debug(`Failed to create index ${PRODUCT_INDEXNAME} :: ${JSON.stringify(err, null, 2)}`);
 });
-
-// const PERSONSNAME_INDEXNAME = 'idxPersonName';
-// localDatabase.createIndex({
-//   index: {
-//     fields: ['data.type', 'data.nombre'],
-//     name: PERSONSNAME_INDEXNAME,
-//   },
-// }).then((result) => {
-//   LG(`New index ${PERSONSNAME_INDEXNAME} :: ${result}`);
-//   LG(result);
-// }).catch((err) => {
-//   LG(`Failed to create index ${PERSONSNAME_INDEXNAME} :: ${err}`);
-//   LG(err);
-// });
 
 const GENERIC_INDEXNAME = 'idxId';
 localDatabase.createIndex({
@@ -158,11 +142,9 @@ localDatabase.createIndex({
     ddoc: 'indexes',
   },
 }).then((result) => {
-  LG(`New index ${BOTTLECODE_INDEXNAME} :: ${result}`);
-  LG(result);
+  window.lgr.debug(`New index ${GENERIC_INDEXNAME} :: ${JSON.stringify(result, null, 2)}`);
 }).catch((err) => {
-  LG(`Failed to create index ${BOTTLECODE_INDEXNAME} :: ${err}`);
-  LG(err);
+  window.lgr.debug(`Failed to create index ${GENERIC_INDEXNAME} :: ${JSON.stringify(err, null, 2)}`);
 });
 
 const BOTTLECODE_INDEXNAME = 'idxTypeCode';
@@ -173,11 +155,9 @@ localDatabase.createIndex({
     ddoc: 'indexes',
   },
 }).then((result) => {
-  LG(`New index ${BOTTLECODE_INDEXNAME} :: ${result}`);
-  LG(result);
+  window.lgr.debug(`New index ${BOTTLECODE_INDEXNAME} :: ${JSON.stringify(result, null, 2)}`);
 }).catch((err) => {
-  LG(`Failed to create index ${BOTTLECODE_INDEXNAME} :: ${err}`);
-  LG(err);
+  window.lgr.debug(`Failed to create index ${BOTTLECODE_INDEXNAME} :: ${JSON.stringify(err, null, 2)}`);
 });
 
 const BOTTLEID_INDEXNAME = 'idxTypeId';
@@ -188,11 +168,9 @@ localDatabase.createIndex({
     ddoc: 'indexes',
   },
 }).then((result) => {
-  LG(`New index ${BOTTLEID_INDEXNAME} :: ${result}`);
-  LG(result);
+  window.lgr.debug(`New index ${BOTTLEID_INDEXNAME} :: ${JSON.stringify(result, null, 2)}`);
 }).catch((err) => {
-  LG(`Failed to create index ${BOTTLEID_INDEXNAME} :: ${err}`);
-  LG(err);
+  window.lgr.debug(`Failed to create index ${BOTTLEID_INDEXNAME} :: ${JSON.stringify(err, null, 2)}`);
 });
 
 const MOVEMENT_INDEXNAME = 'idxTypeInventory';
@@ -203,11 +181,9 @@ localDatabase.createIndex({
     ddoc: 'indexes',
   },
 }).then((result) => {
-  LG(`New index ${MOVEMENT_INDEXNAME} :: ${result}`);
-  LG(result);
+  window.lgr.debug(`New index ${MOVEMENT_INDEXNAME} :: ${JSON.stringify(result, null, 2)}`);
 }).catch((err) => {
-  LG(`Failed to create index ${MOVEMENT_INDEXNAME} :: ${err}`);
-  LG(err);
+  window.lgr.debug(`Failed to create index ${MOVEMENT_INDEXNAME} :: ${JSON.stringify(err, null, 2)}`);
 });
 
 const install = (VueJs) => {

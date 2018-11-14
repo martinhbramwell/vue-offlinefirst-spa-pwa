@@ -1,4 +1,7 @@
 import createCrudModule, { client } from 'vuex-crud';
+// import createCrudModule from 'vuex-crud';
+// import { REST as client } from '@/database/vuejs-pouchdb';
+
 import { store as vuex } from '@/store';
 
 import { variablizeTitles } from '@/utils/strings';
@@ -44,6 +47,16 @@ export const store = createCrudModule({
   urlRoot: `${cfg.server}/api/${RESOURCE}`, // The url to fetch the resource
   client,
 
+
+  // LG(` USING POUCH REST CLIENT ****************************************
+  //   vuex
+  // `);
+
+  // const vue = vuex._vm; // eslint-disable-line no-underscore-dangle
+  // const clnt = vue.$PouchRest;
+  // LG(vue.$yourMethod('xyz'));
+  // clnt.get('a', 'b').then();
+
   state: {
     columns,
     enums: {},
@@ -54,11 +67,14 @@ export const store = createCrudModule({
     /* eslint-disable no-unused-vars */
 
     fetchAll: ({ dispatch }) => {
-      LG('<<<<<< fetchAll >>>>>>');
+      LG('<<<<<< fetchAll products >>>>>>');
       dispatch('fetchList', { customUrlFnArgs: { s: 1, c: 100 } })
         .then((resp) => {
           LG(' * * Fetched products * *');
-          LG(resp.columns);
+          LG(`             >>================================================<<
+            products response: ${JSON.stringify(resp, null, 2)}
+          `);
+          // LG(resp.columns);
           dispatch('setColumns', (resp.columns));
         })
         .catch((e) => {
@@ -119,7 +135,8 @@ export const store = createCrudModule({
   },
 
   customUrlFn(_id, _pgntr) {
-    LG(cfg.server);
+    LG(`config server --> ${cfg.server}`);
+    LG(`client --> ${JSON.stringify(client, null, 2)}`);
     // LG(this.resource);
 
     LG(`using paginator --> ${_pgntr}`);
@@ -144,6 +161,10 @@ export const store = createCrudModule({
   },
 
   parseList(response) {
+    LG(`             ||================================================||
+      products response: ${JSON.stringify(response, null, 2)}
+    `);
+
     const {
       data,
       titles,
@@ -175,9 +196,7 @@ export const store = createCrudModule({
       prodMap[product.codigo] = product;
       return newProd;
     });
-    // LG(' * * Parsed products data * * * * * * * * * * * * * * * ');
-    // LG('prodMap');
-    // LG(prodMap);
+
     vuex.dispatch('product/setEnums', enums);
     vuex.dispatch('product/setMap', prodMap);
     return Object.assign({}, response, {

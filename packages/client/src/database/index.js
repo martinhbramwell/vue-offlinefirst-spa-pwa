@@ -27,13 +27,16 @@ const getCtgryLoadLevels = (vx) => {
     window.lgr.debug(`Category ${key} ${categoryCounts[key].total} ${categoryCounts[key].loaded}`);
     if (categoryCounts[key].total > categoryCounts[key].loaded) haveLoadedCategories = false;
   });
-  window.lgr.info(`Category load levels available? - ${haveLoadedCategories}`);
+  window.lgr.debug(`Category load levels available? - ${haveLoadedCategories}`);
   if (haveLoadedCategories) {
     window.lgr.debug(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
+    vx.commit('setCategoriesLoaded', true);
     return;
   }
 
-  window.lgr.info('Getting category loads state');
+  window.lgr.debug('Getting category loads state');
+
+  vx.commit('setCategoriesLoaded', false);
 
   const db = vx.getters.getDbMgr;
   const counts = {};
@@ -55,7 +58,13 @@ const getCtgryLoadLevels = (vx) => {
         { key: count, value: counts[count] });
     });
 
-    window.lgr.info(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
+    const ct = vx.state.categoryCounts;
+    const stt = Object.keys(ct).filter(c => ct[c].total < 1 || ct[c].total > ct[c].loaded);
+
+
+    if (stt.length < 1) vx.commit('setCategoriesLoaded', true);
+
+    window.lgr.debug(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
   }).catch((err) => {
     window.lgr.error(`${err}
       QQQQQQQQQQQQQQQQQQQQ got nothing QQQQQQQQQQQQQQQQQQQQ`);
@@ -71,18 +80,20 @@ const getCtgryTotals = (vx) => {
     window.lgr.debug(`Category ${key} ${categoryCounts[key].total} ${categoryCounts[key].loaded}`);
     if (categoryCounts[key].total < 1) haveCategoryTotals = false;
   });
-  window.lgr.info(`Category totals available? - ${haveCategoryTotals}`);
+  window.lgr.debug(`Category totals available? - ${haveCategoryTotals}`);
 
   if (haveCategoryTotals) {
     getCtgryLoadLevels(vx);
     return;
   }
 
+  vx.commit('setCategoriesLoaded', false);
+
   const dbName = srvr.databaseName;
   const baseURL = `${srvr.dbServerProtocol}://${srvr.dbServerURI}/`;
   const url = `${dbName}/_design/visible/_view`;
 
-  window.lgr.info(`Getting category totals :: ${user.name} ${baseURL}${url}`);
+  window.lgr.debug(`Getting category totals :: ${user.name} ${baseURL}${url}`);
 
   const promises = [];
   categories.forEach((category) => {
@@ -130,6 +141,7 @@ const state = {
     bottle: { total: 0, loaded: 0 },
     invoice: { total: 0, loaded: 0 },
   },
+  categoriesLoaded: false,
   srvr: {
     dbServerProtocol,
     dbServerURI,
@@ -140,6 +152,7 @@ const state = {
 const getters = {
   getUserCredentials: vx => vx.user,
   getDbMgr: vx => vx.dbMgr,
+  getCategoriesLoaded: vx => vx.categoriesLoaded,
   getCategoryCounts: vx => vx.categoryCounts,
   getCategoryCounters: vx => vx.categoryCounters,
 };
@@ -150,10 +163,14 @@ const mutations = {
     vx.user = user; // eslint-disable-line no-param-reassign
   },
   setDbMgr(vx, pyld) {
-    window.lgr.info('Database (mutation) :: recording database manager');
-    LG(vx.dbMgr);
+    window.lgr.debug('Database (mutation) :: recording database manager');
+    window.lgr.debug(vx.dbMgr);
     vx.dbMgr = pyld; // eslint-disable-line no-param-reassign
-    LG(vx.dbMgr);
+    window.lgr.debug(vx.dbMgr);
+  },
+  setCategoriesLoaded(vx, pyld) {
+    window.lgr.debug(`Database (mutation) :: setting categoriesLoaded "${JSON.stringify(pyld, null, 2)}"`);
+    vx.categoriesLoaded = pyld; // eslint-disable-line no-param-reassign
   },
   setCategoryCounts(vx, pyld) {
     window.lgr.debug(`Database (mutation) :: recording categoryCounts "${JSON.stringify(pyld, null, 2)}"`);
@@ -170,18 +187,18 @@ const actions = {
   setUserCredentials(vx, pyld) {
     if (pyld.payload.couchdb) {
       const user = pyld.payload.couchdb;
-      window.lgr.info(`Database (action) :: recording new user credentials > ${JSON.stringify(pyld.payload, null, 2)}`);
-      LG(user);
+      window.lgr.debug(`Database (action) :: recording new user credentials > ${JSON.stringify(pyld.payload, null, 2)}`);
+      window.lgr.debug(user);
       vx.commit('setUserCredentials', user);
     }
   },
   connectToRemoteService(vx, args) {
-    LG(`
+    window.lgr.debug(`
 
       Connext to remote service >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     `);
-    LG(args);
-    LG(vx);
+    window.lgr.debug(args);
+    window.lgr.debug(vx);
 
     const { user, srvr, dbMgr } = vx.state;
     dbMgr.setMaxListeners(20);
@@ -209,7 +226,7 @@ const actions = {
       dbMgr.replicate.from(dbMaster, options)
         .on('change', (info) => {
           window.lgr.info(`${dbName}/${ddoc.name} ***  INCOMING REPLICATION DELTA **** read: ${info.docs_read} wrote: ${info.docs_written}`);
-          if (ddoc.name === 'ddocs/this_ddoc') LG(info);
+          if (ddoc.name === 'ddocs/this_ddoc') window.lgr.debug(info);
 
           window.lgr.info(`Replication from: ${info.docs.length} records.`);
           info.docs.forEach((doc) => {
@@ -264,7 +281,7 @@ const actions = {
         window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION DELTA ********* `);
         const shortList = info.change.docs.filter(doc => (!doc.data) || (doc.data.type !== 'person' && doc.data.type !== 'bottle'));
         shortList.forEach((doc) => {
-          LG(`DOC :: ${JSON.stringify(doc, null, 2)}`);
+          window.lgr.debug(`DOC :: ${JSON.stringify(doc, null, 2)}`);
         });
       })
       .on('paused', () => {
@@ -313,11 +330,11 @@ const actions = {
     getCtgryTotals(vx);
   },
   rememberDbMgr(vx, args) {
-    LG(`
+    window.lgr.debug(`
 
       Remember DB manager >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      ${JSON.stringify(args, null, 2)}
     `);
-    LG(args);
     vx.commit('setDbMgr', args.dbmgr);
   },
 };
