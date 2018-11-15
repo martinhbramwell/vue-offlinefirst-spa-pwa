@@ -1,6 +1,6 @@
-import createCrudModule, { client } from 'vuex-crud';
-// import createCrudModule from 'vuex-crud';
-// import { REST as client } from '@/database/vuejs-pouchdb';
+// import createCrudModule, { client } from 'vuex-crud';
+import createCrudModule from 'vuex-crud';
+import { REST as client } from '@/database/vuejs-pouchdb';
 
 import { store as vuex } from '@/store';
 
@@ -46,7 +46,6 @@ export const store = createCrudModule({
   idAttribute: IDATTRIBUTE, // What should be used as ID
   urlRoot: `${cfg.server}/api/${RESOURCE}`, // The url to fetch the resource
   client,
-
 
   // LG(` USING POUCH REST CLIENT ****************************************
   //   vuex

@@ -106,8 +106,8 @@
             // LG(rslt);
             // LG(rslt.allPersons);
             // LG(rslt.allPersons[0].nombre);
-            update.doc.data.ultimo =
-              (rslt.allPersons[0] && rslt.allPersons[0].nombre) || update.doc.data.ultimo;
+            update.doc.data.ultimo = (rslt.allPersons[0]
+            && rslt.allPersons[0].nombre) || update.doc.data.ultimo;
             update.doc.data.extra = rslt;
             // LG(update.doc.data);
             vm.getItems(update);
@@ -189,7 +189,7 @@
         LG(this.seekCodigo);
         if (this.seeking) {
           return '⟳ Fetching new results';
-        } else if (this.seekCodigoIsDirty) {
+        } if (this.seekCodigoIsDirty) {
           return '... Typing';
         }
         return '✓ Done';

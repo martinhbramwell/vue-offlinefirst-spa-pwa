@@ -30,13 +30,13 @@ const getCtgryLoadLevels = (vx) => {
   window.lgr.debug(`Category load levels available? - ${haveLoadedCategories}`);
   if (haveLoadedCategories) {
     window.lgr.debug(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
-    vx.commit('setCategoriesLoaded', true);
+    vx.commit('setCategoriesLoading', true);
     return;
   }
 
   window.lgr.debug('Getting category loads state');
 
-  vx.commit('setCategoriesLoaded', false);
+  vx.commit('setCategoriesLoading', false);
 
   const db = vx.getters.getDbMgr;
   const counts = {};
@@ -60,9 +60,7 @@ const getCtgryLoadLevels = (vx) => {
 
     const ct = vx.state.categoryCounts;
     const stt = Object.keys(ct).filter(c => ct[c].total < 1 || ct[c].total > ct[c].loaded);
-
-
-    if (stt.length < 1) vx.commit('setCategoriesLoaded', true);
+    if (stt.length < 1) vx.commit('setCategoriesLoading', true);
 
     window.lgr.debug(`Category counts : ${JSON.stringify(vx.state.categoryCounts, null, 2)}}`);
   }).catch((err) => {
@@ -72,6 +70,7 @@ const getCtgryLoadLevels = (vx) => {
 };
 
 const getCtgryTotals = (vx) => {
+  window.lgr.debug('Getting category totals');
   const { user, srvr, categoryCounts } = vx.state;
   const categories = Object.keys(categoryCounts);
 
@@ -80,14 +79,14 @@ const getCtgryTotals = (vx) => {
     window.lgr.debug(`Category ${key} ${categoryCounts[key].total} ${categoryCounts[key].loaded}`);
     if (categoryCounts[key].total < 1) haveCategoryTotals = false;
   });
-  window.lgr.debug(`Category totals available? - ${haveCategoryTotals}`);
 
+  window.lgr.debug(`Category totals available? - ${haveCategoryTotals}`);
   if (haveCategoryTotals) {
     getCtgryLoadLevels(vx);
     return;
   }
 
-  vx.commit('setCategoriesLoaded', false);
+  vx.commit('setCategoriesLoading', false);
 
   const dbName = srvr.databaseName;
   const baseURL = `${srvr.dbServerProtocol}://${srvr.dbServerURI}/`;
@@ -109,6 +108,8 @@ const getCtgryTotals = (vx) => {
         }
         window.lgr.error(`* ERROR COUNTING PRODUCTS * ${JSON.stringify(response, null, 2)}}`);
         return null;
+      }).catch((err) => {
+        window.lgr.error(`Axios Connection error :: ${JSON.stringify(err.response.data, null, 2)}}`);
       }),
     );
   });
@@ -141,7 +142,7 @@ const state = {
     bottle: { total: 0, loaded: 0 },
     invoice: { total: 0, loaded: 0 },
   },
-  categoriesLoaded: false,
+  categoriesLoading: false,
   srvr: {
     dbServerProtocol,
     dbServerURI,
@@ -152,7 +153,7 @@ const state = {
 const getters = {
   getUserCredentials: vx => vx.user,
   getDbMgr: vx => vx.dbMgr,
-  getCategoriesLoaded: vx => vx.categoriesLoaded,
+  getCategoriesLoading: vx => vx.categoriesLoading,
   getCategoryCounts: vx => vx.categoryCounts,
   getCategoryCounters: vx => vx.categoryCounters,
 };
@@ -163,14 +164,12 @@ const mutations = {
     vx.user = user; // eslint-disable-line no-param-reassign
   },
   setDbMgr(vx, pyld) {
-    window.lgr.debug('Database (mutation) :: recording database manager');
-    window.lgr.debug(vx.dbMgr);
+    window.lgr.debug('Database (mutation) :: recording database manager ');
     vx.dbMgr = pyld; // eslint-disable-line no-param-reassign
-    window.lgr.debug(vx.dbMgr);
   },
-  setCategoriesLoaded(vx, pyld) {
-    window.lgr.debug(`Database (mutation) :: setting categoriesLoaded "${JSON.stringify(pyld, null, 2)}"`);
-    vx.categoriesLoaded = pyld; // eslint-disable-line no-param-reassign
+  setCategoriesLoading(vx, pyld) {
+    window.lgr.debug(`Database (mutation) :: setting categoriesLoading "${JSON.stringify(pyld, null, 2)}"`);
+    vx.categoriesLoading = pyld; // eslint-disable-line no-param-reassign
   },
   setCategoryCounts(vx, pyld) {
     window.lgr.debug(`Database (mutation) :: recording categoryCounts "${JSON.stringify(pyld, null, 2)}"`);

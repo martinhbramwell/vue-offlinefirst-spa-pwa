@@ -93,7 +93,6 @@
   };
 
 export default vm;
-
 </script>
 
 <style>

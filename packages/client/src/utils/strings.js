@@ -13,7 +13,6 @@ export const makeVariableName = (v) => {
     .replace(/[A-Z]/g, m => m.toLowerCase());
 };
 
-export const variablizeTitles =
-  ary => ary.map(itm => makeVariableName(itm));
+export const variablizeTitles = ary => ary.map(itm => makeVariableName(itm));
 
 export const shutUpEsLint = true;

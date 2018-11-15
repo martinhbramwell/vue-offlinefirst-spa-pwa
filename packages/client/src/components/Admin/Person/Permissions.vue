@@ -114,7 +114,6 @@ export default {
     // },
   },
 };
-
 </script>
 
 <style>

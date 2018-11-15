@@ -20,7 +20,7 @@
 <script>
 
   import { shutBurgerMenu } from '@/utils/responsive';
-  import { store as Person } from '../Admin/Person'; // eslint-disable-line no-unused-vars
+  import { store as Person } from './Person'; // eslint-disable-line no-unused-vars
 
   const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 

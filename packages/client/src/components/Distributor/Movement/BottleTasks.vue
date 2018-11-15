@@ -350,6 +350,7 @@ import qrDecode from '@/utils/qrcodes/Decoder';
 import AutoComplete from '@/components/MultiUse/AutoComplete';
 import BaseInputText from '@/components/MultiUse/BaseInputText';
 import { generateMovementId } from '@/database';
+import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
 
 // import TheValidateDemo from '@/utils/qrcodes/TheValidateDemo';
 
@@ -535,7 +536,7 @@ const vm = {
         { codigo: 108, nombre: 'Tangerine' },
         { codigo: 109, nombre: 'Pineapple' },
       ],
-      loaderSpinnerTarget: null,
+      // loaderSpinnerTarget: null,
 
       // inventory: [{ id: 100001, data: 'IBAA001' }, { id: 100005, data: 'IBAA005' }],
       // customer: [{ id: 100014, data: 'IBAA014' }, { id: 100015, data: 'CLAA015' }],
@@ -946,21 +947,21 @@ const vm = {
       this.errors.splice(index, 1);
     },
 
-    startLoaderSpinner() {
-      const allLoaded = this.$store.getters['dbmgr/getCategoriesLoaded'];
-      if (allLoaded) return;
-      this.loaderSpinnerTarget = this.$loading.open({ container: null });
-      window.lgr.debug('Started loader spinner');
-    },
+    // startLoaderSpinner() {
+    //   const allLoaded = this.$store.getters['dbmgr/getCategoriesLoading'];
+    //   if (allLoaded) return;
+    //   this.loaderSpinnerTarget = this.$loading.open({ container: null });
+    //   window.lgr.debug('Started loader spinner');
+    // },
 
-    killLoaderSpinner() {
-      const allLoaded = this.$store.getters['dbmgr/getCategoriesLoaded'];
-      window.lgr.debug(`Checking loader spinner :: \n${JSON.stringify(allLoaded, null, 2)}`);
-      if (allLoaded) {
-        this.loaderSpinnerTarget.close();
-        window.lgr.debug('Killed loader spinner');
-      }
-    },
+    // killLoaderSpinner() {
+    //   const allLoaded = this.$store.getters['dbmgr/getCategoriesLoading'];
+    //   window.lgr.debug(`Checking loader spinner :: \n${JSON.stringify(allLoaded, null, 2)}`);
+    //   if (allLoaded) {
+    //     this.loaderSpinnerTarget.close();
+    //     window.lgr.debug('Killed loader spinner');
+    //   }
+    // },
 
     clearErrors() {
       this.errors = [];
@@ -972,17 +973,13 @@ const vm = {
   },
 
   mounted() {
-    this.startLoaderSpinner();
-    // setTimeout(() => this.killLoaderSpinner(), 3 * 1000);
-
-    this.$store.watch(
-      state => state.dbmgr.categoriesLoaded,
-      this.killLoaderSpinner,
-    );
-    // const loaderSpinnerTarget = this.$loading.open({ container: null });
-    // setTimeout(() => loaderSpinnerTarget.close(), 3 * 1000);
-
     LG('!!!!!!!!!!!!!!!! mounted !!!!!!!!!!!!!!!!!!');
+
+    spinner.start(this.$loading);
+    this.$store.watch(
+      state => state.dbmgr.categoriesLoading,
+      spinner.kill,
+    );
 
     this.currentUser.id = parseInt(this.$store.state.dbmgr.user.name, 10);
     LG(this.currentUser);

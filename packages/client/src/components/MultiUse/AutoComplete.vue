@@ -75,10 +75,9 @@ export default {
     },
 
     filterChoices() {
-      this.choices =
-        this.items.list
-          .filter(item => item.label.toLowerCase().indexOf(this.search.toLowerCase()) > -1)
-          .map(item => item.label);
+      this.choices = this.items.list
+        .filter(item => item.label.toLowerCase().indexOf(this.search.toLowerCase()) > -1)
+        .map(item => item.label);
     },
     setValue(value) {
       LG(`elemId ${this.elemId}`);

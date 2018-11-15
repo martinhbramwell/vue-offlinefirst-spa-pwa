@@ -64,13 +64,21 @@
   import { mapState, mapActions, mapGetters } from 'vuex';
 
   import ProductDetail from './Retrieve';
-
-  const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+  // import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
 
   export default {
     name: 'ProductList',
+    // mounted() {
+    //   window.lgr.warn('!!!!!!!!!!!!!!!! mounted product list !!!!!!!!!!!!!!!!!!');
+
+    //   spinner.start(this.$loading);
+    //   this.$store.watch(
+    //     state => state.dbmgr.categoriesLoading,
+    //     spinner.kill,
+    //   );
+    // },
     beforeMount() {
-      LG('\n * * Ready to fetch products * * \n');
+      window.lgr.warn('\n * * Ready to fetch products * * \n');
       if (this.isLoadingList || this.products.length > 0) return;
       this.onFetchProducts();
     },
@@ -111,26 +119,26 @@
       },
       prods() {
         return this.products.map((prod) => {
-          // LG('>>>>>>>>>>>>>');
+          // window.lgr.debug('>>>>>>>>>>>>>');
           const aProd = prod;
           Object.keys(aProd).forEach((attr) => {
-            // LG('>>>>>>');
-            // LG(attr);
-            // LG(aProd[attr]);
+            // window.lgr.debug('>>>>>>');
+            // window.lgr.debug(attr);
+            // window.lgr.debug(aProd[attr]);
             aProd[attr] = aProd[attr].str || aProd[attr];
           });
           // if (aProd[0] === 997) {
-          //   LG('>>>>>>');
-          //   LG(aProd);
+          //   window.lgr.debug('>>>>>>');
+          //   window.lgr.debug(aProd);
 
           //   Object.keys(aProd).forEach((attr) => {
-          //     LG('>>>>>>');
-          //     LG(attr);
-          //     LG(aProd[attr]);
+          //     window.lgr.debug('>>>>>>');
+          //     window.lgr.debug(attr);
+          //     window.lgr.debug(aProd[attr]);
           //     aProd[attr] = aProd[attr].str || aProd[attr];
           //   });
-          //   LG(aProd);
-          //   LG(prod);
+          //   window.lgr.debug(aProd);
+          //   window.lgr.debug(prod);
           // }
           return aProd;
         });
@@ -144,7 +152,7 @@
         setColumns: 'setColumns',
       }),
       onFetchProducts() {
-        LG(' * * Try to fetch products * *');
+        window.lgr.debug(' * * Try to fetch products * *');
         this.fetchProducts();
       },
     },

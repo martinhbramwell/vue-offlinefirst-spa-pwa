@@ -252,9 +252,9 @@ export default {
   },
   created() {
     if (
-      (this.persons && this.persons.length > 0) &&
-      (this.productsMap && Object.keys(this.productsMap).length > 0) &&
-      (this.products && this.products.length > 0)
+      (this.persons && this.persons.length > 0)
+      && (this.productsMap && Object.keys(this.productsMap).length > 0)
+      && (this.products && this.products.length > 0)
     ) {
       // LG('@@@@@@@@@@@@@@@@@@@@@@ CREATED @@@@@@@@@@@@@@@@@@@@@@');
       // LG(this.products[5]);
@@ -504,7 +504,6 @@ export default {
     },
   },
 };
-
 </script>
 
 <style scoped>

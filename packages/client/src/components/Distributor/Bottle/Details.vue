@@ -53,7 +53,9 @@
 
 <script>
 
-  import { mapGetters, mapActions, mapState, dispatch } from 'vuex'; // eslint-disable-line no-unused-vars
+  import {
+    mapGetters, mapActions, mapState, dispatch, // eslint-disable-line no-unused-vars
+  } from 'vuex';
 
   const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 

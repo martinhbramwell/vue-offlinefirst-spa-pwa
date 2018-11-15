@@ -5,6 +5,8 @@ import debug from 'pouchdb-debug'; // eslint-disable-line no-unused-vars
 import liveFinder from 'pouchdb-live-find';
 
 import config from '@/config';
+import { store as vuex } from '@/store';
+
 
 const { databaseName } = config;
 
@@ -30,6 +32,28 @@ const localDatabase = new PouchDB(databaseName);
 // const plugIn = (plugin) => {
 //   PouchDB.plugin(plugin);
 // };
+
+export const LoaderProgress = {
+  spinner: null,
+  start: (loader) => {
+    if (vuex.getters.isAuthenticated < 1) {
+      vuex.commit('dbmgr/setCategoriesLoading', false);
+      return;
+    }
+    const allLoaded = vuex.getters['dbmgr/getCategoriesLoading'];
+    if (allLoaded) return;
+    LoaderProgress.spinner = loader.open({ container: null });
+    window.lgr.warn('Started loader spinner');
+  },
+  kill: () => {
+    const allLoaded = vuex.getters['dbmgr/getCategoriesLoading'];
+    window.lgr.warn(`Checking loader spinner :: \n${JSON.stringify(allLoaded, null, 2)}`);
+    if (allLoaded) {
+      LoaderProgress.spinner.close();
+      window.lgr.warn('Killed loader spinner');
+    }
+  },
+};
 
 export const REST = {
   get: (endPoint, parameters) => new Promise((resolve) => {
@@ -198,4 +222,5 @@ export default {
   install,
   // plugIn,
   PouchDB,
+  LoaderProgress,
 };
