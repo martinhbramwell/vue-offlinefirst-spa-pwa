@@ -70,7 +70,9 @@ const getCtgryLoadLevels = (vx) => {
 };
 
 const getCtgryTotals = (vx) => {
-  window.lgr.debug('Getting category totals');
+  window.lgr.debug(`Getting category counts ${JSON.stringify(vx.rootState.Auth, null, 2)}`);
+  if (vx.rootGetters.isAuthenticated < 1) return;
+
   const { user, srvr, categoryCounts } = vx.state;
   const categories = Object.keys(categoryCounts);
 
@@ -109,7 +111,7 @@ const getCtgryTotals = (vx) => {
         window.lgr.error(`* ERROR COUNTING PRODUCTS * ${JSON.stringify(response, null, 2)}}`);
         return null;
       }).catch((err) => {
-        window.lgr.error(`Axios Connection error :: ${JSON.stringify(err.response.data, null, 2)}}`);
+        window.lgr.error(`Axios connexion error :: ${JSON.stringify(err.response.data, null, 2)}}`);
       }),
     );
   });
