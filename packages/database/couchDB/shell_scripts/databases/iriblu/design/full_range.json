@@ -2,6 +2,8 @@
   "_id": "_design/full_range",
   "filters": {
     "all_bottles": "function(doc, req) { return doc.data && doc.data.type == 'bottle' }",
+    "all_products": "function(doc, req) { return doc.data && doc.data.type == 'product' }",
+    "all_invoices": "function(doc, req) { return doc.data && doc.data.type == 'invoice' }",
     "all_persons": "function(doc, req) { return doc.data && doc.data.type == 'person' }"
   }
 }

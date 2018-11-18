@@ -1,0 +1,157 @@
+{
+  "docs": [
+    {
+      "_id": "Product_2_MetaData",
+      "data": {
+        "type": "product",
+        "name": "MetaData",
+        "columns": [
+          {
+            "meta": "Codigo",
+            "label": "ID",
+            "field": "codigo",
+            "centered": false,
+            "visible": true,
+            "width": 8,
+            "numeric": true,
+            "type": "integer",
+            "usage": "rw",
+            "idx": 0
+          },
+          {
+            "meta": "idDB",
+            "label": "IDIB",
+            "field": "idib",
+            "centered": true,
+            "visible": false,
+            "width": 8,
+            "numeric": true,
+            "type": "integer",
+            "usage": "rw",
+            "idx": 0
+          },
+          {
+            "meta": "Nombre",
+            "label": "NBR",
+            "field": "nombre",
+            "centered": true,
+            "visible": true,
+            "width": 70,
+            "numeric": false,
+            "type": "title",
+            "usage": "rw",
+            "idx": 1
+          },
+          {
+            "meta": "Descripcion",
+            "label": "DESC",
+            "field": "descripcion",
+            "centered": false,
+            "visible": false,
+            "width": 256,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 2
+          },
+          {
+            "meta": "Categoria",
+            "label": "CAT",
+            "field": "categoria",
+            "centered": true,
+            "visible": false,
+            "width": 16,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 2
+          },
+          {
+            "meta": "Estado",
+            "label": "EST",
+            "field": "estado",
+            "centered": true,
+            "visible": false,
+            "width": 16,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 2
+          },
+          {
+            "meta": "Valor",
+            "label": "VAL",
+            "field": "valor",
+            "centered": false,
+            "visible": true,
+            "width": 10,
+            "numeric": true,
+            "type": "usd",
+            "usage": "r",
+            "idx": 4
+          },
+          {
+            "meta": "PrecioActual",
+            "label": "PA",
+            "field": "precioActual",
+            "centered": false,
+            "visible": false,
+            "width": 10,
+            "numeric": true,
+            "type": "usd",
+            "usage": "r",
+            "idx": 4
+          },
+          {
+            "meta": "Unidad",
+            "label": "UNI",
+            "field": "unidad",
+            "centered": true,
+            "visible": true,
+            "width": 64,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 2
+          },
+          {
+            "meta": "IVA",
+            "label": "IVA",
+            "field": "iva",
+            "centered": false,
+            "visible": false,
+            "width": "4",
+            "numeric": true,
+            "type": "percent",
+            "usage": "r",
+            "idx": 3
+          },
+          {
+            "meta": "Valor Distribuidor",
+            "label": "VLD",
+            "field": "valor_distribuidor",
+            "centered": false,
+            "visible": false,
+            "width": 10,
+            "numeric": true,
+            "type": "usd",
+            "usage": "r",
+            "idx": 5
+          },
+          {
+            "meta": "Porcentaje",
+            "label": "PCT",
+            "field": "porcentaje",
+            "centered": false,
+            "visible": false,
+            "width": 4,
+            "numeric": true,
+            "type": "percent",
+            "usage": "r",
+            "idx": 6
+          }
+        ]
+      }
+    }
+  ]
+}

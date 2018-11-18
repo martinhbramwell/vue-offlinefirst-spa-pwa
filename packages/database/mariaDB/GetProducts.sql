@@ -14,12 +14,18 @@ SELECT
         "_id", concat("Product_1_", lpad(d.product_id, 16, 0))
       , "data", JSON_OBJECT(
           "idIB", d.product_id
+        , "codigo", d.product_id
         , "type", "product"
         , "nombre",  CONCAT("|", IFNULL(d.product_name, "FALTA"), "|")
         , "descripcion",  CONCAT("|", IFNULL(d.product_description, "FALTA"), "|")
         , "categoria",  d.product_category
         , "estado",  CONCAT("|", IFNULL(d.product_status, "FALTA"), "|")
         , "precioActual",  r.product_price
+        , "valor",  r.product_price
+        , "unidad", "unidad"
+        , "iva", 0.12
+        , "valor_distribuidor", 1.0
+        , "porcentaje", 1.0
         , "precios", JSON_ARRAYAGG(
             JSON_OBJECT(
                 "|tipo|",  CONCAT("|", IFNULL(r.product_price_name, "FALTA"), "|")
@@ -43,4 +49,34 @@ ORDER BY d.product_id
 -- LIMIT 2
 ;
 
+
+    --        BAPU : AutoInvoice
+    --        ~~~~~~~~~~~~~~~~~~~~~~~
+    --         idIB: codigo
+    --       nombre: nombre
+    --  descripcion:
+    --    categoria:
+    --       estado:
+    --      precios:
+    -- precioActual: valor
+    --             : unidad
+    --             : iva
+    --             : valor_distribuidor
+    --             : porcentaje
+
+
 -- select d.product_name, d.product_description from tb_products d;
+
+-- SELECT column_name,
+--        ordinal_position,
+--        column_type
+-- FROM   information_schema.columns
+-- WHERE  table_schema = 'ib2018'
+--        AND ( table_name = 'tb_products'
+--               OR table_name = 'tb_products_prices' )
+--        AND column_name IN ( 'product_id', 'product_name', 'product_description',
+--                             'product_price',
+--                             'product_price_name', 'product_price_creation_date'
+--                           )
+--        AND Concat(column_name, ordinal_position) != 'product_id2'
+-- ORDER  BY ordinal_position;
