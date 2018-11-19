@@ -4,11 +4,13 @@ import finder from 'pouchdb-find';
 import debug from 'pouchdb-debug'; // eslint-disable-line no-unused-vars
 import liveFinder from 'pouchdb-live-find';
 
+import { debounce } from 'lodash';
+
 import config from '@/config';
 import { store as vuex } from '@/store';
 
-
 const { databaseName } = config;
+
 
 const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 const LGERR = console.error; // eslint-disable-line no-unused-vars, no-console
@@ -55,44 +57,88 @@ export const LoaderProgress = {
   },
 };
 
+const resolveFind = (upd, rows, resolve) => {
+  LG(`MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+  ${rows}`);
+  resolve(rows);
+  // resolve({
+  //   data: {
+  //     product: {
+  //       data: upd.action,
+  //       columns: upd.id,
+  //     },
+  //   },
+  // });
+};
+const debouncedRefresh = debounce(resolveFind, 50);
+
 export const REST = {
   get: (endPoint, parameters) => new Promise((resolve) => {
     LG(`
       endPoint: ${JSON.stringify(endPoint, null, 2)}
       parameters: ${JSON.stringify(parameters, null, 2)}
     `);
-    localDatabase.liveFind({
-      selector: { _id: 'aPerson_1_0000000000000001' },
-      // selector: {
-      //   $and: [
-      //     { _id: { $gte: 'Product_1_0000000000000000' } },
-      //            // eslint-disable-line no-underscore-dangle
-      //     { _id: { $lt: 'Product_3_0000000000000000' } },
-      //            // eslint-disable-line no-underscore-dangle
-      //   ],
-      // },
+    const db = vuex.getters['dbmgr/getDbMgr'];
 
-      // include_docs: true,
-      // startkey: 'Product_1_0000000000000000',
-      // endkey: 'Product_3_0',
-    }).then((result) => {
-      LG(`
-        Pouch liveFind Result: ${JSON.stringify(result, null, 2)}
-      `);
-    }).catch((err) => {
-      LG(`
-        Pouch AllDocs Error: ${JSON.stringify(err, null, 2)}
-      `);
-    });
+    // db.allDocs({
+    //   include_docs: true,
+    // }).then((result) => {
+    //   LG(`
+    //     Pouch liveFind Result: ${JSON.stringify(result, null, 2)}
+    //   `);
+    // }).catch((err) => {
+    //   LG(`
+    //     Pouch AllDocs Error: ${JSON.stringify(err, null, 2)}
+    //   `);
+    // });
 
-    resolve({
-      data: {
-        product: {
-          data: 'ddddddddddddddddddddd',
-          columns: 'cccccccccccccccccccccccccc',
-        },
+    // db.getIndexes(
+    db.liveFind({
+      aggregate: true,
+      selector: {
+        $and: [
+          { _id: { $gte: 'Product_1_0000000000000000' } },
+          // eslint-disable-line no-underscore-dangle
+          { _id: { $lt: 'Product_3_0000000000000000' } },
+          // eslint-disable-line no-underscore-dangle
+        ],
       },
-    });
+    })
+      .on('update', (update, rows) => {
+        debouncedRefresh(update, rows, resolve);
+      // // update.action is 'ADD', 'UPDATE', or 'REMOVE'
+      // // update also contains id, rev, and doc
+      // // aggregate is an array of docs containing the latest state of the query
+      // refreshUI(aggregate);
+      // // (refreshUI would be a function you write to pipe the changes to your rendering engine)
+      })
+
+    // Called when the initial query is complete
+      .on('ready', () => {
+        LG('Initial query complete.');
+      })
+
+    // Called when you invoke `liveFeed.cancel()`
+      .on('cancelled', () => {
+        LG('LiveFind cancelled.');
+      })
+
+    // Called if there is any error
+      .on('error', (err) => {
+        LG('Oh no!', err);
+      // })
+
+      // .then((result) => {
+      //   LG(`
+      //   Pouch liveFind Result: ${JSON.stringify(result, null, 2)}
+      // `);
+      // })
+
+      // .catch((err) => {
+      //   LG(`
+      //   Pouch AllDocs Error: ${JSON.stringify(err, null, 2)}
+      // `);
+      });
   }),
 };
 

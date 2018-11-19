@@ -4,9 +4,10 @@ import { REST as client } from '@/database/vuejs-pouchdb';
 
 import { store as vuex } from '@/store';
 
+/* eslint-disable no-unused-vars */
 import { variablizeTitles } from '@/utils/strings';
 import format from '@/utils/format';
-
+/* eslint-enable no-unused-vars */
 
 // import Header from '@/components/Header';
 import cfg from '@/config';
@@ -17,7 +18,7 @@ import Product from './Layout';
 import columns from './column_specs';
 import { PRODUCTS, PRODUCTS_LIST } from './accessGroups';
 
-const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+const LG = console.log; // eslint-disable-line no-unused-vars, no-console,
 
 const local = [{
   name: PRODUCTS_LIST,
@@ -69,8 +70,8 @@ export const store = createCrudModule({
       LG('<<<<<< fetchAll products >>>>>>');
       dispatch('fetchList', { customUrlFnArgs: { s: 1, c: 100 } })
         .then((resp) => {
-          LG(' * * Fetched products * *');
-          LG(`             >>================================================<<
+          window.lgr.info(' * * Fetched products * *');
+          window.lgr.debug(`             >>================================================<<
             products response: ${JSON.stringify(resp, null, 2)}
           `);
           // LG(resp.columns);
@@ -160,49 +161,150 @@ export const store = createCrudModule({
   },
 
   parseList(response) {
-    LG(`             ||================================================||
-      products response: ${JSON.stringify(response, null, 2)}
-    `);
+    const productMap = {}; // eslint-disable-line no-unused-vars
+    const productArray = [];
+    // let productArray = [];
 
-    const {
-      data,
-      titles,
-      meta,
-      enums,
-    } = response.data[RESOURCE];
+    let data = {}; // eslint-disable-line no-unused-vars
+    // let titles = [];
+    let meta = [];
+    // let enums = [];
+    const enums = [];
+    if (response.data && response.data[RESOURCE]) {
+      /*            ******************** THIS IS THE OLD VERSION ******************* */
+      window.lgr.error(`
+        ******************** THIS IS THE OLD VERSION *******************
+      `);
+      /*
+            ({
+              data,
+              titles,
+              meta,
+              enums,
+            } = response.data[RESOURCE]);
 
-    const vars = variablizeTitles(titles);
+            const vars = variablizeTitles(titles);
 
-    const prodMap = {};
-    const result = data.map((product) => {
-      const newProd = product;
-      meta.forEach((col, ix) => {
-        newProd[ix] = format[col.type](newProd[ix]);
-        // LG(`  ${newProd[ix]} -->> ${col.type} `);
+            window.lgr.warn(`
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      Products titles:
+      ${JSON.stringify(titles, null, 2)}
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      `);
+
+            window.lgr.error(`
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      Products vars:
+      ${JSON.stringify(vars, null, 2)}
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      `);
+
+            productArray = data.map((product) => {
+              const newProd = product;
+              meta.forEach((col, ix) => {
+                newProd[ix] = format[col.type](newProd[ix]);
+                // LG(`  ${newProd[ix]} -->> ${col.type} `);
+              });
+              newProd.forEach((field, ix) => {
+                // LG(`  ${vars[ix]} -->> ${field} `);
+                // if (vars[ix] === 'retencion' || vars[ix] === 'distribuidor') {
+                //   newProd[vars[ix]] = field === 'si';
+                // } else if (vars[ix] === 'permissions') {
+                //   newProd[vars[ix]] = field ? JSON.parse(field.replace(/'/g, '"')) : '';
+                // } else {
+                //   newProd[vars[ix]] = field;
+                // }
+                newProd[vars[ix]] = field;
+                return field;
+              });
+              productMap[product.codigo] = product;
+              return newProd;
+            });
+      */
+    } else {
+      /*            ******************** THIS IS THE NEW VERSION ******************* */
+      window.lgr.warn(`||================================================||
+        products response: ${JSON.stringify(response, null, 2)}
+        products response length: ${response.length}
+      `);
+
+      let metaData = { name: 'none' };
+      let idx = response.length;
+      while (metaData.name === 'none' && idx >= 0) {
+        idx -= 1;
+        metaData = response[idx].data;
+      }
+
+      meta = metaData.columns;
+      window.lgr.debug(`products meta data: ${JSON.stringify(metaData, null, 2)}`);
+      const vars = variablizeTitles(meta.map(column => column.meta));
+
+      window.lgr.error(`products vars: ${JSON.stringify(vars, null, 2)}`);
+
+      idx = -1;
+      response.forEach((item) => {
+        idx += 1;
+
+        ({ data } = item);
+        const prod = {};
+        if (data.idib) {
+          if (idx < 4) {
+            window.lgr.error(`product nombre: ${data.nombre}`);
+            // ${JSON.stringify(newProd[ix], null, 2)} -->> ${col.type}
+          }
+          meta.forEach((col) => {
+            window.lgr.warn(`column idx: ${col.idx} ${col.field}`);
+            if (data[col.field]) {
+              prod[col.idx] = data[col.field];
+              prod[col.field] = data[col.field];
+            }
+          });
+          productMap[data.codigo] = prod;
+          productArray.push(prod);
+        }
       });
-      newProd.forEach((field, ix) => {
-        // LG(`  ${vars[ix]} -->> ${field} `);
-        // if (vars[ix] === 'retencion' || vars[ix] === 'distribuidor') {
-        //   newProd[vars[ix]] = field === 'si';
-        // } else if (vars[ix] === 'permissions') {
-        //   newProd[vars[ix]] = field ? JSON.parse(field.replace(/'/g, '"')) : '';
-        // } else {
-        //   newProd[vars[ix]] = field;
-        // }
-        newProd[vars[ix]] = field;
-        return field;
-      });
-      prodMap[product.codigo] = product;
-      return newProd;
-    });
+
+      if (enums.length === -1) {
+        return Object.assign({}, response, {
+          data: productArray, // expecting array of objects with IDs
+          columns: meta,
+          enums,
+        });
+      }
+    }
 
     vuex.dispatch('product/setEnums', enums);
-    vuex.dispatch('product/setMap', prodMap);
+    vuex.dispatch('product/setMap', productMap);
+
+    window.lgr.warn(`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Products response:
+${JSON.stringify(response, null, 2)}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`);
+    window.lgr.error(`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Products productArray:
+${JSON.stringify(productArray, null, 2)}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`);
+    window.lgr.warn(`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Products meta:
+${JSON.stringify(meta, null, 2)}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`);
+    window.lgr.error(`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Products enums:
+${JSON.stringify(enums, null, 2)}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`);
+
     return Object.assign({}, response, {
-      data: result, // expecting array of objects with IDs
+      data: productArray, // expecting array of objects with IDs
       columns: meta,
       enums,
     });
   },
-
 });
