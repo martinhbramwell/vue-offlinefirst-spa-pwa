@@ -28,7 +28,7 @@
             "numeric": true,
             "type": "integer",
             "usage": "rw",
-            "idx": 0
+            "idx": 1
           },
           {
             "meta": "Nombre",
@@ -40,7 +40,7 @@
             "numeric": false,
             "type": "title",
             "usage": "rw",
-            "idx": 1
+            "idx": 2
           },
           {
             "meta": "Descripcion",
@@ -52,7 +52,7 @@
             "numeric": false,
             "type": "text",
             "usage": "rw",
-            "idx": 2
+            "idx": 3
           },
           {
             "meta": "Categoria",
@@ -64,7 +64,7 @@
             "numeric": false,
             "type": "text",
             "usage": "rw",
-            "idx": 2
+            "idx": 4
           },
           {
             "meta": "Estado",
@@ -76,7 +76,7 @@
             "numeric": false,
             "type": "text",
             "usage": "rw",
-            "idx": 2
+            "idx": 5
           },
           {
             "meta": "Valor",
@@ -88,7 +88,7 @@
             "numeric": true,
             "type": "usd",
             "usage": "r",
-            "idx": 4
+            "idx": 6
           },
           {
             "meta": "PrecioActual",
@@ -100,7 +100,7 @@
             "numeric": true,
             "type": "usd",
             "usage": "r",
-            "idx": 4
+            "idx": 7
           },
           {
             "meta": "Unidad",
@@ -112,7 +112,7 @@
             "numeric": false,
             "type": "text",
             "usage": "rw",
-            "idx": 2
+            "idx": 8
           },
           {
             "meta": "IVA",
@@ -124,7 +124,7 @@
             "numeric": true,
             "type": "percent",
             "usage": "r",
-            "idx": 3
+            "idx": 9
           },
           {
             "meta": "Valor Distribuidor",
@@ -136,7 +136,7 @@
             "numeric": true,
             "type": "usd",
             "usage": "r",
-            "idx": 5
+            "idx": 10
           },
           {
             "meta": "Porcentaje",
@@ -148,7 +148,7 @@
             "numeric": true,
             "type": "percent",
             "usage": "r",
-            "idx": 6
+            "idx": 11
           }
         ]
       }

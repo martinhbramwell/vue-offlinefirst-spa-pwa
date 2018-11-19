@@ -13,7 +13,7 @@ SELECT
     JSON_OBJECT(
         "_id", concat("Product_1_", lpad(d.product_id, 16, 0))
       , "data", JSON_OBJECT(
-          "idIB", d.product_id
+          "idib", d.product_id
         , "codigo", d.product_id
         , "type", "product"
         , "nombre",  CONCAT("|", IFNULL(d.product_name, "FALTA"), "|")
