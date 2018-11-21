@@ -104,6 +104,7 @@
         products: 'list',
         prod: 'getProduct',
         columns: 'getColumns',
+        getDirtyData: 'getDirtyData',
       }),
       ...mapGetters({
         loggedIn: 'isAuthenticated',
@@ -118,6 +119,12 @@
         return this.isLoadingList || this.isUpdating || this.isCreating;
       },
       prods() {
+        const count = this.getDirtyData;
+        if (count > 0) {
+          window.lgr.info(`Product/List.vue --> Store changed ${JSON.stringify(count, null, 2)}`);
+          this.fetchProducts();
+          this.setDirtyData(0);
+        }
         return this.products.map((prod) => {
           // window.lgr.debug('>>>>>>>>>>>>>');
           const aProd = prod;
@@ -150,6 +157,7 @@
       ...mapActions('product', {
         fetchProducts: 'fetchAll',
         setColumns: 'setColumns',
+        setDirtyData: 'setDirtyData',
       }),
       onFetchProducts() {
         window.lgr.debug(' * * Try to fetch products * *');

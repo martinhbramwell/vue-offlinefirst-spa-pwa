@@ -52,10 +52,10 @@ const getCtgryLoadLevels = (vx) => {
     });
     window.lgr.debug(`Counts values :: ${JSON.stringify(counts, null, 2)}`);
 
-    Object.keys(counts).forEach((count) => {
-      window.lgr.debug(`Count ${count} ${counts[count]} `);
+    Object.keys(counts).forEach((counter) => {
+      window.lgr.debug(`Count ${counter} ${counts[counter]} `);
       vx.commit('setCategoryLoadedCount',
-        { key: count, value: counts[count] });
+        { key: counter, value: counts[counter] });
     });
 
     const ct = vx.state.categoryCounts;
@@ -94,7 +94,7 @@ const getCtgryTotals = (vx) => {
   const baseURL = `${srvr.dbServerProtocol}://${srvr.dbServerURI}/`;
   const url = `${dbName}/_design/visible/_view`;
 
-  window.lgr.debug(`Getting category totals :: ${user.name} ${baseURL}${url}`);
+  window.lgr.info(`Getting category totals :: ${user.name} ${baseURL}${url}`);
 
   const promises = [];
   categories.forEach((category) => {
@@ -235,10 +235,18 @@ const actions = {
             repFromCounts[doc.data.type] += 1;
           });
 
-          Object.keys(repFromCounts).forEach((count) => {
-            window.lgr.debug(`Count ${count} ${repFromCounts[count]} `);
+          Object.keys(repFromCounts).forEach((counter) => {
+            const count = repFromCounts[counter];
+            window.lgr.debug(`Count ${counter} ${count} `);
             vx.commit('setCategoryLoadedCount',
-              { key: count, value: repFromCounts[count] });
+              { key: counter, value: count });
+            const action = `${counter}/setDirtyData`;
+            try {
+              vx.dispatch(action, count, { root: true });
+              window.lgr.debug(`Dispatched ${action} with ${count} for ${counter}.`);
+            } catch (err) {
+              window.lgr.warn(`Action ${action} not found.`);
+            }
           });
 
 

@@ -4,13 +4,11 @@ import finder from 'pouchdb-find';
 import debug from 'pouchdb-debug'; // eslint-disable-line no-unused-vars
 import liveFinder from 'pouchdb-live-find';
 
-import { debounce } from 'lodash';
-
 import config from '@/config';
 import { store as vuex } from '@/store';
+import debouncedRefresh from '@/utils/debouncedRefresh';
 
 const { databaseName } = config;
-
 
 const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 const LGERR = console.error; // eslint-disable-line no-unused-vars, no-console
@@ -45,32 +43,17 @@ export const LoaderProgress = {
     const allLoaded = vuex.getters['dbmgr/getCategoriesLoading'];
     if (allLoaded) return;
     LoaderProgress.spinner = loader.open({ container: null });
-    window.lgr.warn('Started loader spinner');
+    window.lgr.debug('Started loader spinner');
   },
   kill: () => {
     const allLoaded = vuex.getters['dbmgr/getCategoriesLoading'];
-    window.lgr.warn(`Checking loader spinner :: \n${JSON.stringify(allLoaded, null, 2)}`);
+    window.lgr.debug(`Checking loader spinner :: \n${JSON.stringify(allLoaded, null, 2)}`);
     if (allLoaded) {
       LoaderProgress.spinner.close();
-      window.lgr.warn('Killed loader spinner');
+      window.lgr.debug('Killed loader spinner');
     }
   },
 };
-
-const resolveFind = (upd, rows, resolve) => {
-  LG(`MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-  ${rows}`);
-  resolve(rows);
-  // resolve({
-  //   data: {
-  //     product: {
-  //       data: upd.action,
-  //       columns: upd.id,
-  //     },
-  //   },
-  // });
-};
-const debouncedRefresh = debounce(resolveFind, 50);
 
 export const REST = {
   get: (endPoint, parameters) => new Promise((resolve) => {
@@ -105,7 +88,7 @@ export const REST = {
       },
     })
       .on('update', (update, rows) => {
-        debouncedRefresh(update, rows, resolve);
+        debouncedRefresh('Products', update, rows, resolve);
       // // update.action is 'ADD', 'UPDATE', or 'REMOVE'
       // // update also contains id, rev, and doc
       // // aggregate is an array of docs containing the latest state of the query
