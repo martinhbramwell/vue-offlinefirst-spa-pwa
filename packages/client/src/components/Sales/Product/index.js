@@ -4,19 +4,18 @@ import { REST as client } from '@/database/vuejs-pouchdb';
 
 import { store as vuex } from '@/store';
 
-/* eslint-disable no-unused-vars */
 import { variablizeTitles } from '@/utils/strings';
-import format from '@/utils/format';
-/* eslint-enable no-unused-vars */
+import format from '@/utils/format'; // eslint-disable-line no-unused-vars
 
-// import Header from '@/components/Header';
 import cfg from '@/config';
 
 import List from './List';
 import Product from './Layout';
 // import Retrieve from './Retrieve';
 import columns from './column_specs';
-import { PRODUCTS, PRODUCTS_LIST } from './accessGroups';
+import { PRODUCT, PRODUCTS, PRODUCTS_LIST } from './accessGroups'; // eslint-disable-line no-unused-vars
+
+// import { Resources } from '@/accessControl';
 
 const LG = console.log; // eslint-disable-line no-unused-vars, no-console,
 
@@ -45,10 +44,11 @@ const RESOURCE = 'product';
 export const store = createCrudModule({
   resource: RESOURCE, // The name of your CRUD resource (mandatory)
   idAttribute: IDATTRIBUTE, // What should be used as ID
-  client,
 
+  client,
   state: {
     columns,
+
     enums: {},
     productsMap: {},
     paginator: { s: 1, c: 100 },
@@ -57,18 +57,32 @@ export const store = createCrudModule({
   actions: {
     fetchAll: ({ dispatch }) => {
       LG('<<<<<< fetchAll products >>>>>>');
-      dispatch('fetchList', { customUrlFnArgs: { s: 1, c: 100 } })
+      /* eslint-disable no-underscore-dangle */
+      const parameters = {
+        customUrlFnArgs: store.state.paginator,
+        config: {
+          category: 'Products',
+          selector: {
+            $and: [
+              { _id: { $gte: 'Product_1_0000000000000000' } },
+              { _id: { $lt: 'Product_3_0000000000000000' } },
+            ],
+          },
+        },
+      };
+      /* eslint-enable no-underscore-dangle */
+      dispatch('fetchList', parameters)
         .then((resp) => {
           window.lgr.info(' * * Fetched products * *');
           window.lgr.debug(`             >>================================================<<
             products response: ${JSON.stringify(resp, null, 2)}
           `);
-          // LG(resp.columns);
           dispatch('setColumns', (resp.columns));
+          store.state.dirtyData = -1;
+          // dispatch('setDirtyData', -1);
         })
         .catch((e) => {
-          LG(`*** Error while fetching products :: ${e}***`);
-          LG(e.message);
+          window.lgr.error(`*** Error while fetching products :: ${e.message} ***`);
           if (e.message.endsWith('401')) {
             dispatch('handle401', null, { root: true });
           } else {
@@ -80,12 +94,11 @@ export const store = createCrudModule({
         });
     },
     setColumns: ({ commit }, cols) => {
-      window.lgr.info('Product.index --> actions.setColumns');
-      LG(cols);
+      window.lgr.debug(`Product.index --> actions.setColumns ${JSON.stringify(cols, null, 2)}`);
       commit('tableColumns', cols);
     },
     setEnums: ({ commit }, enums) => {
-      window.lgr.info('Product.index --> actions.setEnums');
+      window.lgr.debug('Product.index --> actions.setEnums');
       commit('enums', enums);
     },
     setMap: ({ commit }, prodMap) => {
@@ -130,6 +143,21 @@ export const store = createCrudModule({
     /* eslint-enable no-param-reassign */
   },
 
+  onFetchListSuccess(state, response) { // eslint-disable-line no-unused-vars
+    window.lgr.error(`
+      Parse list success handler >>>>>>>>>>>>>>>>>>>>>>>>>>
+      ${JSON.stringify(state.dirtyData, null, 2)}
+    `);
+    state.dirtyData = -1; // eslint-disable-line no-param-reassign
+    // LG(state);
+    // if (state.dirtyData > 0) {
+    //   window.lgr.info(`Product/index.js -->
+    // Store changed again ${JSON.stringify(state.dirtyData, null, 2)}`);
+    //   // state.dispatch('fetchAll');
+    //   // this.setDirtyData(0);
+    // }
+  },
+
   customUrlFn(_id, _pgntr) {
     LG(`config server --> ${cfg.server}`);
     LG(`client --> ${JSON.stringify(client, null, 2)}`);
@@ -166,107 +194,59 @@ export const store = createCrudModule({
     let meta = [];
     // let enums = [];
     const enums = [];
-    if (response.data && response.data[RESOURCE]) {
-      /*            ******************** THIS IS THE OLD VERSION ******************* */
-      window.lgr.error(`
-        ******************** THIS IS THE OLD VERSION *******************
-      `);
-      /*
-            ({
-              data,
-              titles,
-              meta,
-              enums,
-            } = response.data[RESOURCE]);
 
-            const vars = variablizeTitles(titles);
+    /*            ******************** THIS IS THE NEW VERSION ******************* */
+    window.lgr.debug(`||================================================||
+      products response: ${JSON.stringify(response, null, 2)}
+      products response length: ${response.length}
+    `);
 
-            window.lgr.warn(`
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      Products titles:
-      ${JSON.stringify(titles, null, 2)}
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      `);
+    let metaData = { name: 'none' };
+    let idx = response.length;
+    while (metaData.name === 'none' && idx >= 0) {
+      idx -= 1;
+      metaData = response[idx].data;
+    }
 
-            window.lgr.error(`
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      Products vars:
-      ${JSON.stringify(vars, null, 2)}
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      `);
+    meta = metaData.columns;
+    window.lgr.debug(`products meta data: ${JSON.stringify(metaData, null, 2)}`);
+    const vars = variablizeTitles(meta.map(column => column.meta));
 
-            productArray = data.map((product) => {
-              const newProd = product;
-              meta.forEach((col, ix) => {
-                newProd[ix] = format[col.type](newProd[ix]);
-                // LG(`  ${newProd[ix]} -->> ${col.type} `);
-              });
-              newProd.forEach((field, ix) => {
-                // LG(`  ${vars[ix]} -->> ${field} `);
-                // if (vars[ix] === 'retencion' || vars[ix] === 'distribuidor') {
-                //   newProd[vars[ix]] = field === 'si';
-                // } else if (vars[ix] === 'permissions') {
-                //   newProd[vars[ix]] = field ? JSON.parse(field.replace(/'/g, '"')) : '';
-                // } else {
-                //   newProd[vars[ix]] = field;
-                // }
-                newProd[vars[ix]] = field;
-                return field;
-              });
-              productMap[product.codigo] = product;
-              return newProd;
-            });
-      */
-    } else {
-      /*            ******************** THIS IS THE NEW VERSION ******************* */
-      window.lgr.debug(`||================================================||
-        products response: ${JSON.stringify(response, null, 2)}
-        products response length: ${response.length}
-      `);
+    window.lgr.debug(`products vars: ${JSON.stringify(vars, null, 2)}`);
 
-      let metaData = { name: 'none' };
-      let idx = response.length;
-      while (metaData.name === 'none' && idx >= 0) {
-        idx -= 1;
-        metaData = response[idx].data;
-      }
+    idx = -1;
+    response.forEach((item) => {
+      idx += 1;
 
-      meta = metaData.columns;
-      window.lgr.debug(`products meta data: ${JSON.stringify(metaData, null, 2)}`);
-      const vars = variablizeTitles(meta.map(column => column.meta));
-
-      window.lgr.debug(`products vars: ${JSON.stringify(vars, null, 2)}`);
-
-      idx = -1;
-      response.forEach((item) => {
-        idx += 1;
-
-        ({ data } = item);
-        const prod = {};
-        if (data.idib) {
-          // if (idx < 4) {
-          //   window.lgr.error(`product nombre: ${data.nombre}`);
-          //   // ${JSON.stringify(newProd[ix], null, 2)} -->> ${col.type}
-          // }
-          meta.forEach((col) => {
-            window.lgr.debug(`column idx: ${col.idx} ${col.field}`);
-            if (data[col.field]) {
-              prod[col.idx] = data[col.field];
-              prod[col.field] = data[col.field];
-            }
-          });
-          productMap[data.codigo] = prod;
-          productArray.push(prod);
-        }
-      });
-
-      if (enums.length === -1) {
-        return Object.assign({}, response, {
-          data: productArray, // expecting array of objects with IDs
-          columns: meta,
-          enums,
+      ({ data } = item);
+      const prod = {};
+      if (data.idib) {
+        // if (idx < 4) {
+        //   window.lgr.error(`product nombre: ${data.nombre}`);
+        //   // ${JSON.stringify(newProd[ix], null, 2)} -->> ${col.type}
+        // }
+        meta.forEach((col) => {
+          window.lgr.debug(`column idx: ${col.idx} ${col.field}`);
+          if (data[col.field]) {
+            const attr = format[col.type](data[col.field]);
+            prod[col.idx] = attr;
+            prod[col.field] = attr;
+          }
         });
+        productMap[data.codigo] = prod;
+        Object.keys(prod).forEach((attr) => {
+          prod[attr] = prod[attr].str || prod[attr];
+        });
+        productArray.push(prod);
       }
+    });
+
+    if (enums.length === -1) {
+      return Object.assign({}, response, {
+        data: productArray, // expecting array of objects with IDs
+        columns: meta,
+        enums,
+      });
     }
 
     vuex.dispatch('product/setEnums', enums);

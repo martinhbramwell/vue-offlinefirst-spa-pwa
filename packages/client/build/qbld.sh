@@ -6,12 +6,7 @@ if [[ ${1} == "--wet" ]]; then
   MODE="wet";
 fi;
 
-export OLD_IFS=${IFS};
-IFS='/';
-read -ra PROJ_BUILD_PATH <<< "${0}";
-export IFS=$OLD_IFS;
-
-export THE_PROJECT=${PROJ_BUILD_PATH[0]}/${PROJ_BUILD_PATH[1]};
+export THE_PROJECT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && cd .. && pwd)";
 
 echo -e "
 Building and committing distribution of 'iridium-blue.github.io'";

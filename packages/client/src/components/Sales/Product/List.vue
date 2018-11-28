@@ -1,8 +1,10 @@
 <template>
   <section>
+<!--
     <b-loading :is-full-page="false" :active.sync="isBusy" :canCancel="true"></b-loading>
+ -->
     <b-table
-      :data="isEmpty ? [] : prods"
+      :data="isEmpty ? [] : products"
       :columns="columns"
       :striped="true"
       paginated
@@ -35,7 +37,9 @@
       </template>
     </b-table>
 
+    <!-- <div class="block is-size-7 has-text-light"> -->
     <div class="block">
+        {{ refresh }}
         <button class="button is-small is-primary"
             @click="columnSelectorOpen = !columnSelectorOpen">
             Column Selection
@@ -57,6 +61,7 @@
         </b-field>
       </ul>
     </b-collapse>
+
   </section>
 </template>
 
@@ -115,41 +120,16 @@
         isUpdating: 'isUpdating',
         isCreating: 'isCreating',
       }),
-      isBusy() {
-        return this.isLoadingList || this.isUpdating || this.isCreating;
-      },
-      prods() {
-        const count = this.getDirtyData;
-        if (count > 0) {
-          window.lgr.info(`Product/List.vue --> Store changed ${JSON.stringify(count, null, 2)}`);
+      refresh() {
+        if (this.getDirtyData > 0) {
+          window.lgr.error(`* * Product list dirty? (${this.getDirtyData}) * *`);
           this.fetchProducts();
-          this.setDirtyData(0);
         }
-        return this.products.map((prod) => {
-          // window.lgr.debug('>>>>>>>>>>>>>');
-          const aProd = prod;
-          Object.keys(aProd).forEach((attr) => {
-            // window.lgr.debug('>>>>>>');
-            // window.lgr.debug(attr);
-            // window.lgr.debug(aProd[attr]);
-            aProd[attr] = aProd[attr].str || aProd[attr];
-          });
-          // if (aProd[0] === 997) {
-          //   window.lgr.debug('>>>>>>');
-          //   window.lgr.debug(aProd);
-
-          //   Object.keys(aProd).forEach((attr) => {
-          //     window.lgr.debug('>>>>>>');
-          //     window.lgr.debug(attr);
-          //     window.lgr.debug(aProd[attr]);
-          //     aProd[attr] = aProd[attr].str || aProd[attr];
-          //   });
-          //   window.lgr.debug(aProd);
-          //   window.lgr.debug(prod);
-          // }
-          return aProd;
-        });
+        return (this.getDirtyData > 0) ? '|' : '_';
       },
+      // isBusy() {
+      //   return this.isLoadingList || this.isUpdating || this.isCreating;
+      // },
     },
 
     methods: {

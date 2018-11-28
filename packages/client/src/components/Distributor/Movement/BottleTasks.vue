@@ -640,7 +640,7 @@ const vm = {
     saveMovements() {
       LG('%%%%%%%%%%%%%%%% save movements %%%%%%%%%%%%%%%%%% ');
 
-      const customer = parseInt(this.personChosen.idIB, 10);
+      const customer = parseInt(this.personChosen.idib, 10);
       const inventory = parseInt(this.currentUser.id, 10);
       const type = 'ExchangeRequest';
 
@@ -840,7 +840,7 @@ const vm = {
         this.personChosen = them.data;
         // this.$refs.prsnPckr.$el.value = this.personChosen.nombre;
         this.$refs.prsnPckr.setValue(this.personChosen.nombre);
-        const personChosenId = parseInt(this.personChosen.idIB, 10);
+        const personChosenId = parseInt(this.personChosen.idib, 10);
         const PersonId = this.$pouch.rel.makeDocID({ type: 'aPerson', id: personChosenId });
         LG(PersonId);
         this.$pouch.liveFind({
@@ -898,7 +898,7 @@ const vm = {
           break;
         case 'UPDATE':
           idToUpdate = this.$pouch.rel.parseDocID(pouchData.id).id.toString();
-          idx = this.items.findIndex(item => item.data.idIB == idToUpdate); // eslint-disable-line eqeqeq, max-len
+          idx = this.items.findIndex(item => item.data.idib == idToUpdate); // eslint-disable-line eqeqeq, max-len
           LG('###############   LiveFind update   ##############');
           // LG(idx);
           // LG(this.items[idx].data.nombre);
