@@ -5,6 +5,15 @@
       "data": {
         "type": "person",
         "name": "MetaData",
+        "enums": {
+            "DocTypeLookup": {
+                "_04": "RUC",
+                "_05": "Cedula",
+                "_06": "Pasaporte",
+                "_07": "Venta a Consumidor Final",
+                "_08": "Identificación del Exterior"
+            }
+        },
         "columns": [
           {
             "meta": "Codigo",
