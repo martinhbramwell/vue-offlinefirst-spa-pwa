@@ -31,7 +31,7 @@ if [ -z $1 ]; then
 
   To get JSON results from a specially prepared MariaDB query do
 
-    ./RunAScript.sh  > Get<JSONresult>.sql
+    ./RunAScript.sh Get<JSONresult>.sql
 
 
 

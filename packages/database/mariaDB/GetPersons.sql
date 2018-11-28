@@ -2,6 +2,7 @@
 -- CALL debug_on('JSON_ARRAYAGG');
 
 
+
 SELECT
   -- e.envases_id
   -- e.envases_id, s.direction, JSON_ARRAYAGG(IFNULL(s.movement, 0))
@@ -10,9 +11,38 @@ SELECT
     JSON_OBJECT(
         "_id", concat("aPerson_1_", lpad(p.partner_id, 16, 0))
       , "data", JSON_OBJECT(
-          "idIB", p.partner_id
+          "codigo", p.partner_id
         , "type", "person"
+        , "idib", p.partner_id
         , "ruc_cedula", CONCAT("|", IFNULL(p.partner_legal_id, "FALTA"), "|")
+        , "tipo_de_documento", if(partner_legal_id REGEXP '^[[:digit:]]+$'
+            , if(partner_legal_id*1 = 0
+              , 'INCOMPLETO'
+              , if(partner_nationality = 'EC'
+                , if(length(partner_legal_id) = 13
+                  , 'Ruc'
+                  , if(length(partner_legal_id) = 10
+                    , 'Cedula'
+                    , 'INCOMPLETO'
+                  )
+                )
+                , if(partner_legal_id like '17%'
+                  , if(length(partner_legal_id) = 13
+                    , 'Ruc'
+                    , if(length(partner_legal_id) = 10
+                      , 'Cedula'
+                      , 'INCOMPLETO'
+                    )
+                  )
+                  , 'Pasaporte'
+                )
+              )
+            )
+            , if(partner_legal_id = "INCOMPLETO"
+                , 'INCOMPLETO'
+                , 'Pasaporte'
+              )
+          )
         , "nombre", p.partner_name
         , "es_empresa", IF(LCASE(IFNULL(p.partner_company, "no")) = "y", "si", "no")
         , "es_client", IF(LCASE(IFNULL(p.partner_company, "no")) = "y", "si", "no")
@@ -21,7 +51,7 @@ SELECT
         , "telefono_1", CONCAT("|", IFNULL(p.partner_telf_primary, "FALTA"), "|")
         , "telefono_2", CONCAT("|", IFNULL(p.partner_telf_secundary, "FALTA"), "|")
         , "mobile", CONCAT("|", IFNULL(p.partner_celular_phone, "FALTA"), "|")
-        , "distribuidor", "hq"
+        , "distribuidor", if(d.partner_id in (1,2), "hq", if(d.distribuidor="Y", "si", "no"))
         , "retencion", "no"
         , "email", IFNULL(p.partner_email, "FALTA")
         , "address_details", p.partner_id
@@ -34,6 +64,7 @@ SELECT
 
 FROM
   tb_partners p
+    JOIN tb_ib_partners_especial_data d ON p.partner_id = d.partner_id
     JOIN tb_envases e ON p.partner_id = e.last_partner_id
     JOIN short_list s ON
           s.partner = e.last_partner_id
@@ -48,6 +79,41 @@ GROUP BY p.partner_id
 ORDER BY p.partner_id
 -- limit 3
 ;
+
+-- select
+--     partner_id
+--   , partner_nationality
+--   , partner_legal_id
+--   , if(partner_legal_id REGEXP '^[[:digit:]]+$'
+--     , if(partner_legal_id*1 = 0
+--       , 'INCOMPLETO'
+--       , if(partner_nationality = 'EC'
+--         , if(length(partner_legal_id) = 13
+--           , 'Ruc'
+--           , if(length(partner_legal_id) = 10
+--             , 'Cedula'
+--             , 'INCOMPLETO'
+--           )
+--         )
+--         , if(partner_legal_id like '17%'
+--           , if(length(partner_legal_id) = 13
+--             , 'Ruc'
+--             , if(length(partner_legal_id) = 10
+--               , 'Cedula'
+--               , 'INCOMPLETO'
+--             )
+--           )
+--           , 'Pasaporte'
+--         )
+--       )
+--     )
+--     , if(partner_legal_id = "INCOMPLETO"
+--         , 'INCOMPLETO'
+--         , 'Pasaporte'
+--       )
+--   )
+--   as tipo_documento
+--   from tb_partners where partner_nationality != "EC";
 
 -- from short_list s, tb_partners p
 -- where envase_id < 600
@@ -67,7 +133,6 @@ ORDER BY p.partner_id
 
 -- SELECT * FROM debug;
 -- CALL debug_off('JSON_ARRAYAGG');
-
 
 
 

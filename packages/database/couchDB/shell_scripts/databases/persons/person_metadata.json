@@ -1,0 +1,193 @@
+{
+  "docs": [
+    {
+      "_id": "aPerson_2_MetaData",
+      "data": {
+        "type": "person",
+        "name": "MetaData",
+        "columns": [
+          {
+            "meta": "Codigo",
+            "label": "ID",
+            "field": "codigo",
+            "centered": false,
+            "visible": true,
+            "width": 8,
+            "numeric": true,
+            "type": "integer",
+            "usage": "rw",
+            "idx": 0
+          },
+          {
+            "meta": "idDB",
+            "label": "IDIB",
+            "field": "idib",
+            "centered": true,
+            "visible": false,
+            "width": 8,
+            "numeric": true,
+            "type": "integer",
+            "usage": "rw",
+            "idx": 1
+          },
+          {
+            "meta": "RUC / Cedula",
+            "label": "RUC",
+            "field": "ruc_cedula",
+            "centered": false,
+            "visible": false,
+            "width": 14,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 2
+          },
+          {
+            "meta": "Nombre",
+            "label": "NBR",
+            "field": "nombre",
+            "centered": false,
+            "visible": true,
+            "width": 70,
+            "numeric": false,
+            "type": "title",
+            "usage": "rw",
+            "idx": 3
+          },
+          {
+            "meta": "Dirección",
+            "label": "DIR",
+            "field": "direccion",
+            "centered": false,
+            "visible": false,
+            "width": "",
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 4
+          },
+          {
+            "meta": "Telefono",
+            "label": "TLF",
+            "field": "telefono_1",
+            "centered": false,
+            "visible": true,
+            "width": 18,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 5
+          },
+          {
+            "meta": "Telefono 2",
+            "label": "TLF2",
+            "field": "telefono_2",
+            "centered": false,
+            "visible": true,
+            "width": 18,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 6
+          },
+          {
+            "meta": "Celular",
+            "label": "MOB",
+            "field": "mobile",
+            "centered": false,
+            "visible": true,
+            "width": 18,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 7
+          },
+          {
+            "meta": "Distribuidor?",
+            "label": "DST",
+            "field": "distribuidor",
+            "centered": true,
+            "visible": false,
+            "width": 3,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 8
+          },
+          {
+            "meta": "Retencion?",
+            "label": "RET",
+            "field": "retencion",
+            "centered": true,
+            "visible": false,
+            "width": 3,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 9
+          },
+          {
+            "meta": "Tipo",
+            "label": "TIP",
+            "field": "tipo",
+            "centered": true,
+            "visible": false,
+            "width": 3,
+            "numeric": false,
+            "type": "text",
+            "usage": "r",
+            "idx": 10
+          },
+          {
+            "meta": "Email",
+            "label": "EML",
+            "field": "email",
+            "centered": false,
+            "visible": true,
+            "width": 14,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 11
+          },
+          {
+            "meta": "Permissions",
+            "label": "AUT",
+            "field": "permissions",
+            "centered": false,
+            "visible": false,
+            "width": 127,
+            "numeric": false,
+            "type": "JSON1",
+            "usage": "rw",
+            "idx": 12
+          },
+          {
+            "meta": "Tipo de Documento",
+            "label": "DOC",
+            "field": "tipo_de_documento",
+            "centered": false,
+            "visible": false,
+            "width": 27,
+            "numeric": false,
+            "type": "text",
+            "usage": "r",
+            "idx": 13
+          },
+          {
+            "meta": "Estado",
+            "label": "EST",
+            "field": "estado",
+            "centered": false,
+            "visible": false,
+            "width": 20,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 14
+          }
+        ]
+      }
+    }
+  ]
+}

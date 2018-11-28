@@ -41,6 +41,7 @@ if [[ 1 == 1 ]]; then
   export COUCH_GROUP_NAME='persons';
   export COUCH_COLLECTION_NAME='person';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
   export COUCH_COLLECTION_NAME='address';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
   export COUCH_COLLECTION_NAME='profile';

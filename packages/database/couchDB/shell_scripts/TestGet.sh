@@ -79,15 +79,26 @@ fi;
 
 
 
-export QUERY="Product_1_0000000000000002";
+export QUERY="Product_1_0000000000000003";
+export FIELD="unidad";
+export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+
+# export QUERY="Invoice_1_0000000000000001";
+# export FIELD="notas";
+# export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+
+# export QUERY="aPerson_1_0000000000000001";
+# export FIELD="email";
+# export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+
+
+export PATTERN=".*${FIELD}.*";
 export FULL_URL="${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
-export FIELD=".*unidad.*";
-export NEW_FIELD="    \"unidad\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
 
 generate_post_data()
 {
   PRODUCT_2=$(curl -sH "Content-type: application/json" "${FULL_URL}" | jq -r .);
-  echo -e "${PRODUCT_2}" | sed "s/${FIELD}/${NEW_FIELD}/";
+  echo -e "${PRODUCT_2}" | sed "s/${PATTERN}/${REPLACEMENT}/";
 }
 
 # export NEW_PRODUCT_2=$(generate_post_data);

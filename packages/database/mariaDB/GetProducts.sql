@@ -24,7 +24,7 @@ SELECT
         , "valor",  r.product_price
         , "unidad", "unidad"
         , "iva", 0.12
-        , "valor_distribuidor", 1.0
+        , "valor_distribuidor", r.product_price
         , "porcentaje", 1.0
         , "precios", JSON_ARRAYAGG(
             JSON_OBJECT(
