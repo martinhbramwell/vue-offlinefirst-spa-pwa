@@ -193,7 +193,7 @@ export const store = createCrudModule({
     // let titles = [];
     let meta = [];
     // let enums = [];
-    const enums = [];
+    let enums = [];
 
     /*            ******************** THIS IS THE NEW VERSION ******************* */
     window.lgr.debug(`||================================================||
@@ -208,7 +208,8 @@ export const store = createCrudModule({
       metaData = response[idx].data;
     }
 
-    meta = metaData.columns;
+    // meta = metaData.columns;
+    ({ enums, columns: meta } = metaData);
     window.lgr.debug(`persons meta data: ${JSON.stringify(metaData, null, 2)}`);
     const vars = variablizeTitles(meta.map(column => column.meta));
 

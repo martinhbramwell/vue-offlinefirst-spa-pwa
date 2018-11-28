@@ -1,22 +1,31 @@
 <template>
+<!--
+  <main id="person">
+    <p class="back">
+      <router-link :to="{ name: 'persons' }">Back to Persons</router-link>
+    </p>
+    <person-record v-if="currentPerson" :person="currentPerson" />
+  </main>
+-->
+
   <div>
     <nav class="level">
       <div class="level-item has-text-centered">
         <div>
-          <p class="heading">{{ pers(id).tipo_de_documento }}</p>
-          <p class="is-size-5">{{ pers(id).ruc_cedula }}</p>
+          <p class="heading">{{ pers.tipo_de_documento }}</p>
+          <p class="is-size-5">{{ pers.ruc_cedula }}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Nombre</p>
-          <p class="is-size-5">{{ pers(id).nombre }}</p>
+          <p class="is-size-5">{{ pers.nombre }}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Telefono</p>
-          <p class="is-size-5">{{ pers(id).telefono_1 }}</p>
+          <p class="is-size-5">{{ pers.telefono_1 }}</p>
         </div>
       </div>
     </nav>
@@ -25,7 +34,7 @@
         <div class="level-item has-text-centered">
           <div>
           <p class="heading">Direccion</p>
-          <p class="is-size-5">{{ pers(id).direccion }}</p>
+          <p class="is-size-5">{{ pers.direccion }}</p>
           </div>
         </div>
       </div>
@@ -33,14 +42,14 @@
         <div class="level-item has-text-centered">
           <div>
           <p class="heading">Mail</p>
-          <p class="is-size-5">{{ pers(id).email }}</p>
+          <p class="is-size-5">{{ pers.email }}</p>
           </div>
         </div>
       </div>
       <div class="level-left">
         <div class="level-item has-text-centered">
-          <div v-bind:class="[pers(id).distribuidor === 'no' ? 'strike-out' : '']">
-            {{ pers(id).distribuidor == 'hq' ? 'Sede Principal' : 'Distribuidor' }}
+          <div v-bind:class="[pers.distribuidor === 'no' ? 'strike-out' : '']">
+            {{ pers.distribuidor == 'hq' ? 'Sede Principal' : 'Distribuidor' }}
           </div>
         </div>
 <!--
@@ -65,35 +74,26 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
-
-  const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 
   export default {
 
-    props: ['id'],
-    // props: {
-    //   pers: {
-    //     type: Object,
-    //     required: true,
-    //     default: () => ({
-    //       codigo: 9999,
-    //       ruc_cedula: '34-4545',
-    //       nombre: 'asdf asdf asdf asdf',
-    //       telefono: '23452345',
-    //       direccion: 'asdfasdf',
-    //       distribuidor: 'si',
-    //       retencion: 'no',
-    //       tipo_de_documento: 'RUC',
-    //     }),
-    //   },
-    // },
-    computed: {
-      ...mapGetters('person', {
-        pers: 'getPerson',
-        columns: 'getColumns',
-      }),
+    props: {
+      pers: {
+        type: Object,
+        required: true,
+        default: () => ({
+          codigo: 9999,
+          ruc_cedula: '34-4545',
+          nombre: 'asdf asdf asdf asdf',
+          telefono: '23452345',
+          direccion: 'asdfasdf',
+          distribuidor: 'si',
+          retencion: 'no',
+          tipo_de_documento: 'RUC',
+        }),
+      },
     },
+
   };
 </script>
 

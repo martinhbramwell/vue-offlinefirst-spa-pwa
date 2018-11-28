@@ -1129,7 +1129,7 @@ const vm = {
 export default vm;
 </script>
 
-<style>
+<style scoped>
   input[type=text] {
     border: 1px solid;
     border-radius: 4px;

@@ -66,8 +66,8 @@
 <script>
   import { mapState, mapActions, mapGetters } from 'vuex';
 
-  // import PersonDetail from './RUDcards';
-  import PersonDetail from './Retrieve';
+  import PersonDetail from './RUDcards';
+  // import PersonDetail from './Retrieve';
   import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
 
   // const LG = console.log; // eslint-disable-line no-console, no-unused-vars

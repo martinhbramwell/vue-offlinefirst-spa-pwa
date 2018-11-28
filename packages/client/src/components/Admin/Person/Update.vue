@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-loading :is-full-page="false" :active.sync="isUpdating" :canCancel="true"></b-loading>
+    <!-- <b-loading :is-full-page="false" :active.sync="isUpdating" :canCancel="true"></b-loading> -->
     <formulate
       :name="formUid"
       class="my-form"
@@ -19,7 +19,10 @@
 
           <div class="columns is-mobile is-multiline is-centered">
 
-            <div class="column is-narrow">
+
+
+
+            <div class="column">
               <div class="control">
                 <label class="label">Nombre</label>
 
@@ -27,6 +30,21 @@
                   name="nombre"
                   type="text"
                   placeholder="Nombre y Appellidos"
+                  element-classes="nameTextbox"
+                />
+              </div>
+            </div>
+
+
+
+            <div class="column">
+              <div class="control">
+                <label class="label">Telefono</label>
+
+                <formulate-element
+                  name="telefono_1"
+                  type="tel"
+                  placeholder="# de telefono"
                 />
 
               </div>
@@ -40,7 +58,7 @@
                   class="select is-small is-focused"
                   name="tipo"
                   type="select"
-                  initial="cedula"
+                  initial="_07"
                   :options="typesId"
                 />
 
@@ -55,19 +73,7 @@
                   name="ruc_cedula"
                   type="text"
                   placeholder="Codigo de identificación"
-                />
-
-              </div>
-            </div>
-
-            <div class="column">
-              <div class="control">
-                <label class="label">Telefono</label>
-
-                <formulate-element
-                  name="telefono"
-                  type="tel"
-                  placeholder="# de telefono"
+                  element-classes="identTextbox"
                 />
 
               </div>
@@ -82,6 +88,7 @@
                   name="direccion"
                   type="text"
                   placeholder="Dirección"
+                  element-classes="addrTextbox"
                 />
 
               </div>
@@ -98,16 +105,6 @@
                 />
 
               </div>
-              <div class="control">
-
-                <label class="label">Retencion?</label>
-                <formulate-element
-                  type="checkbox"
-                  label="  "
-                  name="retencion"
-                />
-
-              </div>
             </div>
 
             <div class="column">
@@ -118,6 +115,7 @@
                   name="email"
                   type="text"
                   placeholder="Correos Electronicos"
+                  element-classes="emailTextbox"
                 />
 
               </div>
@@ -190,5 +188,9 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+  .nombreTextbox { width: 20px; padding: 1px; text-align: left; }
+  .emailTextbox { width: 240px; padding: 1px; text-align: left; }
+  .identTextbox { width: 200px; padding: 1px; text-align: left; }
+  .addrTextbox { width: 200px; padding: 1px; text-align: left; }
 </style>

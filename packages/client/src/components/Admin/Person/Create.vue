@@ -26,6 +26,7 @@
                   type="text"
                   initial="Joe Bloggs"
                   placeholder="Nombre y Appellidos"
+                  element-classes="nameTextbox"
                 />
 
               </div>
@@ -56,6 +57,7 @@
                   type="text"
                   initial="1713931416"
                   placeholder="Codigo de identificación"
+                  element-classes="identTextbox"
                 />
 
               </div>
@@ -70,6 +72,7 @@
                   type="text"
                   initial="a@b.cd"
                   placeholder="Correos Electronicos"
+                  element-classes="emailTextbox"
                 />
 
               </div>
@@ -83,19 +86,6 @@
                   type="checkbox"
                   label="  "
                   name="distribuidor"
-                />
-
-              </div>
-            </div>
-
-            <div class="column">
-              <div class="control">
-
-                <label class="label">Retencion?</label>
-                <formulate-element
-                  type="checkbox"
-                  label="  "
-                  name="retencion"
                 />
 
               </div>
@@ -124,34 +114,12 @@
                   initial="#1 1st St., Here, There, Everywhere"
                   type="text"
                   placeholder="Dirección"
+                  element-classes="addrTextbox"
                 />
 
               </div>
             </div>
 
-
-            <div class="column">
-              <div class="control">
-
-                <formulate-element
-                  name="Person"
-                  initial=0
-                  type="text"
-                />
-
-              </div>
-            </div>
-            <div class="column">
-              <div class="control">
-
-                <formulate-element
-                  name="Example"
-                  initial=3
-                  type="text"
-                />
-
-              </div>
-            </div>
 
             <div class="control">
 
@@ -249,4 +217,8 @@ export default {
 </script>
 
 <style>
+  .nameTextbox { width: 220px; padding: 1px; text-align: left; }
+  .identTextbox { width: 110px; padding: 1px; text-align: left; }
+  .emailTextbox { width: 300px; padding: 1px; text-align: left; }
+  .addrTextbox { width: 500px; padding: 1px; text-align: left; }
 </style>
