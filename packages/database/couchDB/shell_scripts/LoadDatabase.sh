@@ -17,6 +17,8 @@ if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
   usage;
 fi;
 
+echo -e "MariaDB export files : ${DATAFILES_TEMP_DIR}";
+
 if [[ 1 == 0 ]]; then
   ./CleanSheetsFilenames.sh &>/dev/null;
   pushd ${HOME}/Downloads;

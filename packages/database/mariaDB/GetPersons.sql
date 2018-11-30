@@ -17,30 +17,30 @@ SELECT
         , "ruc_cedula", CONCAT("|", IFNULL(p.partner_legal_id, "FALTA"), "|")
         , "tipo_de_documento", if(partner_legal_id REGEXP '^[[:digit:]]+$'
             , if(partner_legal_id*1 = 0
-              , 'INCOMPLETO'
+              , '_07'
               , if(partner_nationality = 'EC'
                 , if(length(partner_legal_id) = 13
-                  , 'Ruc'
+                  , '_04'
                   , if(length(partner_legal_id) = 10
-                    , 'Cedula'
-                    , 'INCOMPLETO'
+                    , '_05'
+                    , '_07'
                   )
                 )
                 , if(partner_legal_id like '17%'
                   , if(length(partner_legal_id) = 13
-                    , 'Ruc'
+                    , '_04'
                     , if(length(partner_legal_id) = 10
-                      , 'Cedula'
-                      , 'INCOMPLETO'
+                      , '_05'
+                      , '_07'
                     )
                   )
-                  , 'Pasaporte'
+                  , '_06'
                 )
               )
             )
             , if(partner_legal_id = "INCOMPLETO"
-                , 'INCOMPLETO'
-                , 'Pasaporte'
+                , '_07'
+                , '_06'
               )
           )
         , "nombre", p.partner_name
@@ -51,7 +51,8 @@ SELECT
         , "telefono_1", CONCAT("|", IFNULL(p.partner_telf_primary, "FALTA"), "|")
         , "telefono_2", CONCAT("|", IFNULL(p.partner_telf_secundary, "FALTA"), "|")
         , "mobile", CONCAT("|", IFNULL(p.partner_celular_phone, "FALTA"), "|")
-        , "distribuidor", if(d.partner_id in (1,2), "hq", if(d.distribuidor="Y", "si", "no"))
+        , "role", if(d.partner_id in (1,2), "Sede Principal", if(d.distribuidor="Y", "Distribuidor", "Cliente"))
+        , "distribuidor", if(d.distribuidor="Y", "si", "no")
         , "retencion", "no"
         , "email", IFNULL(p.partner_email, "FALTA")
         , "address_details", p.partner_id
@@ -86,30 +87,30 @@ ORDER BY p.partner_id
 --   , partner_legal_id
 --   , if(partner_legal_id REGEXP '^[[:digit:]]+$'
 --     , if(partner_legal_id*1 = 0
---       , 'INCOMPLETO'
+--       , '_07'
 --       , if(partner_nationality = 'EC'
 --         , if(length(partner_legal_id) = 13
---           , 'Ruc'
+--           , '_04'
 --           , if(length(partner_legal_id) = 10
---             , 'Cedula'
---             , 'INCOMPLETO'
+--             , '_05'
+--             , '_07'
 --           )
 --         )
 --         , if(partner_legal_id like '17%'
 --           , if(length(partner_legal_id) = 13
---             , 'Ruc'
+--             , '_04'
 --             , if(length(partner_legal_id) = 10
---               , 'Cedula'
---               , 'INCOMPLETO'
+--               , '_05'
+--               , '_07'
 --             )
 --           )
---           , 'Pasaporte'
+--           , '_06'
 --         )
 --       )
 --     )
 --     , if(partner_legal_id = "INCOMPLETO"
---         , 'INCOMPLETO'
---         , 'Pasaporte'
+--         , '_07'
+--         , '_06'
 --       )
 --   )
 --   as tipo_documento

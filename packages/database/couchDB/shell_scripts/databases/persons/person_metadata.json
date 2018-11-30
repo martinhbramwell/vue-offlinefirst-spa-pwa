@@ -92,7 +92,7 @@
             "label": "TLF2",
             "field": "telefono_2",
             "centered": false,
-            "visible": true,
+            "visible": false,
             "width": 18,
             "numeric": false,
             "type": "text",
@@ -112,6 +112,18 @@
             "idx": 7
           },
           {
+            "meta": "Role",
+            "label": "ROL",
+            "field": "role",
+            "centered": true,
+            "visible": false,
+            "width": 32,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 8
+          },
+          {
             "meta": "Distribuidor?",
             "label": "DST",
             "field": "distribuidor",
@@ -119,7 +131,7 @@
             "visible": false,
             "width": 3,
             "numeric": false,
-            "type": "text",
+            "type": "boolean",
             "usage": "rw",
             "idx": 8
           },
@@ -131,7 +143,7 @@
             "visible": false,
             "width": 3,
             "numeric": false,
-            "type": "text",
+            "type": "boolean",
             "usage": "rw",
             "idx": 9
           },
