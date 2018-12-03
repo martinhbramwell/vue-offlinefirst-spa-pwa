@@ -78,10 +78,20 @@ fi;
 # echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";
 
 
+export QUERY="aPerson_1_0000000000000018";
 
-export QUERY="Product_1_0000000000000003";
-export FIELD="unidad";
-export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+
+# export FIELD="ruc_cedula";
+# export FIELD="tipo_de_documento";
+# export FIELD="nombre";
+# export FIELD="direccion";
+# export FIELD="telefono_1";
+export FIELD="telefono_2";
+# export FIELD="mobile";
+# export FIELD="distribuidor";
+# export FIELD="email";
+
+export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc)\",";
 
 # export QUERY="Invoice_1_0000000000000001";
 # export FIELD="notas";
@@ -97,8 +107,8 @@ export FULL_URL="${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
 
 generate_post_data()
 {
-  PRODUCT_2=$(curl -sH "Content-type: application/json" "${FULL_URL}" | jq -r .);
-  echo -e "${PRODUCT_2}" | sed "s/${PATTERN}/${REPLACEMENT}/";
+  PERSON_2=$(curl -sH "Content-type: application/json" "${FULL_URL}" | jq -r .);
+  echo -e "${PERSON_2}" | sed "s/${PATTERN}/${REPLACEMENT}/";
 }
 
 # export NEW_PRODUCT_2=$(generate_post_data);

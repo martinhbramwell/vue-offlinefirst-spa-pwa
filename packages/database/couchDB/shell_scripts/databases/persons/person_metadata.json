@@ -4,7 +4,7 @@
       "_id": "aPerson_2_MetaData",
       "data": {
         "type": "person",
-        "name": "MetaData",
+        "metadata": true,
         "enums": {
             "DocTypeLookup": {
                 "_04": "RUC",
