@@ -42,7 +42,7 @@
         {{ refresh }}
         <button class="button is-small is-primary"
             @click="columnSelectorOpen = !columnSelectorOpen">
-            Column Selection
+            Escoger Columnas
         </button>
     </div>
 

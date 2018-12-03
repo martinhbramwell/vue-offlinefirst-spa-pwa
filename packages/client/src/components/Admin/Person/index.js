@@ -48,7 +48,7 @@ export const store = createCrudModule({
   client,
   state: {
     columns,
-
+    originalRecord: {},
     enums: {},
     personsMap: {},
     paginator: { s: 1, c: 100 },
@@ -56,7 +56,7 @@ export const store = createCrudModule({
   },
   actions: {
     fetchAll: ({ dispatch }) => {
-      LG('<<<<<< fetchAll persons >>>>>>');
+      window.lgr.debug('<<<<<< fetchAll persons >>>>>>');
       /* eslint-disable no-underscore-dangle */
       const parameters = {
         customUrlFnArgs: store.state.paginator,
@@ -101,13 +101,21 @@ export const store = createCrudModule({
       window.lgr.debug('Person.index --> actions.setEnums');
       commit('enums', enums);
     },
-    setMap: ({ commit }, prodMap) => {
-      window.lgr.debug('Person.index --> actions.setProdMap');
-      commit('prodMap', prodMap);
+    setMap: ({ commit }, payload) => {
+      window.lgr.debug('Person.index --> actions.setMap');
+      commit('setPersonsMap', payload);
     },
     setDirtyData: ({ commit }, dataState) => {
       window.lgr.debug('Person.index --> actions.setDirtyData');
       commit('dirtyData', dataState);
+    },
+    rememberOriginalRecord: ({ commit }, payload) => {
+      window.lgr.debug('Person.index --> actions.rememberOriginalRecord');
+      commit('originalRecord', payload);
+    },
+    update: ({ commit }, payload) => {
+      window.lgr.info('Person.index --> actions.update');
+      commit('update', payload);
     },
   },
 
@@ -119,12 +127,13 @@ export const store = createCrudModule({
     getPersonsMap: vx => vx.personsMap,
     getPaginator: vx => vx.paginator,
     getPerson: vx => id => vx.entities[id],
+    getOriginalRecord: vx => vx.originalRecord,
   },
 
   mutations: {
     /* eslint-disable no-param-reassign */
     persons: (vx, payload) => {
-      LG(`${payload.id} = ${payload.data.codigo}/${payload.data.nombre}`);
+      // window.lgr.debug(`${payload.id} = ${payload.data.codigo}/${payload.data.nombre}`);
       vx.entities[payload.id] = payload.data;
     },
     enums: (vx, enums) => {
@@ -133,41 +142,53 @@ export const store = createCrudModule({
     dirtyData: (vx, dataState) => {
       vx.dirtyData = dataState;
     },
-    prodMap: (vx, personsMap) => {
+    setPersonsMap: (vx, personsMap) => {
       vx.personsMap = personsMap;
     },
     tableColumns: (vx, cols) => {
       window.lgr.debug('Person.index --> mutation.tableColumns');
       vx.columns = cols;
     },
+    originalRecord: (vx, payload) => {
+      window.lgr.warn(`Person.index --> mutations.originalRecord
+        ${JSON.stringify(payload, null, 2)}
+      `);
+      vx.originalRecord = payload;
+    },
+    update: (vx, payload) => {
+      window.lgr.warn(`Person.index --> mutations.update
+        ${JSON.stringify(payload, null, 2)}
+      `);
+      window.lgr.debug(vx);
+    },
     /* eslint-enable no-param-reassign */
   },
 
+  onUpdateStart(state, response) { // eslint-disable-line no-unused-vars
+    window.lgr.debug('Person.index --> onUpdateStart');
+    // LG('Person.index --> onUpdateStart');
+    // LG(state);
+    // LG(response);
+  },
+
   onFetchListSuccess(state, response) { // eslint-disable-line no-unused-vars
-    window.lgr.error(`
+    window.lgr.debug(`
       Parse list success handler >>>>>>>>>>>>>>>>>>>>>>>>>>
       ${JSON.stringify(state.dirtyData, null, 2)}
     `);
     state.dirtyData = -1; // eslint-disable-line no-param-reassign
-    // LG(state);
-    // if (state.dirtyData > 0) {
-    //   window.lgr.info(`Person/index.js -->
-    // Store changed again ${JSON.stringify(state.dirtyData, null, 2)}`);
-    //   // state.dispatch('fetchAll');
-    //   // this.setDirtyData(0);
-    // }
   },
 
   customUrlFn(_id, _pgntr) {
-    LG(`config server --> ${cfg.server}`);
-    LG(`client --> ${JSON.stringify(client, null, 2)}`);
-    // LG(this.resource);
+    // LG(`config server --> ${cfg.server}`);
+    // LG(`client --> ${JSON.stringify(client, null, 2)}`);
+    // // LG(this.resource);
 
-    LG(`using paginator --> ${_pgntr}`);
+    // LG(`using paginator --> ${_pgntr}`);
     const id = _id ? `/${_id}` : '';
     const pgntr = _pgntr ? `s=${_pgntr.s}&c=${_pgntr.c}` : 's=0&c=0';
-    LG(`using customUrlFn( ${id}, ${pgntr} )`);
-    LG(`URI :: ${cfg.server}/api/${RESOURCE}${id}?${pgntr}`);
+    // LG(`using customUrlFn( ${id}, ${pgntr} )`);
+    // LG(`URI :: ${cfg.server}/api/${RESOURCE}${id}?${pgntr}`);
     const URI = `${cfg.server}/api/${RESOURCE}${id}?${pgntr}`;
     return URI;
   },
@@ -201,16 +222,16 @@ export const store = createCrudModule({
       persons response length: ${response.length}
     `);
 
-    let metaData = { name: 'none' };
+    let metaData = { metadata: false };
     let idx = response.length;
-    while (metaData.name === 'none' && idx >= 0) {
+    while (!metaData.metadata && idx >= 0) {
       idx -= 1;
       metaData = response[idx].data;
     }
-
-    // meta = metaData.columns;
-    ({ enums, columns: meta } = metaData);
     window.lgr.debug(`persons meta data: ${JSON.stringify(metaData, null, 2)}`);
+
+    ({ enums, columns: meta } = metaData);
+
     const vars = variablizeTitles(meta.map(column => column.meta));
 
     window.lgr.debug(`persons vars: ${JSON.stringify(vars, null, 2)}`);
@@ -220,25 +241,33 @@ export const store = createCrudModule({
       idx += 1;
 
       ({ data } = item);
-      const prod = {};
+      const prsn = {};
       if (data.idib) {
         // if (idx < 4) {
         //   window.lgr.error(`person nombre: ${data.nombre}`);
-        //   // ${JSON.stringify(newProd[ix], null, 2)} -->> ${col.type}
+        //   // ${JSON.stringify(response[ix], null, 2)} -->> ${col.type}
         // }
+        prsn.version = response[idx]._rev; // eslint-disable-line no-underscore-dangle
+
         meta.forEach((col) => {
           window.lgr.debug(`column idx: ${col.idx} ${col.field}`);
           if (data[col.field]) {
             const attr = format[col.type](data[col.field]);
-            prod[col.idx] = attr;
-            prod[col.field] = attr;
+            prsn[col.idx] = attr;
+            prsn[col.field] = attr;
           }
         });
-        personMap[data.codigo] = prod;
-        Object.keys(prod).forEach((attr) => {
-          prod[attr] = prod[attr].str || prod[attr];
+        personMap[data.codigo] = prsn;
+        Object.keys(prsn).forEach((attr) => {
+          if (prsn[attr].str) {
+            if (typeof prsn[attr].raw === 'boolean') {
+              prsn[attr] = prsn[attr].raw;
+            } else {
+              prsn[attr] = prsn[attr].str;
+            }
+          }
         });
-        personArray.push(prod);
+        personArray.push(prsn);
       }
     });
 

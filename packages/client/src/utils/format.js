@@ -1,4 +1,4 @@
-const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 
 export default {
   text: v => v,
@@ -12,7 +12,12 @@ export default {
       str: `${((v || 0) * 100).toFixed(decimalPlaces || 1)}%`,
     });
   },
-  boolean: v => v === 'si',
+  boolean: (v) => { // eslint-disable-line arrow-body-style
+    return {
+      raw: v !== 'no',
+      str: v,
+    };
+  },
   JSON1: (v, pkg) => pkg.JSON1.fn(pkg.JSON1.vl),
   foreignKey1: (v, pkg) => {
     // LG(v);
