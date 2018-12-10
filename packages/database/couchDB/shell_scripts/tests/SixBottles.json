@@ -3,7 +3,7 @@
     {
       "_id": "aBottle_1_0000000000100001",
       "data": {
-        "idIB": "100001",
+        "idib": "100001",
         "codigo": "IBAA001",
         "type": "bottle",
         "fechaCompra": "2014-09-01",
@@ -15,7 +15,7 @@
     {
       "_id": "aBottle_1_0000000000100002",
       "data": {
-        "idIB": "100002",
+        "idib": "100002",
         "codigo": "IBAA002",
         "type": "bottle",
         "fechaCompra": "2014-09-01",
@@ -27,7 +27,7 @@
     {
       "_id": "aBottle_1_0000000000100003",
       "data": {
-        "idIB": "100003",
+        "idib": "100003",
         "codigo": "IBAA003",
         "type": "bottle",
         "fechaCompra": "2014-09-01",
@@ -39,7 +39,7 @@
     {
       "_id": "aBottle_1_0000000000100004",
       "data": {
-        "idIB": "100004",
+        "idib": "100004",
         "codigo": "IBAA004",
         "type": "bottle",
         "fechaCompra": "2014-09-01",
@@ -51,7 +51,7 @@
     {
       "_id": "aBottle_1_0000000000100005",
       "data": {
-        "idIB": "100005",
+        "idib": "100005",
         "codigo": "IBAA005",
         "type": "bottle",
         "fechaCompra": "2014-09-01",
@@ -63,7 +63,7 @@
     {
       "_id": "aBottle_1_0000000000100006",
       "data": {
-        "idIB": "100006",
+        "idib": "100006",
         "codigo": "IBAA006",
         "type": "bottle",
         "fechaCompra": "2014-09-01",

@@ -4,7 +4,7 @@ SELECT DISTINCT
           "_id", concat("address_1_", lpad(p.partner_id, 16, 0))
         , "data", JSON_OBJECT(
             "type", "address"
-          , "idIB", IFNULL(p.partner_id, 0)
+          , "idib", IFNULL(p.partner_id, 0)
           , "partner_country_acc", TITLECASE(IFNULL(p.partner_country_acc, "FALTA"))
           , "partner_state_acc", TITLECASE(IFNULL(p.partner_state_acc, "FALTA"))
           , "partner_city_acc", TITLECASE(IFNULL(p.partner_city_acc, "FALTA"))

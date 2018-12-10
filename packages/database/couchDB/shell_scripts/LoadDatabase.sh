@@ -19,7 +19,7 @@ fi;
 
 echo -e "MariaDB export files : ${DATAFILES_TEMP_DIR}";
 
-if [[ 1 == 0 ]]; then
+if [[ 1 == 0 ]]; then # Legacy stuff to pull from Google Sheets
   ./CleanSheetsFilenames.sh &>/dev/null;
   pushd ${HOME}/Downloads;
     mkdir -p backup;
@@ -34,7 +34,7 @@ if [[ 1 == 0 ]]; then
   fi;
 fi;
 
-if [[ 1 == 1 ]]; then
+if [[ 1 == 1 ]]; then # Database data
   ./DropCreateDatabase.sh;
   ./PutSecurity.sh;
   ./PutUsers.sh;
@@ -65,9 +65,9 @@ if [[ 1 == 1 ]]; then
   export COUCH_COLLECTION_NAME='movementsOut';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 
-  export COUCH_GROUP_NAME='invoices';
-  export COUCH_COLLECTION_NAME='invoice';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  # export COUCH_GROUP_NAME='invoices';
+  # export COUCH_COLLECTION_NAME='invoice';
+  # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 
   export COUCH_GROUP_NAME='products';
   export COUCH_COLLECTION_NAME='product';
@@ -76,8 +76,9 @@ if [[ 1 == 1 ]]; then
 
 fi;
 
-if [[ 1 == 1 ]]; then
+if [[ 1 == 0 ]]; then # Old filters
 
+  # Filters
   export COUCH_GROUP_NAME='movements';
   export SPEC_NAME='post_processing';
   ./PutDesignDocument.sh;
@@ -90,12 +91,30 @@ if [[ 1 == 1 ]]; then
   export SPEC_NAME='user_specific';
   ./PutDesignDocument.sh;
 
+  # Views
   export SPEC_NAME='visible';
   ./PutViewsDocument.sh;
 
 fi;
 
-if [[ 1 == 0 ]]; then
+if [[ 1 == 1 ]]; then # New filters
+
+  export COUCH_GROUP_NAME='supervisor';
+  export SPEC_NAME='post_processing';
+  ./PutDesignDocument.sh;
+
+  # export SPEC_NAME='ddocs';
+  # ./PutDesignDocument.sh;
+
+  export SPEC_NAME='core_data';
+  ./PutDesignDocument.sh;
+
+  export SPEC_NAME='visible';
+  ./PutViewsDocument.sh;
+
+fi;
+
+if [[ 1 == 0 ]]; then # Test data
 
   # ./TestGet.sh;
   ./tests/ResetExchangeRequestData.sh;

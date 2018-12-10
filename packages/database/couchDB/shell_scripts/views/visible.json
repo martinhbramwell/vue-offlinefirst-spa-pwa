@@ -24,7 +24,7 @@
       "map": "function(doc) { if (doc.data && doc.data.type === 'product')  emit(doc.data.type, 1) }", "reduce": "_count"
     },
     "compact_product": {
-      "map": "function (doc) { if (doc.data && doc.data.type === 'product') { emit(doc.data.nombre, { \"idIB\": doc.data.idIB, \"nombre\": doc.data.nombre, \"descripcion\": doc.data.descripcion, \"precioActual\": doc.data.precioActual }); } }"
+      "map": "function (doc) { if (doc.data && doc.data.type === 'product') { emit(doc.data.nombre, { \"idib\": doc.data.idib, \"nombre\": doc.data.nombre, \"descripcion\": doc.data.descripcion, \"precioActual\": doc.data.precioActual }); } }"
     },
 
 
@@ -33,7 +33,7 @@
       "map": "function(doc) { if (doc.data && doc.data.type === 'invoice' && doc.data.fecha > '2018-09-09 23:59:59')  emit(doc.data.type, 1) }", "reduce": "_count"
     },
     "compact_invoice": {
-      "map": "function (doc) { if (doc.data && doc.data.type === 'invoice' && doc.data.fecha > '2018-09-09 23:59:59') { emit(doc.data.codigo, {  \"idIB\": doc.data.idIB, \"codigo\": doc.data.codigo, \"fecha\": doc.data.fecha, \"idCliente\": doc.data.idCliente, \"nombreCliente\": doc.data.nombreCliente, \"estado\": doc.data.estado, \"total\": doc.data.total, \"count\": doc.data.count  }); } }"
+      "map": "function (doc) { if (doc.data && doc.data.type === 'invoice' && doc.data.fecha > '2018-09-09 23:59:59') { emit(doc.data.codigo, {  \"idib\": doc.data.idib, \"codigo\": doc.data.codigo, \"fecha\": doc.data.fecha, \"idCliente\": doc.data.idCliente, \"nombreCliente\": doc.data.nombreCliente, \"estado\": doc.data.estado, \"total\": doc.data.total, \"count\": doc.data.count  }); } }"
     },
 
 

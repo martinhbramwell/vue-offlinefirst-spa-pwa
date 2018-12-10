@@ -144,7 +144,7 @@ ORDER BY p.partner_id
 {
   "_id": "aPerson_1_0000000000012345",
   "data": {
-    "idIB": "12345",
+    "idib": "12345",
     "type": "person",
     "codigo": "100",
     "ruc_cedula": "1713931416001",

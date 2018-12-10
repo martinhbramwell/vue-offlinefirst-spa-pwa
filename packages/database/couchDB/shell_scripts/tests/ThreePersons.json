@@ -1,0 +1,88 @@
+{
+  "docs": [
+    {
+      "_id": "aPerson_1_0000000000000018",
+      "data": {
+        "codigo": 18,
+        "type": "person",
+        "idib": 18,
+        "ruc_cedula": "1792501652001",
+        "tipo_de_documento": "_04",
+        "nombre": "Cervecería SABAIBEER S.A.",
+        "es_empresa": "si",
+        "es_client": "si",
+        "es_proveedor": "no",
+        "direccion": "Av. Oswaldo Guayasamin E4-145 y Sienna, CUMBAYA, CUMBAYA, QUITO, ",
+        "telefono_1": "2894 016",
+        "telefono_2": "90",
+        "mobile": "099-835-1092",
+        "role": "Cliente",
+        "distribuidor": "no",
+        "retencion": "no",
+        "email": "sabai@sabaibeer.com",
+        "address_details": 18,
+        "bottle_movements": 18,
+        "admin_details": 18,
+        "bottles": [],
+        "id": 18
+      }
+    },
+    {
+      "_id": "aPerson_1_0000000000000036",
+      "data": {
+        "codigo": 36,
+        "type": "person",
+        "idib": 36,
+        "ruc_cedula": "1704764008001",
+        "tipo_de_documento": "_04",
+        "nombre": "Rafael Wild",
+        "es_empresa": "no",
+        "es_client": "no",
+        "es_proveedor": "no",
+        "direccion": "San José de Rumihuaico, Tumbaco, TUMBACO, QUITO, QUITO, ",
+        "telefono_1": "237-3797",
+        "telefono_2": "FALTA",
+        "mobile": "098-432-3489",
+        "role": "Cliente",
+        "distribuidor": "no",
+        "retencion": "no",
+        "email": "lacasaderafa@gmail.com",
+        "address_details": 36,
+        "bottle_movements": 36,
+        "admin_details": 36,
+        "bottles": [
+          87
+        ]
+      }
+    },
+    {
+      "_id": "aPerson_1_0000000000000113",
+      "data": {
+        "codigo": 113,
+        "type": "person",
+        "idib": 113,
+        "ruc_cedula": "1700522509",
+        "tipo_de_documento": "_05",
+        "nombre": "Carlos Cobos",
+        "es_empresa": "no",
+        "es_client": "no",
+        "es_proveedor": "no",
+        "direccion": "Julia Arreyano 254 Monteserrin, CHAUPICRUZ, QUITO, QUITO, ",
+        "telefono_1": "246-1456",
+        "telefono_2": "FALTA",
+        "mobile": "099-629-0336",
+        "role": "Cliente",
+        "distribuidor": "no",
+        "retencion": "no",
+        "email": "carlose@gralcobos.com",
+        "address_details": 113,
+        "bottle_movements": 113,
+        "admin_details": 113,
+        "bottles": [
+          124,
+          124
+        ]
+      }
+    }
+  ]
+}

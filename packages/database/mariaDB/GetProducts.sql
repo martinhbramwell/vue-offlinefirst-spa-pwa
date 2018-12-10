@@ -52,7 +52,7 @@ ORDER BY d.product_id
 
     --        BAPU : AutoInvoice
     --        ~~~~~~~~~~~~~~~~~~~~~~~
-    --         idIB: codigo
+    --         idib: codigo
     --       nombre: nombre
     --  descripcion:
     --    categoria:

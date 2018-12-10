@@ -1,0 +1,7 @@
+{
+  "_id": "_design/post_processing",
+  "filters": {
+       "by_person_update": "function(doc, req) { return doc._id === '_design/post_processing' || doc.data && doc.data.type && doc.data.type ==    'PersonUpdate' }",
+    "by_exchange_request": "function(doc, req) { return doc._id === '_design/post_processing' || doc.data && doc.data.type && doc.data.type == 'ExchangeRequest' }"
+  }
+}

@@ -7,7 +7,7 @@ SELECT
     JSON_OBJECT(
         "_id", concat("Invoice_1_", lpad(i.invoice_id, 16, 0))
       , "data", JSON_OBJECT(
-          "idIB", i.invoice_id
+          "idib", i.invoice_id
         , "type", "invoice"
         , "codigo", i.invoice_number
         , "fecha",  i.invoice_creation_date
