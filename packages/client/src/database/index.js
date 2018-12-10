@@ -3,11 +3,12 @@ import axios from 'axios'; // eslint-disable-line no-unused-vars
 
 // import { dbServerProtocol, dbServerURI, databaseName } from '@/config';
 import config from '@/config';
+import utils from './utils'; // eslint-disable-line no-unused-vars
 
 const { dbServerProtocol, dbServerURI, databaseName } = config;
 
-const LG = console.log; // eslint-disable-line no-console, no-unused-vars
-const LGERR = console.error; // eslint-disable-line no-console, no-unused-vars
+const LG = console.log; // eslint-disable-line no-unused-vars, no-console
+const LGERR = console.error; // eslint-disable-line no-unused-vars, no-console
 
 LG(`PouchDb configuration...
   ${JSON.stringify(config, null, 2)}
@@ -19,6 +20,7 @@ if (!databaseName) throw new Error('VuePouchDB Error → a main database name is
 
 
 const getCtgryLoadLevels = (vx) => {
+  window.lgr.debug('Getting category load levels');
   const { categoryCounts } = vx.state;
   const categories = Object.keys(categoryCounts);
 
@@ -70,7 +72,8 @@ const getCtgryLoadLevels = (vx) => {
 };
 
 const getCtgryTotals = (vx) => {
-  window.lgr.debug(`Getting category counts ${JSON.stringify(vx.rootState.Auth, null, 2)}`);
+  window.lgr.debug('Getting category counts.');
+  window.lgr.debug(`Authentication status ${JSON.stringify(vx.rootState.Auth, null, 2)}`);
   if (vx.rootGetters.isAuthenticated < 1) return;
 
   const { user, srvr, categoryCounts } = vx.state;
@@ -98,12 +101,24 @@ const getCtgryTotals = (vx) => {
 
   const promises = [];
   categories.forEach((category) => {
+    window.lgr.debug(`
+      Getting category count ${baseURL}${url}/count_${category}
+      `);
     promises.push(
       axios.get(`${baseURL}${url}/count_${category}`, {
         auth: { username: user.name, password: user.password },
         method: 'get',
       }).then((response) => {
+        window.lgr.debug(`
+          Response for category count ${baseURL}${url}/count_${category} ::
+            ${JSON.stringify(response, null, 2)}
+          `);
         if (response.status === 200) {
+          if (!response.data) {
+            window.lgr.error(`
+              Should have data element ${JSON.stringify(response, null, 2)}
+              `);
+          }
           const count = response.data.rows[0].value;
           window.lgr.debug(`Got '${category}' category count ${JSON.stringify(count, null, 2)}`);
           return { key: category, value: count };
@@ -111,7 +126,7 @@ const getCtgryTotals = (vx) => {
         window.lgr.error(`* ERROR COUNTING PRODUCTS * ${JSON.stringify(response, null, 2)}}`);
         return null;
       }).catch((err) => {
-        window.lgr.error(`Axios connexion error :: ${JSON.stringify(err.response.data, null, 2)}}`);
+        window.lgr.error(`Axios connexion error :: ${JSON.stringify(err, null, 2)}}`);
       }),
     );
   });
@@ -119,8 +134,8 @@ const getCtgryTotals = (vx) => {
   Promise.all(promises).then((results) => {
     window.lgr.debug(`CATEGORIES: ${JSON.stringify(results, null, 2)}}`);
     const counts = {};
-    results.forEach((result) => {
-      counts[result.key] = { total: result.value, loaded: 0 };
+    results.filter(r => r).forEach((r) => {
+      counts[r.key] = { total: r.value, loaded: 0 };
     });
 
     window.lgr.debug(`Items per category : ${JSON.stringify(counts, null, 2)}}`);
@@ -170,7 +185,7 @@ const mutations = {
     vx.dbMgr = pyld; // eslint-disable-line no-param-reassign
   },
   setCategoriesLoading(vx, pyld) {
-    window.lgr.debug(`Database (mutation) :: setting categoriesLoading "${JSON.stringify(pyld, null, 2)}"`);
+    window.lgr.warn(`Database (mutation) :: setting categoriesLoading "${JSON.stringify(pyld, null, 2)}"`);
     vx.categoriesLoading = pyld; // eslint-disable-line no-param-reassign
   },
   setCategoryCounts(vx, pyld) {
@@ -202,7 +217,7 @@ const actions = {
     window.lgr.debug(vx);
 
     const { user, srvr, dbMgr } = vx.state;
-    dbMgr.setMaxListeners(20);
+    dbMgr.setMaxListeners(Infinity);
 
     const dbName = srvr.databaseName;
     const dbMasterURI = `${srvr.dbServerProtocol}://${user.name}:${user.password}@${srvr.dbServerURI}/${srvr.databaseName}`;
@@ -276,64 +291,18 @@ const actions = {
         .on('error', err => window.lgr.error(`${dbName}/${ddoc.name} INCOMING REPLICATION FAILURE ************ ${err}`));
     });
 
-    // const filter = 'post_processing/by_new_inventory';
-    const filterText = 'ExchangeRequest';
-    const filter = doc => doc._id.substring(0, 15) === filterText; // eslint-disable-line max-len, no-underscore-dangle
-    const options = {
-      live: true,
-      retry: true,
-      filter,
-      // query_params: { agent: user.name },
-    };
-    dbMgr.replicate.to(dbMaster, options)
-      .on('change', (info) => {
-        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION DELTA ********* `);
-        const shortList = info.change.docs.filter(doc => (!doc.data) || (doc.data.type !== 'person' && doc.data.type !== 'bottle'));
-        shortList.forEach((doc) => {
-          window.lgr.debug(`DOC :: ${JSON.stringify(doc, null, 2)}`);
-        });
-      })
-      .on('paused', () => {
-        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION ON HOLD ********* ${user.name}`);
-        dbMgr.allDocs({
-          include_docs: true,
-          attachments: true,
-        }).then((result) => {
-          window.lgr.debug(`allDocs fetch result ${JSON.stringify(result, null, 2)}`);
-        }).catch((err) => {
-          window.lgr.error(`allDocs fetch failure ${err}`);
-        });
-      })
-      .on('active', () => {
-        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION RESUMED *********`);
-      })
-      .on('denied', (info) => {
-        window.lgr.info(`${dbName}/${filterText} **********  OUTGOING REPLICATION DENIED ********* ${info}`);
-      })
-      .on('error', err => window.lgr.error(`${dbName}/${filterText} OUTGOING REPLICATION FAILURE ************ ${err}`));
+    const filterNames = ['ExchangeRequest', 'PersonUpdate'];
+    filterNames.forEach((filterName) => {
+      LG(` filterName ${filterName}`);
+      const replicatorOptions = {
+        filterText: filterName,
+        dbMaster,
+        dbName,
+        user,
+      };
 
-    // const filter = 'user_specific/by_vendor_agent';
-    // dbMgr.sync(dbMaster, {
-    //   live: true,
-    //   retry: true,
-    //   filter,
-    // })
-    //   .on('change', (repl) => {
-    //     LG(`${dbName}/${filter} **********  SYNCING DELTA ********* `);
-    //     LG(`Database replication: ${repl.direction} ${repl.change.docs.length} records.`);
-    //     LG(repl.change.docs[0].data);
-    //     LG(repl);
-    //     LG(this);
-    //   })
-    //   .on('active', () => {
-    //     LG(`${dbName}/${filter} **********  SYNCING RESUMED ********* `);
-    //   })
-    //   .on('paused', () => {
-    //     LG(`${dbName}/${filter}  ************  SYNCING ON HOLD *********** `);
-    //   })
-    //   .on('error', err => LG(`Database error ${err}`));
-
-    // const view = 'persons/minimal_person';
+      utils.replicateOut(dbMgr, replicatorOptions);
+    });
   },
   collectCategoryCounts(vx) {
     getCtgryTotals(vx);
@@ -380,9 +349,9 @@ function ID() {
   return unique();
 }
 
-export const generateMovementId = (user, spacer = '_') => `${ID()}${spacer}${user.toString().padStart(5, '0')}`;
+export const generateRequestId = (user, spacer = '_') => `${ID()}${spacer}${user.toString().padStart(5, '0')}`;
 
-// export const generateMovementId = (user, rand) => {
+// export const generateRequestId = (user, rand) => {
 //   const tddt = tightDate(rand).toString();
 //   LG(`ID request :: ${parseInt(`${user}${tddt}`, 10)}`);
 //   LG(`Max safe integer :: ${Number.MAX_SAFE_INTEGER}`);

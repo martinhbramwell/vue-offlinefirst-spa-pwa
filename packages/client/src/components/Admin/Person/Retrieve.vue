@@ -1,88 +1,64 @@
 <template>
-<!--
-  <main id="person">
-    <p class="back">
-      <router-link :to="{ name: 'persons' }">Back to Persons</router-link>
-    </p>
-    <person-record v-if="currentPerson" :person="currentPerson" />
-  </main>
--->
-
   <div>
     <nav class="level">
       <div class="level-item has-text-centered">
         <div>
-          <p class="heading">{{ pers.tipo_de_documento }}</p>
-          <p class="is-size-5">{{ pers.ruc_cedula }}</p>
+          <p class="heading">{{ this.enums.DocTypeLookup[p(id).tipo_de_documento] }}</p>
+          <p class="is-size-5">{{ p(id).ruc_cedula }}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Nombre</p>
-          <p class="is-size-5">{{ pers.nombre }}</p>
+          <p class="is-size-5">{{ p(id).nombre }}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
         <div>
           <p class="heading">Telefono</p>
-          <p class="is-size-5">{{ pers.telefono }}</p>
+          <p class="is-size-5">{{ p(id).telefono_1 }}</p>
         </div>
       </div>
     </nav>
     <nav class="level">
-      <div class="level-right">
-        <div class="level-item has-text-centered">
-          <div>
-          <p class="heading">Direccion</p>
-          <p class="is-size-5">{{ pers.direccion }}</p>
-          </div>
+      <div class="level-item has-text-centered">
+        <div>
+        <p class="heading">Direccion</p>
+        <p class="is-size-5">{{ p(id).direccion }}</p>
         </div>
       </div>
-      <div class="level-right">
-        <div class="level-item has-text-centered">
-          <div>
-          <p class="heading">Mail</p>
-          <p class="is-size-5">{{ pers.email }}</p>
-          </div>
+      <div class="level-item has-text-centered">
+        <div>
+        <p class="heading">Mail</p>
+        <p class="is-size-5">{{ p(id).email }}</p>
         </div>
       </div>
-      <div class="level-left">
-        <div class="level-item has-text-centered">
-          <div v-bind:class="[pers.distribuidor === 'si' ? '' : 'strike-out']">
-            Distribuidor
-          </div>
-        </div>
-        <div class="level-item has-text-centered">
-          <div v-bind:class="[pers.retencion === 'si' ? '' : 'strike-out']">
-            Retencion
-          </div>
+      <div class="level-item has-text-centered">
+        <div>
+        <p class="heading">Rol</p>
+        <p class="is-size-5">{{ p(id).role }}</p>
         </div>
       </div>
     </nav>
+    {{ p(id).version }}
   </div>
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
+
+  const LG = console.log; // eslint-disable-line no-unused-vars, no-console,
 
   export default {
+    props: ['id'],
 
-    props: {
-      pers: {
-        type: Object,
-        required: true,
-        default: () => ({
-          codigo: 9999,
-          ruc_cedula: '34-4545',
-          nombre: 'asdf asdf asdf asdf',
-          telefono: '23452345',
-          direccion: 'asdfasdf',
-          distribuidor: 'si',
-          retencion: 'no',
-          tipo_de_documento: 'RUC',
-        }),
-      },
+    computed: {
+      ...mapGetters('person', {
+        enums: 'getEnums',
+        p: 'getPerson',
+        pmap: 'getPersonsMap',
+      }),
     },
-
   };
 </script>
 

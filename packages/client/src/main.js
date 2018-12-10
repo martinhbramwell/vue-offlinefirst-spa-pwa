@@ -131,6 +131,7 @@ const mainVue = new Vue({
     // this.$store.dispatch('person/fetchAll');
     // this.$store.dispatch('product/fetchAll');
 
+    LG('<<<<<<<<<< Checking if all data loaded >>>>>>>>>>>');
     this.$store.dispatch('dbmgr/collectCategoryCounts');
   },
   created() {

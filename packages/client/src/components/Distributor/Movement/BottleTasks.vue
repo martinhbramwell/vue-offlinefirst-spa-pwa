@@ -349,8 +349,8 @@ import { mapGetters, mapActions, mapState } from 'vuex'; // eslint-disable-line 
 import qrDecode from '@/utils/qrcodes/Decoder';
 import AutoComplete from '@/components/MultiUse/AutoComplete';
 import BaseInputText from '@/components/MultiUse/BaseInputText';
-import { generateMovementId } from '@/database';
-import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
+import { generateRequestId } from '@/database';
+import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb'; // eslint-disable-line no-unused-vars
 
 // import TheValidateDemo from '@/utils/qrcodes/TheValidateDemo';
 
@@ -640,7 +640,7 @@ const vm = {
     saveMovements() {
       LG('%%%%%%%%%%%%%%%% save movements %%%%%%%%%%%%%%%%%% ');
 
-      const customer = parseInt(this.personChosen.idIB, 10);
+      const customer = parseInt(this.personChosen.idib, 10);
       const inventory = parseInt(this.currentUser.id, 10);
       const type = 'ExchangeRequest';
 
@@ -657,7 +657,7 @@ const vm = {
       // LG(`bottles going out ${JSON.stringify(outgoingIds, null, 2)}`);
       if (incomingIds.length > 0) {
         const pouchId = this.$pouch.rel.makeDocID({
-          type, id: generateMovementId(customer, 'I'),
+          type, id: generateRequestId(customer, 'I'),
         });
         const pchid = this.$pouch.rel.parseDocID(pouchId);
 
@@ -688,7 +688,7 @@ const vm = {
 
       if (outgoingIds.length > 0) {
         const pouchId = this.$pouch.rel.makeDocID({
-          type, id: generateMovementId(customer, 'O'),
+          type, id: generateRequestId(customer, 'O'),
         });
         const pchid = this.$pouch.rel.parseDocID(pouchId);
         const moveOut = {
@@ -840,7 +840,7 @@ const vm = {
         this.personChosen = them.data;
         // this.$refs.prsnPckr.$el.value = this.personChosen.nombre;
         this.$refs.prsnPckr.setValue(this.personChosen.nombre);
-        const personChosenId = parseInt(this.personChosen.idIB, 10);
+        const personChosenId = parseInt(this.personChosen.idib, 10);
         const PersonId = this.$pouch.rel.makeDocID({ type: 'aPerson', id: personChosenId });
         LG(PersonId);
         this.$pouch.liveFind({
@@ -898,7 +898,7 @@ const vm = {
           break;
         case 'UPDATE':
           idToUpdate = this.$pouch.rel.parseDocID(pouchData.id).id.toString();
-          idx = this.items.findIndex(item => item.data.idIB == idToUpdate); // eslint-disable-line eqeqeq, max-len
+          idx = this.items.findIndex(item => item.data.idib == idToUpdate); // eslint-disable-line eqeqeq, max-len
           LG('###############   LiveFind update   ##############');
           // LG(idx);
           // LG(this.items[idx].data.nombre);
@@ -975,11 +975,11 @@ const vm = {
   mounted() {
     LG('!!!!!!!!!!!!!!!! mounted !!!!!!!!!!!!!!!!!!');
 
-    spinner.start(this.$loading);
-    this.$store.watch(
-      state => state.dbmgr.categoriesLoading,
-      spinner.kill,
-    );
+    // spinner.start(this.$loading);
+    // this.$store.watch(
+    //   state => state.dbmgr.categoriesLoading,
+    //   spinner.kill,
+    // );
 
     this.currentUser.id = parseInt(this.$store.state.dbmgr.user.name, 10);
     LG(this.currentUser);
@@ -1129,7 +1129,7 @@ const vm = {
 export default vm;
 </script>
 
-<style>
+<style scoped>
   input[type=text] {
     border: 1px solid;
     border-radius: 4px;

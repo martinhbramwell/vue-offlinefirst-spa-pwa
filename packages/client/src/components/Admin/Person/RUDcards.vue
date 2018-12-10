@@ -11,7 +11,7 @@
               <b-icon icon="eye"></b-icon>
             </p>
           </template>
-          <person-record :pers="p(id)"/>
+          <person-record :id="id"/>
         </b-tab-item>
 
         <b-tab-item :visible="canAlter()">
@@ -20,7 +20,7 @@
               <b-icon icon="edit"></b-icon>
             </p>
           </template>
-          <person-update :pers="p(id)"/>
+          <person-update :id="id" v-on:closePersonUpdate="activeSubTab = 0"/>
         </b-tab-item>
 
         <b-tab-item :visible="canAssign()">

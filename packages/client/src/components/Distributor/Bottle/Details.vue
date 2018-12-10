@@ -98,6 +98,6 @@
   };
 </script>
 
-<style>
- .resizedTextbox { width: 75px; height: 20px; padding: 1px }
+<style scoped>
+ .resizedTextbox { width: 77px; height: 20px; padding: 1px }
 </style>

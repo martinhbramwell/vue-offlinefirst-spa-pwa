@@ -56,39 +56,31 @@ export const LoaderProgress = {
 };
 
 export const REST = {
+  interceptors: {
+    request: {
+      interceptors: [],
+      use: (interceptor) => {
+        window.lgr.debug(`
+        ??????????????????????????????
+          interceptor: ${JSON.stringify(interceptor, null, 2)}
+        ??????????????????????????????`);
+        this.interceptors.push(interceptor);
+      },
+    },
+  },
   get: (endPoint, parameters) => new Promise((resolve) => {
-    LG(`
+    window.lgr.debug(`
       endPoint: ${JSON.stringify(endPoint, null, 2)}
       parameters: ${JSON.stringify(parameters, null, 2)}
     `);
     const db = vuex.getters['dbmgr/getDbMgr'];
 
-    // db.allDocs({
-    //   include_docs: true,
-    // }).then((result) => {
-    //   LG(`
-    //     Pouch liveFind Result: ${JSON.stringify(result, null, 2)}
-    //   `);
-    // }).catch((err) => {
-    //   LG(`
-    //     Pouch AllDocs Error: ${JSON.stringify(err, null, 2)}
-    //   `);
-    // });
-
-    // db.getIndexes(
     db.liveFind({
       aggregate: true,
-      selector: {
-        $and: [
-          { _id: { $gte: 'Product_1_0000000000000000' } },
-          // eslint-disable-line no-underscore-dangle
-          { _id: { $lt: 'Product_3_0000000000000000' } },
-          // eslint-disable-line no-underscore-dangle
-        ],
-      },
+      selector: parameters.selector,
     })
       .on('update', (update, rows) => {
-        debouncedRefresh('Products', update, rows, resolve);
+        debouncedRefresh(parameters.category, update, rows, resolve);
       // // update.action is 'ADD', 'UPDATE', or 'REMOVE'
       // // update also contains id, rev, and doc
       // // aggregate is an array of docs containing the latest state of the query
