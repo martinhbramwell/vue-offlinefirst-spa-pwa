@@ -349,8 +349,8 @@ import { mapGetters, mapActions, mapState } from 'vuex'; // eslint-disable-line 
 import qrDecode from '@/utils/qrcodes/Decoder';
 import AutoComplete from '@/components/MultiUse/AutoComplete';
 import BaseInputText from '@/components/MultiUse/BaseInputText';
-import { generateMovementId } from '@/database';
-import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
+import { generateRequestId } from '@/database';
+import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb'; // eslint-disable-line no-unused-vars
 
 // import TheValidateDemo from '@/utils/qrcodes/TheValidateDemo';
 
@@ -657,7 +657,7 @@ const vm = {
       // LG(`bottles going out ${JSON.stringify(outgoingIds, null, 2)}`);
       if (incomingIds.length > 0) {
         const pouchId = this.$pouch.rel.makeDocID({
-          type, id: generateMovementId(customer, 'I'),
+          type, id: generateRequestId(customer, 'I'),
         });
         const pchid = this.$pouch.rel.parseDocID(pouchId);
 
@@ -688,7 +688,7 @@ const vm = {
 
       if (outgoingIds.length > 0) {
         const pouchId = this.$pouch.rel.makeDocID({
-          type, id: generateMovementId(customer, 'O'),
+          type, id: generateRequestId(customer, 'O'),
         });
         const pchid = this.$pouch.rel.parseDocID(pouchId);
         const moveOut = {
@@ -975,11 +975,11 @@ const vm = {
   mounted() {
     LG('!!!!!!!!!!!!!!!! mounted !!!!!!!!!!!!!!!!!!');
 
-    spinner.start(this.$loading);
-    this.$store.watch(
-      state => state.dbmgr.categoriesLoading,
-      spinner.kill,
-    );
+    // spinner.start(this.$loading);
+    // this.$store.watch(
+    //   state => state.dbmgr.categoriesLoading,
+    //   spinner.kill,
+    // );
 
     this.currentUser.id = parseInt(this.$store.state.dbmgr.user.name, 10);
     LG(this.currentUser);

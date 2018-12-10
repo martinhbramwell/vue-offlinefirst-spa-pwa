@@ -38,6 +38,8 @@
   import { shutBurgerMenu } from '@/utils/responsive';
   import Authentication from '@/accessControl/Authentication';
 
+  import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb'; // eslint-disable-line no-unused-vars
+
   import Shop from '../Shop/Menu';
   import Admin from '../Admin/Menu';
   import Tests from '../Tests/Menu';
@@ -59,6 +61,15 @@
         activeTab: 0,
         logo: `${process.env.BASE_URL}img/WaterDrop_50.png`,
       };
+    },
+    mounted() {
+      LG('!!!!!!!!!!!!!!!! mounted !!!!!!!!!!!!!!!!!!');
+
+      spinner.start(this.$loading);
+      this.$store.watch(
+        state => state.dbmgr.categoriesLoading,
+        spinner.kill,
+      );
     },
     methods: {
       showTab() {

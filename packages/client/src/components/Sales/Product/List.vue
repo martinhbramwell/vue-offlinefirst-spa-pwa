@@ -69,19 +69,19 @@
   import { mapState, mapActions, mapGetters } from 'vuex';
 
   import ProductDetail from './Retrieve';
-  // import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
+  import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb'; // eslint-disable-line no-unused-vars
 
   export default {
     name: 'ProductList',
-    // mounted() {
-    //   window.lgr.warn('!!!!!!!!!!!!!!!! mounted product list !!!!!!!!!!!!!!!!!!');
+    mounted() {
+      window.lgr.warn('!!!!!!!!!!!!!!!! mounted product list !!!!!!!!!!!!!!!!!!');
 
-    //   spinner.start(this.$loading);
-    //   this.$store.watch(
-    //     state => state.dbmgr.categoriesLoading,
-    //     spinner.kill,
-    //   );
-    // },
+      // spinner.start(this.$loading);
+      // this.$store.watch(
+      //   state => state.dbmgr.categoriesLoading,
+      //   spinner.kill,
+      // );
+    },
     beforeMount() {
       window.lgr.warn('\n * * Ready to fetch products * * \n');
       if (this.isLoadingList || this.products.length > 0) return;

@@ -189,6 +189,8 @@
 
   import { mapGetters, mapActions, mapState } from 'vuex'; // eslint-disable-line no-unused-vars
   import Conflict from './Conflict';
+  import { generateRequestId } from '@/database';
+
 
   const LG = console.log; // eslint-disable-line no-console, no-unused-vars
 
@@ -290,8 +292,8 @@
             if (!liveRecord[k]) return false;
             return liveRecord[k] !== originalRecord[k];
           });
-        // LG('affectedKeys');
-        // LG(affectedKeys);
+        LG('affectedKeys');
+        LG(affectedKeys);
         const discrepancies = affectedKeys.map(k => ({
           key: k,
           name: titles[k],
@@ -301,25 +303,8 @@
             r: liveRecord[k],
           },
         }));
-        // const discrepancies = [{
-        //   attr: titles.idib,
-        //   v: {
-        // //    o: 21,
-        //     r: 21,
-        //     l: 99,
-        //   },
-        // },
-        // {
-        //   attr: titles.mobile,
-        //   v: {
-        // //    o: 12341234,
-        //     r: 1234123,
-        //     l: 565656,
-        //   },
-        // }];
 
-
-        // LG(discrepancies);
+        LG(discrepancies);
         if (discrepancies.length > 0) {
           this.formProps = {
             pyld: discrepancies,
@@ -330,18 +315,34 @@
           // LG('-------   Updating  ------');
           // LG(this.$pouch);
           // LG(currentRecord);
+          const type = 'PersonUpdate';
           const changedData = {
             version: currentRecord.version,
-            type: 'person',
+            type,
+            status: 'new',
+            id: this.id,
+            _id: this.$pouch.rel.makeDocID({ type: 'aPerson', id: this.id }),
           };
-          Object.keys(titles).forEach((title) => {
-            if (currentRecord[title] && currentRecord[title] !== originalRecord[title]) {
-              LG(`Field : ${title} :: ${currentRecord[title]} | ${originalRecord[title]} `);
-              changedData[title] = currentRecord[title];
+          let tmp = {};
+          Object.keys(titles).forEach((k) => {
+            tmp = currentRecord[k] ? currentRecord[k] : originalRecord[k];
+            if (k === 'distribuidor') {
+              tmp = (tmp || 'no');
+              tmp = tmp === 'no' ? 'no' : 'si';
+            }
+            if (tmp) {
+              changedData[k] = tmp;
+              const flag = changedData[k] === originalRecord[k] ? '  ' : '##';
+              const vals = `${changedData[k]} | ${currentRecord[k]} | ${originalRecord[k]}`;
+              LG(`Field : ${flag} ${k} :: ${vals} `);
             }
           });
 
-          const pId = this.$pouch.rel.makeDocID({ type: 'aPersonUpdate', id: this.id });
+          window.lgr.warn(`
+            new ID : ${type}_${generateRequestId(this.id)}
+            `);
+
+          const pId = `${type}_${generateRequestId(this.id)}`;
           const personUpdate = {
             _id: pId,
             data: changedData,

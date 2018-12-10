@@ -68,20 +68,20 @@
 
   import PersonDetail from './RUDcards';
   // import PersonDetail from './Retrieve';
-  import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb';
+  import { LoaderProgress as spinner } from '@/database/vuejs-pouchdb'; // eslint-disable-line no-unused-vars
 
-  // const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+  // const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 
   export default {
     name: 'PersonList',
     mounted() {
       window.lgr.debug('!!!!!!!!!!!!!!!! mounted person list !!!!!!!!!!!!!!!!!!');
 
-      spinner.start(this.$loading);
-      this.$store.watch(
-        state => state.dbmgr.categoriesLoading,
-        spinner.kill,
-      );
+      // spinner.start(this.$loading);
+      // this.$store.watch(
+      //   state => state.dbmgr.categoriesLoading,
+      //   spinner.kill,
+      // );
     },
     beforeMount() {
       window.lgr.debug('\n * * Ready to fetch persons * * \n');
