@@ -291,7 +291,8 @@ const actions = {
         .on('error', err => window.lgr.error(`${dbName}/${ddoc.name} INCOMING REPLICATION FAILURE ************ ${err}`));
     });
 
-    const filterNames = ['ExchangeRequest', 'PersonUpdate'];
+    // const filterNames = ['ExchangeRequest', 'PersonUpdate'];
+    const filterNames = ['Request'];
     filterNames.forEach((filterName) => {
       LG(` filterName ${filterName}`);
       const replicatorOptions = {

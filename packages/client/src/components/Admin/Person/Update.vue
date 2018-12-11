@@ -290,7 +290,7 @@
           .filter((k) => {
             if (k === 'version') return false;
             if (!liveRecord[k]) return false;
-            return liveRecord[k] !== originalRecord[k];
+            return liveRecord[k] !== currentRecord[k] && liveRecord[k] !== originalRecord[k];
           });
         LG('affectedKeys');
         LG(affectedKeys);
@@ -315,34 +315,43 @@
           // LG('-------   Updating  ------');
           // LG(this.$pouch);
           // LG(currentRecord);
-          const type = 'PersonUpdate';
-          const changedData = {
-            version: currentRecord.version,
-            type,
-            status: 'new',
-            id: this.id,
-            _id: this.$pouch.rel.makeDocID({ type: 'aPerson', id: this.id }),
-          };
-          let tmp = {};
-          Object.keys(titles).forEach((k) => {
-            tmp = currentRecord[k] ? currentRecord[k] : originalRecord[k];
-            if (k === 'distribuidor') {
-              tmp = (tmp || 'no');
-              tmp = tmp === 'no' ? 'no' : 'si';
-            }
-            if (tmp) {
-              changedData[k] = tmp;
-              const flag = changedData[k] === originalRecord[k] ? '  ' : '##';
-              const vals = `${changedData[k]} | ${currentRecord[k]} | ${originalRecord[k]}`;
-              LG(`Field : ${flag} ${k} :: ${vals} `);
-            }
-          });
+          const changedData = {};
+          Object.keys(titles)
+            .forEach((k) => {
+              changedData[k] = (typeof currentRecord[k] === 'undefined')
+                ? originalRecord[k]
+                : currentRecord[k];
+            });
 
-          window.lgr.warn(`
-            new ID : ${type}_${generateRequestId(this.id)}
+          changedData.version = currentRecord.version;
+          changedData.type = 'Request';
+          changedData.handler = 'PersonUpdate';
+          changedData.status = 'new';
+          changedData.id = this.id;
+          changedData._id = this.$pouch.rel.makeDocID({ type: 'aPerson', id: this.id }); // eslint-disable-line no-underscore-dangle
+          changedData.distribuidor = changedData.distribuidor ? 'si' : 'no';
+          changedData.role = changedData.distribuidor === 'si' ? 'Distribuidor' : 'Cliente';
+
+          // let tmp = {};
+          // LG(`Field : flag key ::  changedData  |  currentRecord  |  originalRecord `);
+          // Object.keys(titles).forEach((k) => {
+          //   tmp = (typeof currentRecord[k] === 'undefined') ? originalRecord[k] : currentRecord[k];
+          //   if (k === 'distribuidor') {
+          //     LG(`${tmp} VS ${originalRecord[k]}`);
+          //     tmp = tmp ? 'si' : 'no';
+          //   }
+          //   if (tmp) {
+          //     changedData[k] = tmp;
+          //     const flag = changedData[k] === originalRecord[k] ? '  ' : '##';
+          //     const vals = `${changedData[k]} | ${currentRecord[k]} | ${originalRecord[k]}`;
+          //     LG(`Field : ${flag} ${k} :: ${vals} `);
+          //   }
+          // });
+
+          const pId = `${changedData.type}_2_${generateRequestId(this.id)}`;
+
+          window.lgr.warn(`new ID : ${pId}
             `);
-
-          const pId = `${type}_${generateRequestId(this.id)}`;
           const personUpdate = {
             _id: pId,
             data: changedData,

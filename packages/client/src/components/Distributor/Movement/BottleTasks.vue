@@ -642,7 +642,9 @@ const vm = {
 
       const customer = parseInt(this.personChosen.idib, 10);
       const inventory = parseInt(this.currentUser.id, 10);
-      const type = 'ExchangeRequest';
+      // const type = 'ExchangeRequest';
+      const type = 'Request';
+      const handler = 'BottleExchange';
 
       // LG(`MOVEMENT ID ${moveId}`);
 
@@ -666,6 +668,7 @@ const vm = {
           data: {
             id: pchid.id,
             type,
+            handler,
             inOut: 'in',
             status: 'new',
             bottles: incomingIds,
@@ -696,6 +699,7 @@ const vm = {
           data: {
             id: pchid.id,
             type,
+            handler,
             status: 'new',
             inOut: 'out',
             bottles: outgoingIds,
