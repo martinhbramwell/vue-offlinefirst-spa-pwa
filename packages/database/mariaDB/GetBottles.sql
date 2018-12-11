@@ -10,7 +10,7 @@ SELECT DISTINCT
       JSON_OBJECT(
           "_id", concat("aBottle_1_", lpad(v.envases_id, 16, 0))
         , "data", JSON_OBJECT(
-            "idIB", v.envases_id
+            "idib", v.envases_id
           , "codigo", IFNULL(v.cod, "FALTA")
           , "type", "bottle"
           , "fechaCompra", IFNULL(v.date_purchase, NOW())
@@ -52,7 +52,7 @@ GROUP BY v.envases_id
 --       JSON_OBJECT(
 --           "_id", concat("aBottle_1_", lpad(e.envases_id, 16, 0))
 --         , "data", JSON_OBJECT(
---             "idIB", e.envases_id
+--             "idib", e.envases_id
 --           , "codigo", IFNULL(e.cod, "FALTA")
 --           , "type", "bottle"
 --           , "fechaCompra", IFNULL(e.date_purchase, NOW())
@@ -94,7 +94,7 @@ GROUP BY v.envases_id
 {
   "_id": "aBottle_1_0000000000100001",
   "data": {
-    "idIB": "100001",
+    "idib": "100001",
     "codigo": "IBAA001",
     "type": "bottle",
     "fechaCompra": "2014-09-01",

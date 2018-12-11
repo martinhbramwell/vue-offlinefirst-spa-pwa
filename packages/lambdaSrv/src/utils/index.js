@@ -40,6 +40,18 @@ function ID() {
   return unique();
 }
 
+//  This has not been tested or even used yet
+export const waitFor = (conditionFunction) => {
+  const poll = (resolve) => {
+    if (conditionFunction()) {
+      resolve();
+    } else {
+      setTimeout(() => poll(resolve), 400);
+    }
+  };
+  return new Promise(poll);
+};
+
 export const generateMovementId = user => `${ID()}${user}`;
 
 export const logDir = '/tmp/pouchLog';

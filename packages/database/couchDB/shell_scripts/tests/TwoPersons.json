@@ -3,7 +3,7 @@
     {
       "_id": "aPerson_1_0000000000012345",
       "data": {
-        "idIB": "12345",
+        "idib": "12345",
         "type": "person",
         "codigo": "100",
         "ruc_cedula": "1713931416001",
@@ -23,7 +23,7 @@
     {
       "_id": "aPerson_1_0000000000012351",
       "data": {
-        "idIB": "12351",
+        "idib": "12351",
         "type": "person",
         "codigo": "128",
         "ruc_cedula": "1708217086001",

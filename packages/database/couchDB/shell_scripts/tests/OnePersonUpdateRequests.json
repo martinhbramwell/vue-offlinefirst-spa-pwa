@@ -1,0 +1,12 @@
+{
+  "docs": [
+    {
+      "_id": "PersonUpdate_1_0000000000000018",
+      "data": {
+        "version": "10-ca8eb9e191b257f6922f0a1ad079abd2",
+        "type": "PersonUpdate",
+        "email": "sabai@saer.com"
+      }
+    }
+  ]
+}

@@ -77,9 +77,11 @@ fi;
 # Getting test query: ${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
 # echo -e "# of ${dataset} records : $(curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}" | jq -r .rows[0].value)";
 
+# Test "count_movement" view
+# export QUERY="_design/visible/_view/count_movement";
+# echo curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}"
 
 export QUERY="aPerson_1_0000000000000018";
-
 
 # export FIELD="ruc_cedula";
 # export FIELD="tipo_de_documento";
@@ -104,7 +106,6 @@ export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc)\",";
 
 export PATTERN=".*${FIELD}.*";
 export FULL_URL="${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
-
 generate_post_data()
 {
   PERSON_2=$(curl -sH "Content-type: application/json" "${FULL_URL}" | jq -r .);
@@ -114,10 +115,12 @@ generate_post_data()
 # export NEW_PRODUCT_2=$(generate_post_data);
 # echo -e ${NEW_PRODUCT_2};
 
+echo -e "Updating person '${QUERY}' in database '${COUCH_DATABASE}'..."
 curl --silent --include \
   --header "Accept: application/json" \
   --header "Content-Type:application/json" \
   --request PUT \
-  --data "$(generate_post_data)" ${FULL_URL}  > /dev/null
+  --data "$(generate_post_data)" ${FULL_URL} > /dev/null
 
+echo -e "... fetching result."
 curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}"

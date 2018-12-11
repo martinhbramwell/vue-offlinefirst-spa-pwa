@@ -1,0 +1,28 @@
+{
+  "docs": [
+    {
+      "_id": "PersonUpdate_1_0000000000000018",
+      "data": {
+        "version": "10-ca8eb9e191b257f6922f0a1ad079abd2",
+        "type": "PersonUpdate",
+        "email": "sabai@saer.com"
+      }
+    },
+    {
+      "_id": "PersonUpdate_1_0000000000000036",
+      "data": {
+        "version": "1-0d416aaa7c1a610aabc750354aa30a4b",
+        "type": "PersonUpdate",
+        "tipo_de_documento": "_06"
+      }
+    },
+    {
+      "_id": "PersonUpdate_1_0000000000000113",
+      "data": {
+        "version": "2-f7644624ef10ff6b45b6236d08c048ad",
+        "type": "PersonUpdate",
+        "nombre": "Carlos Cobos Cobos"
+      }
+    }
+  ]
+}

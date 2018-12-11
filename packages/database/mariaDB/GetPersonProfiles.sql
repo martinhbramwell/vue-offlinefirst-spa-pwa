@@ -4,7 +4,7 @@ SELECT DISTINCT
           "_id", concat("profile_1_", lpad(p.partner_id, 16, 0))
         , "data", JSON_OBJECT(
             "type", "profile"
-          , "idIB", IFNULL(p.partner_id, 0)
+          , "idib", IFNULL(p.partner_id, 0)
           , "partner_last_update", IFNULL(p.partner_last_update, NOW())
           , "partner_creation_date", IFNULL(p.partner_creation_date, NOW())
           , "partner_create_by", IFNULL(p.partner_create_by, "FALTA")
