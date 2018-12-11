@@ -5,10 +5,7 @@ import finder from 'pouchdb-find';
 
 import adptrMemory from 'pouchdb-adapter-memory';
 
-import {
-  exchangeRequestsFilter,
-  personUpdateRequestFilter,
-} from '../supervisor';
+import supervisor from '../supervisor';
 
 import { logger as LG } from '../utils';
 
@@ -139,7 +136,8 @@ export default () => {
         //   };
         //   replicatedEntityCounters[doc.data.type] += 1;
         // });
-        // LG.info(`'from' counts by type : ${JSON.stringify(replicatedEntityCounters, null, 2)}`);
+
+        // LG.debug(`The request(s) : ${JSON.stringify(docs, null, 2)}`);
       })
       .on('active', () => {
         LG.info(`${lclDb} ${name} *** ${label} sync resumed *** `);
@@ -199,7 +197,12 @@ export default () => {
     name: 'core_data/by_entities',
     label: 'CORE DATA ENTITIES',
     action: nullAction,
-    direction: 'to',
+  };
+
+  const requestsReplicationFilter = {
+    name: 'post_processing/by_request',
+    label: 'CHANGE REQUEST',
+    action: supervisor,
   };
 
     // {
@@ -211,8 +214,7 @@ export default () => {
 
   const replicationFilters = [
     coreReplicationFilter,
-    exchangeRequestsFilter,
-    personUpdateRequestFilter,
+    requestsReplicationFilter,
   ];
 
   let secondaryReplicationsWaiting = true;

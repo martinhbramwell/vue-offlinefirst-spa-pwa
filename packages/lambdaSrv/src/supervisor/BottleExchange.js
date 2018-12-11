@@ -1,13 +1,11 @@
 import { logger as LG } from '../utils';
 
-import processor from './requestProcessor';
-
 const MOVEMENT_RECORD = 'movement';
 
 const PROCESSING = 'processing';
 const COMPLETE = 'complete';
 
-class Request {
+class BottleExchange {
   constructor(requestSpec, localDatabase, jobStack) {
     this.lclDB = localDatabase;
     this.request = requestSpec;
@@ -57,9 +55,6 @@ class Request {
     LG.info(`Process request ${this.request.doc.data.id}; status = ${this.request.doc.data.status}`);
     const exchangeRequest = this.request.doc;
     const mvdt = exchangeRequest.data;
-
-    // if (mvdt.status === PROCESSING) { rej({ msg: DAMAGED, idER: mvdt.id }); return; }
-    // if (mvdt.status !== NEW) { res({ msg: UNINTERESTING }); return; }
 
     // LG.verbose(`Row ${JSON.stringify(exchangeRequest, null, 2)}`);
     LG.info(`Process ${mvdt.bottles.length} bottles for request '${mvdt.id}'`);
@@ -223,10 +218,11 @@ class Request {
               .then((values) => {
                 LG.debug(`PROMISE LIST \n${JSON.stringify(values, null, 2)}`);
                 exchangeRequest._deleted = true; // eslint-disable-line no-underscore-dangle
-                LG.debug(`EXCHANGE \n${JSON.stringify(exchangeRequest, null, 2)}`);
+                LG.verbose(`Delete :: ${JSON.stringify(exchangeRequest, null, 2)}`);
+
                 this.lclDB.put(exchangeRequest)
                   .then((exrq) => {
-                    LG.verbose('Marked Exchange Request Deleted');
+                    LG.debug('Marked BottleExchange Request Deleted');
                     LG.debug(`Deletion :: ${JSON.stringify(exrq, null, 2)}`);
                     mvdt.status = COMPLETE;
                     mvdt.type = MOVEMENT_RECORD;
@@ -251,25 +247,4 @@ class Request {
 }
 
 
-const category = 'ExchangeRequest';
-const name = 'Exchange Request';
-const label = 'BOTTLE EXCHANGE REQUEST';
-const filterName = 'post_processing/by_exchange_request';
-const action = (database) => {
-  processor({
-    name,
-    category,
-    label,
-    database,
-    Request,
-  });
-};
-
-
-const filterDefinition = {
-  name: filterName,
-  label,
-  action,
-};
-
-export default filterDefinition;
+export default BottleExchange;

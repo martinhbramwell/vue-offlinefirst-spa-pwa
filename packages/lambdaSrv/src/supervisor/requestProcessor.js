@@ -1,26 +1,18 @@
 import { logger as LG } from '../utils';
 
+const name = 'Request';
+
 const ignoreList = [];
 const processRequests = (parms) => {
   const {
-    name,
-    category,
-    label,
-    Request,
+    actions,
     database,
   } = parms;
 
-  LG.debug(`
-
-    ${label}S
-    `);
-
-  // console.log('................................');
-
   database.allDocs({
     include_docs: true,
-    startkey: category,
-    endkey: `${category}\ufff0`,
+    startkey: name,
+    endkey: `${name}\ufff0`,
   }).then((rslt) => {
     let numOfRequests = 0;
     rslt.rows.filter((request) => {
@@ -37,8 +29,9 @@ const processRequests = (parms) => {
     if (numOfRequests > 0) {
       const jobStack = [];
       rslt.rows.forEach((request) => {
-        LG.info(`Stacking ${name}s :: ${JSON.stringify(request.id, null, 2)}`);
-        jobStack.push(new Request(request, database, jobStack));
+        const { handler } = request.doc.data;
+        LG.debug(`Stacking ${name}s :: ${handler} ${request.id}`);
+        jobStack.push(new actions[handler](request, database, jobStack));
       });
       LG.verbose(`Processing ${name.toLowerCase()} stack...`);
       const job = jobStack.pop();
