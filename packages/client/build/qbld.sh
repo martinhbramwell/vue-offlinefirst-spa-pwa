@@ -9,7 +9,8 @@ fi;
 export THE_PROJECT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && cd .. && pwd)";
 
 echo -e "
-Building and committing distribution of 'iridium-blue.github.io'";
+Building and committing distribution of 'iridium-blue.github.io' ...
+";
 
 export THE_TARGET='iridium-blue.github.io';
 export DIR=$(pwd);
@@ -30,9 +31,12 @@ if [[ ! $(which jq) ]]; then
   sudo apt -y install jq;
 fi;
 
-echo "      THE_PROJECT = ${THE_PROJECT}";
-echo "       THE_TARGET = ${THE_TARGET}";
-echo "THE_TARGET_BRANCH = ${THE_TARGET_BRANCH}";
+
+echo "         THE_PROJECT = ${THE_PROJECT}";
+echo "THE_TARGET DIRECTORY = ${THE_TARGET}";
+echo "     THE TARGET REPO = $(cat .git/config | grep 'url =' | sed 's|.*url = ||')";
+echo "   THE_TARGET_BRANCH = ${THE_TARGET_BRANCH}";
+echo -e "\n";
 
 echo -e "\nSwitching directories ... "
 pushd ${THE_PROJECT}
