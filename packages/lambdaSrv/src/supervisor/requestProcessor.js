@@ -31,12 +31,17 @@ const processRequests = (parms) => {
       rslt.rows.forEach((request) => {
         const { handler } = request.doc.data;
         LG.debug(`Stacking ${name}s :: ${handler} ${request.id}`);
+        if (!actions[handler]) throw new Error(`Request action handler "${handler}" is undefined.`);
         jobStack.push(new actions[handler](request, database, jobStack));
       });
       LG.verbose(`Processing ${name.toLowerCase()} stack...`);
       const job = jobStack.pop();
       job.process();
     }
+  }).catch((err) => {
+    LG.error(`\n
+      Request processor exception! ${err}
+      `);
   });
 };
 
