@@ -36,11 +36,9 @@
               </div>
             </div>
 
-
-
             <div class="column">
               <div class="control">
-                <label class="label">Telefono 1ra</label>
+                <label class="label">Telefono 1ro</label>
 
                 <formulate-element
                   name="telefono_1"
@@ -72,6 +70,7 @@
                   name="mobile"
                   type="tel"
                   placeholder="# de telefono mobile"
+
                 />
 
               </div>
@@ -101,11 +100,11 @@
                   type="text"
                   placeholder="Codigo de identificación"
                   element-classes="identTextbox"
+
                 />
 
               </div>
             </div>
-
 
             <div class="column">
               <div class="control">
@@ -116,6 +115,7 @@
                   type="text"
                   placeholder="Dirección"
                   element-classes="addrTextbox"
+
                 />
 
               </div>
@@ -130,6 +130,7 @@
                   label="  "
                   name="distribuidor"
                 />
+
               </div>
             </div>
 
@@ -143,6 +144,7 @@
                   placeholder="Correos Electronicos"
                   element-classes="emailTextbox"
                   validation="email"
+
                 />
 
               </div>

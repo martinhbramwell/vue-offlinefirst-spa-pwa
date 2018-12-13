@@ -360,6 +360,7 @@ export const generateRequestId = (user, spacer = '_') => `${ID()}${spacer}${user
 //   // return parseInt(`${user}${tddt}`, 10);
 //   return `${user}${ID()}`;
 // };
+export const RequestMsgIdentifier = 'Request';
 
 export default {
   namespaced: true,

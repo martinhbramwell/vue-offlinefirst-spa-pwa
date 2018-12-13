@@ -9,11 +9,14 @@ import format from '@/utils/format'; // eslint-disable-line no-unused-vars
 
 import cfg from '@/config';
 
+import { generateRequestId, RequestMsgIdentifier } from '@/database'; // eslint-disable-line no-unused-vars, no-console
+
 import List from './List';
 import layout from './Layout';
 // import Retrieve from './Retrieve';
 import columns from './column_specs';
 import { PERSON, PERSONS, PERSONS_LIST } from './accessGroups'; // eslint-disable-line no-unused-vars
+
 
 // import { Resources } from '@/accessControl';
 
@@ -39,10 +42,15 @@ export const routes = [
   },
 ];
 
+const moduleTitle = 'Person';
+const moduleName = 'person';
+const operationName = 'index';
+// const categoryName = 'aPerson';
+// const categoryMetaData = `${categoryName}_2_MetaData`;
+
 const IDATTRIBUTE = 'codigo';
-const RESOURCE = 'person';
 export const store = createCrudModule({
-  resource: RESOURCE, // The name of your CRUD resource (mandatory)
+  resource: moduleName, // The name of your CRUD resource (mandatory)
   idAttribute: IDATTRIBUTE, // What should be used as ID
 
   client,
@@ -94,27 +102,27 @@ export const store = createCrudModule({
         });
     },
     setColumns: ({ commit }, cols) => {
-      window.lgr.debug(`Person.index --> actions.setColumns ${JSON.stringify(cols, null, 2)}`);
+      window.lgr.debug(`${moduleTitle}.${operationName} --> actions ${JSON.stringify(cols, null, 2)}`);
       commit('tableColumns', cols);
     },
     setEnums: ({ commit }, enums) => {
-      window.lgr.debug('Person.index --> actions.setEnums');
+      window.lgr.debug(`${moduleTitle}.${operationName} --> actions`);
       commit('enums', enums);
     },
     setMap: ({ commit }, payload) => {
-      window.lgr.debug('Person.index --> actions.setMap');
+      window.lgr.debug(`${moduleTitle}.${operationName} --> actions`);
       commit('setPersonsMap', payload);
     },
     setDirtyData: ({ commit }, dataState) => {
-      window.lgr.debug('Person.index --> actions.setDirtyData');
+      window.lgr.debug(`${moduleTitle}.${operationName} --> actions`);
       commit('dirtyData', dataState);
     },
     rememberOriginalRecord: ({ commit }, payload) => {
-      window.lgr.debug('Person.index --> actions.rememberOriginalRecord');
+      window.lgr.debug(`${moduleTitle}.${operationName} --> actions`);
       commit('originalRecord', payload);
     },
     update: ({ commit }, payload) => {
-      window.lgr.info('Person.index --> actions.update');
+      window.lgr.info(`${moduleTitle}.${operationName} --> actions`);
       commit('update', payload);
     },
   },
@@ -146,33 +154,66 @@ export const store = createCrudModule({
       vx.personsMap = personsMap;
     },
     tableColumns: (vx, cols) => {
-      window.lgr.debug('Person.index --> mutation.tableColumns');
+      window.lgr.debug(`${moduleTitle}.${operationName} --> mutations`);
       vx.columns = cols;
     },
     originalRecord: (vx, payload) => {
-      window.lgr.warn(`Person.index --> mutations.originalRecord
+      window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
         ${JSON.stringify(payload, null, 2)}
       `);
       vx.originalRecord = payload;
     },
     update: (vx, payload) => {
-      window.lgr.warn(`Person.index --> mutations.update
+      window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
         ${JSON.stringify(payload, null, 2)}
       `);
       window.lgr.debug(vx);
     },
+    // create: (vx, payload) => {
+    //   window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
+    //     ${JSON.stringify(payload, null, 2)}
+    //   `);
+    //   window.lgr.info(client);
+    //   LG(vx.state.person);
+
+    //   client.put();
+    //   // this.$pouch.put(payload)
+    //   //   .then(() => {
+    //   //     window.lgr.debug(`Saved Person Update -- ${payload}`);
+    //   //   }).catch(() => {
+    //   //     window.lgr.debug('---------- Could not save the record --------');
+    //   //   });
+    // },
     /* eslint-enable no-param-reassign */
   },
 
+  onCreateStart(state) { // eslint-disable-line no-unused-vars
+    LG(vuex);
+    const action = 'Create'; // eslint-disable-line no-unused-vars
+    const newRecordRequest = {
+      _id: `${RequestMsgIdentifier}_2_${generateRequestId(0)}`,
+      data: state.originalRecord,
+    };
+    newRecordRequest.data.type = RequestMsgIdentifier;
+    newRecordRequest.data.handler = `${moduleTitle}${action}`;
+    delete newRecordRequest.data.Grabar;
+    delete newRecordRequest.data.codigo;
+    window.lgr.info(`${moduleTitle}.${operationName}
+      ------------------------------------------
+      ${JSON.stringify(newRecordRequest, null, 2)}`);
+
+    vuex.dispatch('person/rememberOriginalRecord', newRecordRequest);
+  },
+
   onUpdateStart(state, response) { // eslint-disable-line no-unused-vars
-    window.lgr.debug('Person.index --> onUpdateStart');
+    window.lgr.debug(`${moduleTitle}.${operationName}`);
     // LG('Person.index --> onUpdateStart');
     // LG(state);
     // LG(response);
   },
 
   onFetchListSuccess(state, response) { // eslint-disable-line no-unused-vars
-    window.lgr.debug(`
+    window.lgr.debug(`${moduleTitle}.${operationName}
       Parse list success handler >>>>>>>>>>>>>>>>>>>>>>>>>>
       ${JSON.stringify(state.dirtyData, null, 2)}
     `);
@@ -188,8 +229,8 @@ export const store = createCrudModule({
     const id = _id ? `/${_id}` : '';
     const pgntr = _pgntr ? `s=${_pgntr.s}&c=${_pgntr.c}` : 's=0&c=0';
     // LG(`using customUrlFn( ${id}, ${pgntr} )`);
-    // LG(`URI :: ${cfg.server}/api/${RESOURCE}${id}?${pgntr}`);
-    const URI = `${cfg.server}/api/${RESOURCE}${id}?${pgntr}`;
+    // LG(`URI :: ${cfg.server}/api/${moduleName}${id}?${pgntr}`);
+    const URI = `${cfg.server}/api/${moduleName}${id}?${pgntr}`;
     return URI;
   },
 
@@ -217,7 +258,7 @@ export const store = createCrudModule({
     let enums = [];
 
     /*            ******************** THIS IS THE NEW VERSION ******************* */
-    window.lgr.debug(`||================================================||
+    window.lgr.debug(`${moduleTitle}.${operationName}
       persons response: ${JSON.stringify(response, null, 2)}
       persons response length: ${response.length}
     `);

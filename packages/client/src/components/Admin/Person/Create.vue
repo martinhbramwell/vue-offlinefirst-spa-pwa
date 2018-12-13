@@ -24,9 +24,50 @@
                 <formulate-element
                   name="nombre"
                   type="text"
-                  initial="Joe Bloggs"
+                  initial="Carmen Miranda"
                   placeholder="Nombre y Appellidos"
                   element-classes="nameTextbox"
+                />
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="control">
+                <label class="label">Telefono 1ro</label>
+
+                <formulate-element
+                  name="telefono_1"
+                  type="tel"
+                  initial="02-222-2222"
+                  placeholder="# de telefono"
+                />
+
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="control">
+                <label class="label">Telefono 2do</label>
+
+                <formulate-element
+                  name="telefono_2"
+                  type="tel"
+                  initial="03-333-3333"
+                  placeholder="# de telefono alterno"
+                />
+
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="control">
+                <label class="label">Mobile</label>
+
+                <formulate-element
+                  name="mobile"
+                  type="tel"
+                  placeholder="# de telefono mobile"
+                  initial="099-999-9999"
                 />
 
               </div>
@@ -37,13 +78,12 @@
                 <label class="label">Tipo de Identificación</label>
 
                 <formulate-element
-                  class="select is-small"
-                  name="tipo"
+                  class="select is-small is-focused"
+                  name="tipo_de_documento"
                   type="select"
-                  initial="_05"
+                  initial="_07"
                   :options="typesId"
                 />
-
 
               </div>
             </div>
@@ -55,9 +95,9 @@
                 <formulate-element
                   name="ruc_cedula"
                   type="text"
-                  initial="1713931416"
                   placeholder="Codigo de identificación"
                   element-classes="identTextbox"
+                  initial="1711711717"
                 />
 
               </div>
@@ -65,14 +105,14 @@
 
             <div class="column">
               <div class="control">
-                <label class="label">Correos Electronicos</label>
+                <label class="label">Dirección</label>
 
                 <formulate-element
-                  name="email"
+                  name="direccion"
                   type="text"
-                  initial="a@b.cd"
-                  placeholder="Correos Electronicos"
-                  element-classes="emailTextbox"
+                  placeholder="Dirección"
+                  element-classes="addrTextbox"
+                  initial="#1 1st St., Here, There, Everywhere"
                 />
 
               </div>
@@ -93,68 +133,83 @@
 
             <div class="column">
               <div class="control">
-                <label class="label">Telefono</label>
+                <label class="label">Correos Electronicos</label>
 
                 <formulate-element
-                  name="telefono"
-                  type="tel"
-                  initial="4444719"
-                  placeholder="# de telefono"
-                />
-
-              </div>
-            </div>
-
-            <div class="column">
-              <div class="control">
-                <label class="label">Dirección</label>
-
-                <formulate-element
-                  name="direccion"
-                  initial="#1 1st St., Here, There, Everywhere"
+                  name="email"
                   type="text"
-                  placeholder="Dirección"
-                  element-classes="addrTextbox"
+                  placeholder="Correos Electronicos"
+                  element-classes="emailTextbox"
+                  validation="email"
+                  initial="a@b.cd"
                 />
 
               </div>
             </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
             <div class="control">
 
               <formulate-element
                 type="submit"
-                name="Save"
+                name="Grabar"
                 elementClasses="button is-info"
               />
+
             </div>
-
           </div>
-
         </article>
 
     </formulate>
+
+
+
+
 
   </div>
 </template>
 
 <script>
 
-import { mapGetters, mapActions, mapState } from 'vuex'; // eslint-disable-line no-unused-vars
+/* eslint-disable no-unused-vars */
+import { mapGetters, mapActions, mapState } from 'vuex';
+
+import { RequestMsgIdentifier } from '@/database';
+/* eslint-enable no-unused-vars */
 
 const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+
+const moduleTitle = 'Person';
+const moduleName = 'person';
+const operationName = 'Create';
+// const categoryName = 'aPerson';
+// const categoryMetaData = `${categoryName}_2_MetaData`;
 
 export default {
   props: ['pers'],
   data() {
-    return { values: false };
+    return {
+      values: false,
+    };
   },
   computed: {
-    ...mapGetters('person', {
+    ...mapGetters(moduleName, {
       enums: 'getEnums',
     }),
-    ...mapState('person', {
+    ...mapState(moduleName, {
       isCreating: 'isCreating',
     }),
     typesId() {
@@ -185,40 +240,24 @@ export default {
     },
   },
   methods: {
-    // qtst() {
-    //   LG(' ------- Quick Test -------');
-    //   this.onCreatePerson();
-    // },
-    // onCreatePerson() {
-    //   this.createPerson({
-    //     data: {
-    //       store: 'person',
-    //       mode: 'post',
-    //       data: {
-    //         ruc_cedula: '0708217086001',
-    //         nombre: 'Jesu Cristo',
-    //         direccion: '#1 Pearly Gates',
-    //         telefono: '099-444-4719',
-    //         distribuidor: 'si',
-    //         retencion: 'si',
-    //         tipo: '_04',
-    //         scabetti: '333',
-    //         tipo_de_documento: 'RUC',
-    //       },
-    //     },
-    //   });
-    // },
-
-    ...mapActions('person', {
-      saveForm: 'saveForm',
+    ...mapActions(moduleName, {
+      create: 'create',
+      holdRecord: 'rememberOriginalRecord',
     }),
+    saveForm(form) {
+      window.lgr.debug(`${moduleTitle}.${operationName} --> methods
+      ${JSON.stringify(form, null, 2)}`);
+
+      this.holdRecord(form);
+      this.create();
+    },
   },
 };
 </script>
 
-<style>
-  .nameTextbox { width: 220px; padding: 1px; text-align: left; }
-  .identTextbox { width: 110px; padding: 1px; text-align: left; }
-  .emailTextbox { width: 300px; padding: 1px; text-align: left; }
-  .addrTextbox { width: 500px; padding: 1px; text-align: left; }
+<style scoped>
+  .nombreTextbox { width: 20px; padding: 1px; text-align: left; }
+  .emailTextbox { width: 240px; padding: 1px; text-align: left; }
+  .identTextbox { width: 200px; padding: 1px; text-align: left; }
+  .addrTextbox { width: 200px; padding: 1px; text-align: left; }
 </style>

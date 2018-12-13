@@ -68,6 +68,22 @@ export const REST = {
       },
     },
   },
+  post: (endPoint, parameters) => new Promise((resolve) => { // eslint-disable-line no-unused-vars
+    window.lgr.warn(`
+      endPoint: ${JSON.stringify(endPoint, null, 2)}
+      parameters: ${JSON.stringify(parameters, null, 2)}
+    `);
+    const db = vuex.getters['dbmgr/getDbMgr'];
+    const record = vuex.getters['person/getOriginalRecord'];
+    LG(db);
+    LG(record);
+    db.put(record)
+      .then(() => {
+        window.lgr.info(`Posted Person Create Request -- ${record}`);
+      }).catch(() => {
+        window.lgr.error('---------- Could not save the request --------');
+      });
+  }),
   get: (endPoint, parameters) => new Promise((resolve) => {
     window.lgr.debug(`
       endPoint: ${JSON.stringify(endPoint, null, 2)}
