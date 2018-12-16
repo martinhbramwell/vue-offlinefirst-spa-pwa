@@ -665,10 +665,12 @@ const vm = {
 
         const moveIn = {
           _id: pouchId,
-          data: {
-            id: pchid.id,
+          meta: {
             type,
             handler,
+          },
+          data: {
+            id: pchid.id,
             inOut: 'in',
             status: 'new',
             bottles: incomingIds,

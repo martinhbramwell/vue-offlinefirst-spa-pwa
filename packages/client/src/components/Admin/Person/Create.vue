@@ -184,75 +184,64 @@
 
 <script>
 
-/* eslint-disable no-unused-vars */
-import { mapGetters, mapActions, mapState } from 'vuex';
+  /* eslint-disable no-unused-vars */
+  import { mapGetters, mapActions, mapState } from 'vuex';
 
-import { RequestMsgIdentifier } from '@/database';
-/* eslint-enable no-unused-vars */
+  import { RequestMsgIdentifier } from '@/database';
 
-const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+  import { moduleTitle } from '@/components/Admin/Person';
 
-const moduleTitle = 'Person';
-const moduleName = 'person';
-const operationName = 'Create';
-// const categoryName = 'aPerson';
-// const categoryMetaData = `${categoryName}_2_MetaData`;
+  import utils from './utils';
 
-export default {
-  props: ['pers'],
-  data() {
-    return {
-      values: false,
-    };
-  },
-  computed: {
-    ...mapGetters(moduleName, {
-      enums: 'getEnums',
-    }),
-    ...mapState(moduleName, {
-      isCreating: 'isCreating',
-    }),
-    typesId() {
-      LG('CC %%%%%%%%%%%%%%%%%%');
-      // LG(this);
-      const ret = [];
-      const types = this.enums.DocTypeLookup;
-      if (types) {
-        Object.keys(types).forEach((value) => {
-          const name = types[value];
-          ret.push({
-            name,
-            value,
-            id: value,
-            label: name,
-          });
-        });
-      } else {
-        ret.push({
-          name: 'aa',
-          value: 'AA',
-          id: 'AA-',
-          label: 'aa-',
-        });
-      }
-      LG(ret);
-      return ret;
+  const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+
+  const moduleName = 'person';
+  const operationName = 'Create';
+
+  const { computeTypesId } = utils;
+
+  export default {
+    props: ['pers'],
+    data() {
+      return {
+        values: false,
+      };
     },
-  },
-  methods: {
-    ...mapActions(moduleName, {
-      create: 'create',
-      holdRecord: 'rememberOriginalRecord',
-    }),
-    saveForm(form) {
-      window.lgr.debug(`${moduleTitle}.${operationName} --> methods
-      ${JSON.stringify(form, null, 2)}`);
-
-      this.holdRecord(form);
-      this.create();
+    computed: {
+      ...mapGetters(moduleName, {
+        enums: 'getEnums',
+      }),
+      ...mapState(moduleName, {
+        isCreating: 'isCreating',
+      }),
+      typesId() {
+        return computeTypesId(this.enums.DocTypeLookup);
+      },
     },
-  },
-};
+    methods: {
+      ...mapActions(moduleName, {
+        create: 'create',
+      }),
+      saveForm(form) {
+        const pyld = form;
+        window.lgr.debug(`${moduleTitle}.${operationName} --> methods
+        ${JSON.stringify(pyld, null, 2)}`);
+
+        let dstrbdr = null;
+        dstrbdr = pyld.distribuidor || 'no';
+        if (dstrbdr) {
+          pyld.distribuidor = 'si';
+          pyld.role = 'Distribuidor';
+        } else {
+          pyld.distribuidor = 'no';
+          pyld.role = 'Cliente';
+        }
+
+        LG({ data: { pyld } });
+        this.create({ data: { pyld } });
+      },
+    },
+  };
 </script>
 
 <style scoped>

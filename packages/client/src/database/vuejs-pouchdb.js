@@ -68,24 +68,83 @@ export const REST = {
       },
     },
   },
-  post: (endPoint, parameters) => new Promise((resolve) => { // eslint-disable-line no-unused-vars
-    window.lgr.warn(`
-      endPoint: ${JSON.stringify(endPoint, null, 2)}
-      parameters: ${JSON.stringify(parameters, null, 2)}
-    `);
+
+  patch: (endPoint, parameters) => new Promise((resolve) => { // eslint-disable-line no-unused-vars
+    LG(`
+
+Step 5 -- Combine data and envelope
+      `);
     const db = vuex.getters['dbmgr/getDbMgr'];
-    const record = vuex.getters['person/getOriginalRecord'];
-    LG(db);
-    LG(record);
-    db.put(record)
+    const envelope = vuex.getters['person/getNewRecord'];
+    LG('envelope');
+    LG(envelope);
+
+    const meta = Object.assign(envelope.meta, parameters.meta);
+    const data = parameters.pyld;
+    // window.lgr.warn(` -- patch --
+    //   endPoint: ${JSON.stringify(endPoint, null, 2)}
+    //   parameters: ${JSON.stringify(parameters, null, 2)}
+    // `);
+    // LG('formValues');
+    // LG(formValues);
+
+    const request = {
+      _id: envelope._id, // eslint-disable-line no-underscore-dangle
+      data,
+      meta,
+    };
+
+    LG('request');
+    LG(request);
+
+    db.put(request)
       .then(() => {
-        window.lgr.info(`Posted Person Create Request -- ${record}`);
-      }).catch(() => {
-        window.lgr.error('---------- Could not save the request --------');
+        window.lgr.info(`Posted Record Update Request -- ${request}`);
+      }).catch((err) => {
+        window.lgr.error(`${JSON.stringify(err, null, 2)}
+          ---------- Could not save the request --------`);
       });
   }),
+
+  post: (endPoint, parameters) => new Promise((resolve) => { // eslint-disable-line no-unused-vars
+    // window.lgr.warn(` -- post ---
+    //   endPoint: ${JSON.stringify(endPoint, null, 2)}
+    //   parameters: ${JSON.stringify(parameters, null, 2)}
+    // `);
+    const db = vuex.getters['dbmgr/getDbMgr'];
+    const envelope = vuex.getters['person/getNewRecord'];
+
+    LG('envelope');
+    LG(envelope);
+
+    // const formValues = parameters;
+    // delete formValues.Grabar;
+    // delete formValues.codigo;
+
+    // envelope.data = Object.assign(envelope.data, formValues);
+    // LG(db);
+    // LG(envelope);
+
+    const request = {
+      _id: envelope._id, // eslint-disable-line no-underscore-dangle
+      data: parameters.pyld,
+      meta: envelope.meta,
+    };
+
+    LG('request');
+    LG(request);
+
+    db.put(request)
+      .then(() => {
+        window.lgr.info(`Posted New Record Create Request -- ${request}`);
+      }).catch((err) => {
+        window.lgr.error(`Err : ${JSON.stringify(err, null, 2)}
+          ---------- Could not save the request --------`);
+      });
+  }),
+
   get: (endPoint, parameters) => new Promise((resolve) => {
-    window.lgr.debug(`
+    window.lgr.warn(` -- get --
       endPoint: ${JSON.stringify(endPoint, null, 2)}
       parameters: ${JSON.stringify(parameters, null, 2)}
     `);

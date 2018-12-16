@@ -31,7 +31,7 @@ export default {
     // optional: defaults to false if not specified
     showConsoleColors: true,
   },
-  version: '0.0.102',
+  version: '0.0.103',
   //  dbServerProtocol: 'https',
   //  dbServerURI: 'yourdb.yourpublic.work',
   //  databaseName: 'ib2018_103',

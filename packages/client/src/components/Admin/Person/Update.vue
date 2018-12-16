@@ -8,7 +8,7 @@
       :name="formUid"
       class="my-form"
       v-if="!values"
-      @submit="submit"
+      @submit="saveForm"
 
       :initial="p(id)"
     >
@@ -191,10 +191,18 @@
 
   import { mapGetters, mapActions, mapState } from 'vuex'; // eslint-disable-line no-unused-vars
   import Conflict from './Conflict';
-  import { generateRequestId } from '@/database';
+  // import { generateRequestId } from '@/database';
 
+  import { moduleTitle } from '@/components/Admin/Person';
+
+  import utils from './utils';
 
   const LG = console.log; // eslint-disable-line no-console, no-unused-vars
+
+  const moduleName = 'person';
+  const operationName = 'Update';
+
+  const { computeTypesId } = utils;
 
   export default {
     props: ['id'],
@@ -213,14 +221,14 @@
       this.rememberOriginalRecord(cloneDeep(this.p(this.id)));
     },
     computed: {
-      ...mapGetters('person', {
+      ...mapGetters(moduleName, {
         enums: 'getEnums',
         p: 'getPerson',
         o: 'getOriginalRecord',
         columns: 'getColumns',
         // pers: 'getPersonsMap',
       }),
-      ...mapState('person', {
+      ...mapState(moduleName, {
         isUpdating: 'isUpdating',
       }),
       formUid() {
@@ -228,23 +236,26 @@
         return this.formUID;
       },
       typesId() {
-        const ret = [];
-        const types = this.enums.DocTypeLookup || {};
-        Object.keys(types).forEach((value) => {
-          const name = types[value];
-          ret.push({
-            name,
-            value,
-            id: value,
-            label: name,
-          });
-        });
-        // LG(ret);
-        return ret;
+        return computeTypesId(this.enums.DocTypeLookup);
       },
+      // typesId() {
+      //   const ret = [];
+      //   const types = this.enums.DocTypeLookup || {};
+      //   Object.keys(types).forEach((value) => {
+      //     const name = types[value];
+      //     ret.push({
+      //       name,
+      //       value,
+      //       id: value,
+      //       label: name,
+      //     });
+      //   });
+      //   // LG(ret);
+      //   return ret;
+      // },
     },
     methods: {
-      ...mapActions('person', {
+      ...mapActions(moduleName, {
         update: 'update',
         rememberOriginalRecord: 'rememberOriginalRecord',
       }),
@@ -263,7 +274,10 @@
         this.$store.state.values[this.formUID] = formCopy;
         this.rememberOriginalRecord(cloneDeep(this.p(this.id)));
       },
-      submit(form) {
+      saveForm(form) {
+        window.lgr.debug(`${moduleTitle}.${operationName} --> methods
+        ${JSON.stringify(form, null, 2)}`);
+
         const liveRecord = this.p(this.id);
         const originalRecord = this.o;
         const currentRecord = form;
@@ -317,25 +331,26 @@
           // LG('-------   Updating  ------');
           // LG(this.$pouch);
           // LG(currentRecord);
-          const changedData = {};
+          const pyld = {};
           Object.keys(titles)
             .forEach((k) => {
-              changedData[k] = (typeof currentRecord[k] === 'undefined')
+              pyld[k] = (typeof currentRecord[k] === 'undefined')
                 ? originalRecord[k]
                 : currentRecord[k];
             });
+          pyld.id = this.id;
+          pyld.status = 'new';
+          pyld.distribuidor = pyld.distribuidor ? 'si' : 'no';
+          pyld.role = pyld.distribuidor === 'si' ? 'Distribuidor' : 'Cliente';
 
-          changedData.version = currentRecord.version;
-          changedData.type = 'Request';
-          changedData.handler = 'PersonUpdate';
-          changedData.status = 'new';
-          changedData.id = this.id;
-          changedData._id = this.$pouch.rel.makeDocID({ type: 'aPerson', id: this.id }); // eslint-disable-line no-underscore-dangle
-          changedData.distribuidor = changedData.distribuidor ? 'si' : 'no';
-          changedData.role = changedData.distribuidor === 'si' ? 'Distribuidor' : 'Cliente';
+          delete pyld.permissions;
+
+          const meta = {};
+          meta.version = currentRecord.version;
+          meta._id = this.$pouch.rel.makeDocID({ type: 'aPerson', id: this.id }); // eslint-disable-line no-underscore-dangle
 
           // let tmp = {};
-          // LG(`Field : flag key ::  changedData  |  currentRecord  |  originalRecord `);
+          // LG(`Field : flag key ::  pyld  |  currentRecord  |  originalRecord `);
           // Object.keys(titles).forEach((k) => {
           //   tmp = (typeof currentRecord[k] === 'undefined') ? originalRecord[k] : currentRecord[k];
           //   if (k === 'distribuidor') {
@@ -343,36 +358,44 @@
           //     tmp = tmp ? 'si' : 'no';
           //   }
           //   if (tmp) {
-          //     changedData[k] = tmp;
-          //     const flag = changedData[k] === originalRecord[k] ? '  ' : '##';
-          //     const vals = `${changedData[k]} | ${currentRecord[k]} | ${originalRecord[k]}`;
+          //     pyld[k] = tmp;
+          //     const flag = pyld[k] === originalRecord[k] ? '  ' : '##';
+          //     const vals = `${pyld[k]} | ${currentRecord[k]} | ${originalRecord[k]}`;
           //     LG(`Field : ${flag} ${k} :: ${vals} `);
           //   }
           // });
 
-          const pId = `${changedData.type}_2_${generateRequestId(this.id)}`;
+          LG(`
+
+Step 1
+            `);
+          LG({ data: { pyld, meta } });
+          this.update({ data: { pyld, meta } });
+          /*
+          const pId = `${pyld.type}_2_${generateRequestId(this.id)}`;
 
           window.lgr.warn(`new ID : ${pId}
             `);
           const personUpdate = {
             _id: pId,
-            data: changedData,
+            pyld,
           };
           LG(personUpdate);
+          */
 
-          this.$pouch.get(pId)
-            .then((prevUpd) => {
-              window.lgr.debug('---------- Got the record --------');
-              personUpdate._rev = prevUpd._rev; // eslint-disable-line no-underscore-dangle
-            }).catch(() => {
-              window.lgr.debug('---------- Did not get the record --------');
-            }).then(() => {
-              window.lgr.debug('---------- Do the other thing --------');
-              this.$pouch.put(personUpdate)
-                .then(() => {
-                  window.lgr.debug(`Saved Person Update -- ${personUpdate}`);
-                });
-            });
+          // this.$pouch.get(pId)
+          //   .then((prevUpd) => {
+          //     window.lgr.debug('---------- Got the record --------');
+          //     personUpdate._rev = prevUpd._rev; // eslint-disable-line no-underscore-dangle
+          //   }).catch(() => {
+          //     window.lgr.debug('---------- Did not get the record --------');
+          //   }).then(() => {
+          //     window.lgr.debug('---------- Do the other thing --------');
+          //     this.$pouch.put(personUpdate)
+          //       .then(() => {
+          //         window.lgr.debug(`Saved Person Update -- ${personUpdate}`);
+          //       });
+          //   });
 
           this.$emit('closePersonUpdate');
         }

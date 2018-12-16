@@ -42,8 +42,8 @@ export const routes = [
   },
 ];
 
-const moduleTitle = 'Person';
-const moduleName = 'person';
+export const moduleTitle = 'Person';
+export const moduleName = 'person';
 const operationName = 'index';
 // const categoryName = 'aPerson';
 // const categoryMetaData = `${categoryName}_2_MetaData`;
@@ -57,6 +57,7 @@ export const store = createCrudModule({
   state: {
     columns,
     originalRecord: {},
+    newRecord: {},
     enums: {},
     personsMap: {},
     paginator: { s: 1, c: 100 },
@@ -121,10 +122,14 @@ export const store = createCrudModule({
       window.lgr.debug(`${moduleTitle}.${operationName} --> actions`);
       commit('originalRecord', payload);
     },
-    update: ({ commit }, payload) => {
-      window.lgr.info(`${moduleTitle}.${operationName} --> actions`);
-      commit('update', payload);
+    rememberNewRecord: ({ commit }, payload) => {
+      // window.lgr.debug(`${moduleTitle}.${operationName} --> actions`);
+      commit('newRecord', payload);
     },
+    // update: ({ commit }, payload) => {
+    //   window.lgr.info(`${moduleTitle}.${operationName} --> actions`);
+    //   commit('update', payload);
+    // },
   },
 
   getters: {
@@ -136,6 +141,7 @@ export const store = createCrudModule({
     getPaginator: vx => vx.paginator,
     getPerson: vx => id => vx.entities[id],
     getOriginalRecord: vx => vx.originalRecord,
+    getNewRecord: vx => vx.newRecord,
   },
 
   mutations: {
@@ -163,12 +169,20 @@ export const store = createCrudModule({
       `);
       vx.originalRecord = payload;
     },
-    update: (vx, payload) => {
-      window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
-        ${JSON.stringify(payload, null, 2)}
-      `);
-      window.lgr.debug(vx);
+    newRecord: (vx, payload) => {
+      // window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
+      //   ${JSON.stringify(payload, null, 2)}
+      // `);
+      vx.newRecord = payload;
     },
+
+    // update: (vx, payload) => {
+    //   window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
+    //     ${JSON.stringify(payload, null, 2)}
+    //   `);
+    //   window.lgr.debug(vx);
+    // },
+
     // create: (vx, payload) => {
     //   window.lgr.warn(`${moduleTitle}.${operationName} --> mutations
     //     ${JSON.stringify(payload, null, 2)}
@@ -187,29 +201,50 @@ export const store = createCrudModule({
     /* eslint-enable no-param-reassign */
   },
 
-  onCreateStart(state) { // eslint-disable-line no-unused-vars
-    LG(vuex);
+  onCreateStart() { // eslint-disable-line no-unused-vars
+    // LG(vuex);
+    // LG(vuex.getters.formValues.createPerson);
+    // LG(state);
     const action = 'Create'; // eslint-disable-line no-unused-vars
-    const newRecordRequest = {
+    const request = {
       _id: `${RequestMsgIdentifier}_2_${generateRequestId(0)}`,
-      data: state.originalRecord,
+      meta: {
+        type: RequestMsgIdentifier,
+        handler: `${moduleTitle}${action}`,
+      },
     };
-    newRecordRequest.data.type = RequestMsgIdentifier;
-    newRecordRequest.data.handler = `${moduleTitle}${action}`;
-    delete newRecordRequest.data.Grabar;
-    delete newRecordRequest.data.codigo;
     window.lgr.info(`${moduleTitle}.${operationName}
       ------------------------------------------
-      ${JSON.stringify(newRecordRequest, null, 2)}`);
+      ${JSON.stringify(request, null, 2)}`);
 
-    vuex.dispatch('person/rememberOriginalRecord', newRecordRequest);
+    vuex.dispatch('person/rememberNewRecord', request);
   },
 
-  onUpdateStart(state, response) { // eslint-disable-line no-unused-vars
-    window.lgr.debug(`${moduleTitle}.${operationName}`);
-    // LG('Person.index --> onUpdateStart');
+  onUpdateStart(state) { // eslint-disable-line no-unused-vars
+    LG(`
+
+Step 2 - make the envelope
+      `);
+    // LG('vuex');
+    // LG(vuex);
+    // LG('state');
     // LG(state);
-    // LG(response);
+    // LG('the form');
+    // LG(vuex.getters.formValues[`pers_${state.originalRecord.idib}`]);
+
+    const action = 'Update'; // eslint-disable-line no-unused-vars
+    const request = {
+      _id: `${RequestMsgIdentifier}_2_${generateRequestId(state.originalRecord.idib)}`,
+      meta: {
+        type: RequestMsgIdentifier,
+        handler: `${moduleTitle}${action}`,
+      },
+    };
+    window.lgr.info(`${moduleTitle}.${operationName}
+      ------------------------------------------
+      ${JSON.stringify(request, null, 2)}`);
+
+    vuex.dispatch('person/rememberNewRecord', request);
   },
 
   onFetchListSuccess(state, response) { // eslint-disable-line no-unused-vars

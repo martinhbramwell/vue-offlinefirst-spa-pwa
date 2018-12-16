@@ -40,31 +40,8 @@
       },
     },
     methods: {
-      qtst() {
-        LG(' ------- Quick Test -------');
-        this.onCreatePerson();
-      },
       canEdit() {
         return this.$can('comment', 'persons/list');
-      },
-      onCreatePerson() {
-        this.createPerson({
-          data: {
-            store: 'person',
-            mode: 'post',
-            data: {
-              ruc_cedula: '0708217086001',
-              nombre: 'Jesu Cristo',
-              direccion: '#1 Pearly Gates',
-              telefono: '099-444-4719',
-              distribuidor: 'si',
-              retencion: 'si',
-              tipo: '_04',
-              scabetti: '333',
-              tipo_de_documento: 'RUC',
-            },
-          },
-        });
       },
       ...mapActions('person', {
         createPerson: 'create',
