@@ -110,6 +110,7 @@ export default () => {
   //   LG.info(`\n*** UNRECOVERABLE DATA CHANGE ERROR ::\n${JSON.stringify(err, null, 3)} *** `);
   // });
 
+  const replicatedEntityCounters = {};
   const launchSyncs = (db, filter) => { // eslint-disable-line no-unused-vars
     const {
       name,
@@ -130,12 +131,12 @@ export default () => {
         const { docs } = response.change;
         LG.info(`${lclDb} ${name} *** ${label} ${dir} sync delta *** `);
         LG.info(`Database replication from: ${docs.length} records.`);
-        // response.docs.forEach((doc) => {
-        //   if (!replicatedEntityCounters[doc.data.type]) {
-        //     replicatedEntityCounters[doc.data.type] = 0
-        //   };
-        //   replicatedEntityCounters[doc.data.type] += 1;
-        // });
+        docs.forEach((doc) => {
+          if (!replicatedEntityCounters[doc.data.type]) {
+            replicatedEntityCounters[doc.data.type] = 0;
+          }
+          replicatedEntityCounters[doc.data.type] += 1;
+        });
 
         // LG.debug(`The request(s) : ${JSON.stringify(docs, null, 2)}`);
       })
@@ -243,26 +244,29 @@ export default () => {
     .on('change', (info) => {
       LG.info(`${lclDb} *** ${filterLabel} REPLICATION DELTA FROM ${rmtDbHost} *** `);
       LG.info(`Database replication inbound _${JSON.stringify(info.docs.length, null, 3)}_ records.`);
-      // LG.info(`${JSON.stringify(info.change.docs, null, 3)}`);
-      // info.docs.forEach((doc) => {
-      //   if (!replicatedEntityCounters[doc.data.type]) {
-      //     replicatedEntityCounters[doc.data.type] = 0
-      //   };
-      //   replicatedEntityCounters[doc.data.type] += 1;
-      // });
-      // LG.info(`'from' counts by type : ${JSON.stringify(replicatedEntityCounters, null, 2)}`);
+      CLG(`${JSON.stringify(info.docs[0], null, 3)}`);
+      info.docs.forEach((doc) => {
+        if (doc.data.type) {
+          if (!replicatedEntityCounters[doc.data.type]) {
+            replicatedEntityCounters[doc.data.type] = 0;
+          }
+          replicatedEntityCounters[doc.data.type] += 1;
+        }
+        if (doc.filters) {
+          if (!replicatedEntityCounters[doc.filters]) {
+            replicatedEntityCounters[doc.filters] = 0;
+          }
+          replicatedEntityCounters[doc.filters] += 1;
+        }
+      });
+      LG.info(`'from' counts by type : ${JSON.stringify(replicatedEntityCounters, null, 2)}`);
     })
     .on('active', () => {
       LG.info(`${lclDb} *** ${filterLabel} REPLICATION RESUMED *** `);
     })
     .on('paused', (err) => {
       LG.info(`${lclDb} *** ${filterLabel} REPLICATION PAUSED *** `);
-      if (err) LG.info(`${databaseLocal} *** Error? >${err}< *** `);
-      startSecondaryReplications(initialReplicator);
-    })
-    .on('paused', (err) => {
-      LG.info(`${lclDb} *** ${filterLabel} REPLICATION PAUSED *** `);
-      if (err) LG.info(`${databaseLocal} *** Error? >${err}< *** `);
+      if (err.message.length > 0) LG.info(`${lclDb} *** Error? >${err}< *** `);
       startSecondaryReplications(initialReplicator);
     })
     .on('complete', (info) => {

@@ -18,14 +18,14 @@ export default class {
 
     updateRequest._deleted = true;
 
+    alteredPerson._rev = updateRequest.meta.version;
+    alteredPerson._id = updateRequest.meta._id;
     alteredPerson.data = Object.assign({}, updateRequest.data);
-    alteredPerson._rev = alteredPerson.data.version;
-    delete alteredPerson.data.version;
-    alteredPerson._id = alteredPerson.data._id;
-    delete alteredPerson.data._id;
-    delete alteredPerson.data.id;
-    delete alteredPerson.data.status;
-    delete alteredPerson.data.type;
+    // delete alteredPerson.meta.version;
+    // delete alteredPerson.data._id;
+    // delete alteredPerson.data.id;
+    // delete alteredPerson.data.status;
+    // delete alteredPerson.data.type;
 
     this.lclDB.get(alteredPerson._id)
       .then((pers) => {
