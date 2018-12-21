@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 #
 
+read -p "Ready to recreate CouchDb main database!! Type 'y' to confirm? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+  echo -e "Quitting..."
+  exit 0;
+fi
+
 export DOWNLOADS_DIR="${HOME}/Downloads";
 export SAFE_DIR="backup";
 export SOURCE_FILES_DIR="${DOWNLOADS_DIR}/${SAFE_DIR}";
@@ -112,6 +120,12 @@ if [[ 1 == 1 ]]; then # New filters
   export SPEC_NAME='visible';
   ./PutViewsDocument.sh;
 
+  # **** THIS CODE SHOULD BE BACKBURNERED ***
+  # https://stackoverflow.com/questions/53843331/why-does-first-use-of-a-pouchdb-view-after-from-replication-return-one-record
+  export SPEC_NAME='sequences';
+  ./PutViewsDocument.sh;
+
+# curl -sH "Content-type: application/json" -X POST "https://hasan:34erDFCV@yourdb.yourpublic.work/ib201812_12/_design/sequences/_view/last_invoice_serial" -d '{"queries": [{"limit":1,"descending":true}]}' | jq .results[0].rows[0].key;
 fi;
 
 if [[ 1 == 0 ]]; then # Test data

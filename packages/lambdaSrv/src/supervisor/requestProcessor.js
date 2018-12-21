@@ -30,7 +30,7 @@ const processRequests = (parms) => {
       const jobStack = [];
       rslt.rows.forEach((request) => {
         const { handler } = request.doc.meta;
-        LG.debug(`Stacking ${name}s :: ${handler} ${request.id}`);
+        LG.verbose(`\nStacking ${name}s :: ${handler} ${request.id}\n`);
         if (!actions[handler]) throw new Error(`Request action handler "${handler}" is undefined.`);
         jobStack.push(new actions[handler](request, database, jobStack));
       });

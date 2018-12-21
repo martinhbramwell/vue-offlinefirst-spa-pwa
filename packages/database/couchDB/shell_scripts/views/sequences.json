@@ -1,0 +1,14 @@
+{
+  "_id": "_design/sequences",
+  "_rev": "4-ea1229f329b4d63820dffc1df84430f6",
+  "comment": "**** THIS CODE IS BACKBURNERED ***  https://stackoverflow.com/questions/53843331/why-does-first-use-of-a-pouchdb-view-after-from-replication-return-one-record",
+  "views": {
+    "last_invoice_id": {
+      "map": "function(doc) {if (doc.data && doc.data.type === 'invoice' && !doc.data.metadata && !doc.meta) emit(doc.data.idib, doc.data.codigo)}"
+    },
+    "last_invoice_serial": {
+      "map": "function(doc) {if (doc.data && doc.data.type === 'invoice' && !doc.data.metadata && !doc.meta) emit(parseInt(doc.data.codigo.split('-')[2], 10), doc.data.codigo)}"
+    }
+  },
+  "language": "javascript"
+}

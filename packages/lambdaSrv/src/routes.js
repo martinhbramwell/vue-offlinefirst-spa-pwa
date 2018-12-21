@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
+import inspectInvoices from './inspections/inspectInvoices';
 
 const routes = Router();
 const BY_BOTTLE = 'byBottle';
@@ -55,6 +56,10 @@ routes.get('/list', (req, res, next) => { // eslint-disable-line no-unused-vars
 
 routes.get('/inspect', (req, res, next) => {
   inspectDesignDocs(req, res, next);
+});
+
+routes.get('/invoices', (req, res, next) => {
+  inspectInvoices(req, res, next);
 });
 
 export default routes;

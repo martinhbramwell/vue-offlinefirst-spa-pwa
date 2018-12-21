@@ -22,6 +22,14 @@ if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
   usage;
 fi;
 
+timestamp() {
+  date +"%Y%m%d%H%M%S";
+}
+
+fecha() {
+  date +"%Y-%m-%d %H:%M:%S";
+}
+
 # ##
 # # export QUERY="_security";
 # # export QUERY="_design/persons/_view/minimal_person";
@@ -81,46 +89,116 @@ fi;
 # export QUERY="_design/visible/_view/count_movement";
 # echo curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}"
 
-export QUERY="aPerson_1_0000000000000018";
+export FULL_URL="${COUCH_URL}/${COUCH_DATABASE}";
 
-# export FIELD="ruc_cedula";
-# export FIELD="tipo_de_documento";
-# export FIELD="nombre";
-# export FIELD="direccion";
-# export FIELD="telefono_1";
-export FIELD="telefono_2";
-# export FIELD="mobile";
-# export FIELD="distribuidor";
-# export FIELD="email";
+if [[ 1 == 0 ]]; then # Database data
+  export QUERY="aPerson_1_0000000000000018";
 
-export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc)\",";
+  # export FIELD="ruc_cedula";
+  # export FIELD="tipo_de_documento";
+  # export FIELD="nombre";
+  # export FIELD="direccion";
+  # export FIELD="telefono_1";
+  export FIELD="telefono_2";
+  # export FIELD="mobile";
+  # export FIELD="distribuidor";
+  # export FIELD="email";
 
-# export QUERY="Invoice_1_0000000000000001";
-# export FIELD="notas";
-# export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+  export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc)\",";
 
-# export QUERY="aPerson_1_0000000000000001";
-# export FIELD="email";
-# export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+  # export QUERY="Invoice_1_0000000000000001";
+  # export FIELD="notas";
+  # export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
+
+  # export QUERY="aPerson_1_0000000000000001";
+  # export FIELD="email";
+  # export REPLACEMENT="    \"${FIELD}\": \"$(echo $RANDOM % 1000 + 1 | bc) litros\",";
 
 
-export PATTERN=".*${FIELD}.*";
-export FULL_URL="${COUCH_URL}/${COUCH_DATABASE}/${QUERY}";
-generate_post_data()
+  export PATTERN=".*${FIELD}.*";
+  generate_post_data()
+  {
+    PUTDATA=$(curl -sH "Content-type: application/json" "${FULL_URL}" | jq -r .);
+    echo -e "${PUTDATA}" | sed "s/${PATTERN}/${REPLACEMENT}/";
+  }
+
+  # export NEW_PRODUCT_2=$(generate_post_data);
+  # echo -e ${NEW_PRODUCT_2};
+
+  echo -e "Updating person '${QUERY}' in database '${COUCH_DATABASE}'..."
+  curl --silent --include \
+    --header "Accept: application/json" \
+    --header "Content-Type:application/json" \
+    --request PUT \
+    --data "$(generate_post_data)" ${FULL_URL} > /dev/null
+
+  echo -e "... fetching result."
+  curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}"
+fi;
+
+if [[ 1 == 1 ]]; then # Database data
+
+  export ID="Request_2_$(timestamp)_Invoice";
+
+  read -r -d '' PUTDATA <<EOF
 {
-  PERSON_2=$(curl -sH "Content-type: application/json" "${FULL_URL}" | jq -r .);
-  echo -e "${PERSON_2}" | sed "s/${PATTERN}/${REPLACEMENT}/";
+  "data": {
+    "idib": 5,
+    "type": "invoice",
+    "fecha": "$(fecha)",
+    "codigo": "001-001",
+    "sucursal": 1,
+    "pdv": 1,
+    "sequential": 0,
+    "idCliente": 347,
+    "nombreCliente": "Santiago Mora Cevallos",
+    "idResponsable": 6,
+    "nombreResponsable": "Segundo Morales",
+    "estado": "P",
+    "subTotalConImpuesto": 6.25,
+    "subTotalSinImpuesto": 0,
+    "subTotal": 6.25,
+    "totalImpuesto": 0.75,
+    "total": 7,
+    "descuento": 0,
+    "notas": "",
+    "count": 1,
+    "itemes": [
+      {
+        "idItem": 1,
+        "idProducto": 1,
+        "nombreProducto": "Agua IridiumBlue",
+        "cantidad": 1,
+        "descuento": 6,
+        "precio": 6.25,
+        "total": 6.25,
+        "impuesto": 6
+      }
+    ]
+  },
+  "meta": {
+    "type": "Request",
+    "handler": "InvoiceCreate"
+  },
+  "_id": "${ID}"
 }
+EOF
 
-# export NEW_PRODUCT_2=$(generate_post_data);
-# echo -e ${NEW_PRODUCT_2};
+  generatePutData()
+  {
+    echo -e "${PUTDATA}";
+  }
 
-echo -e "Updating person '${QUERY}' in database '${COUCH_DATABASE}'..."
-curl --silent --include \
-  --header "Accept: application/json" \
-  --header "Content-Type:application/json" \
-  --request PUT \
-  --data "$(generate_post_data)" ${FULL_URL} > /dev/null
+  export QUERY_URL=${FULL_URL}/${ID};
+  echo -e "Submitting new record '${ID}' to database '${COUCH_DATABASE}'..."
 
-echo -e "... fetching result."
-curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}"
+  curl --silent --include \
+    --header 'Accept: application/json' \
+    --header 'Content-Type:application/json' \
+    --request PUT \
+   --data "$(generatePutData)" ${QUERY_URL} >/dev/null;
+
+  echo -e "... fetching result.";
+  curl -sH 'Content-type: application/json' ${QUERY_URL};
+fi;
+

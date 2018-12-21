@@ -1,4 +1,3 @@
-// import fs from 'fs';
 import PouchDB from 'pouchdb';
 import relater from 'relational-pouch';
 import finder from 'pouchdb-find';
@@ -8,8 +7,9 @@ import adptrMemory from 'pouchdb-adapter-memory';
 import supervisor from '../supervisor';
 
 import { logger as LG } from '../utils';
+import query from '../utils/query'; // eslint-disable-line no-unused-vars
 
-const CLG = console.log; // eslint-disable-line no-console, no-unused-vars
+const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 
 const runInMemory = false;
 const adapter = runInMemory ? 'memory' : null;
@@ -153,45 +153,6 @@ export default () => {
       .on('error', err => LG.error(`Database error ${err}`));
   };
 
-  // const launchSyncs = (db, filter) => { // eslint-disable-line no-unused-vars
-  //   const {
-  //     name,
-  //     label,
-  //     action,
-  //     direction,
-  //   } = filter;
-  //   const dir = direction.toUpperCase();
-
-  //   db.replicate[direction](databaseRemote, {
-  //     live: true,
-  //     retry: true,
-  //     filter: name,
-  //     query_params: { agent: userId },
-  //   })
-  //     .on('change', (response) => {
-  //       LG.info(`${lclDb} ${name} *** ${label} REPLICATION DELTA ${dir} *** `);
-  //       LG.info(`Database replication from: ${response.docs.length} records.`);
-  //       // response.docs.forEach((doc) => {
-  //       //   if (!replicatedEntityCounters[doc.data.type]) {
-  //       //     replicatedEntityCounters[doc.data.type] = 0
-  //       //   };
-  //       //   replicatedEntityCounters[doc.data.type] += 1;
-  //       // });
-  //     // LG.info(`'from' counts by type : ${JSON.stringify(replicatedEntityCounters, null, 2)}`);
-  //     })
-  //     .on('active', () => {
-  //       LG.info(`${lclDb} ${name} *** ${label} REPLICATION ${dir} RESUMED *** `);
-  //     })
-  //     .on('paused', () => {
-  //       LG.info(`${lclDb} ${name}  *** ${label} REPLICATION ${dir} ON HOLD *** `);
-  //       action(db);
-  //     })
-  //     .on('denied', (info) => {
-  //       LG.info(`${lclDb}/${name} *** ${label} REPLICATION ${dir} DENIED *** ${info}`);
-  //     })
-  //     .on('error', err => LG.error(`Database error ${err}`));
-  // };
-
   const nullAction = () => { LG.info(' no special action required '); };
 
   const coreReplicationFilter = {
@@ -219,12 +180,10 @@ export default () => {
   ];
 
   let secondaryReplicationsWaiting = true;
-  const startSecondaryReplications = (initializer) => { // eslint-disable-line no-unused-vars
-    initializer.cancel();
+  const startSecondaryReplications = () => { // eslint-disable-line no-unused-vars
     if (secondaryReplicationsWaiting) {
       LG.info('--------------------\nStart Secondary Replicators\n--------------------');
       replicationFilters.forEach((filter) => {
-        // launchReplicator(databaseLocal, filter);
         launchSyncs(databaseLocal, filter);
       });
       secondaryReplicationsWaiting = false;
@@ -235,18 +194,16 @@ export default () => {
   const filterLabel = 'CORE DATA ENTITIES';
 
   databaseLocal.setMaxListeners(Infinity);
-  const initialReplicator = databaseLocal.replicate.from(databaseRemote, {
-    live: true,
-    retry: true,
+
+  databaseLocal.replicate.from(databaseRemote, {
     filter: filterName,
-    // query_params: { agent: userId },
+    batch_size: 500,
   })
     .on('change', (info) => {
       LG.info(`${lclDb} *** ${filterLabel} REPLICATION DELTA FROM ${rmtDbHost} *** `);
       LG.info(`Database replication inbound _${JSON.stringify(info.docs.length, null, 3)}_ records.`);
-      CLG(`${JSON.stringify(info.docs[0], null, 3)}`);
       info.docs.forEach((doc) => {
-        if (doc.data.type) {
+        if (doc.data && doc.data.type) {
           if (!replicatedEntityCounters[doc.data.type]) {
             replicatedEntityCounters[doc.data.type] = 0;
           }
@@ -261,18 +218,116 @@ export default () => {
       });
       LG.info(`'from' counts by type : ${JSON.stringify(replicatedEntityCounters, null, 2)}`);
     })
-    .on('active', () => {
-      LG.info(`${lclDb} *** ${filterLabel} REPLICATION RESUMED *** `);
+    .then((rslt) => {
+      LG.info(`${lclDb} *** ${filterLabel}
+    INITIAL REPLICATION COMPLETE ***  (${JSON.stringify(rslt, null, 3)})`);
+      startSecondaryReplications();
     })
-    .on('paused', (err) => {
-      LG.info(`${lclDb} *** ${filterLabel} REPLICATION PAUSED *** `);
-      if (err.message.length > 0) LG.info(`${lclDb} *** Error? >${err}< *** `);
-      startSecondaryReplications(initialReplicator);
-    })
-    .on('complete', (info) => {
-      LG.info(`${lclDb} *** ${filterLabel} INITIAL REPLICATION COMPLETE ***  (${JSON.stringify(info, null, 3)})`);
-    })
-    .on('error', err => LG.error(`Database replication error ${err}`));
+    .catch(err => LG.error(`Database replication error ${err}`));
+
+  /* eslint-disable max-len */
+
+  // .on('active', () => {
+  //   LG.info(`${lclDb} *** ${filterLabel} REPLICATION RESUMED *** `);
+  // })
+  // .on('complete', (info) => {
+  //   CLG(info);
+  // LG.info(`${lclDb} *** ${filterLabel} REPLICATION FINISHED ***\n${info}`);
+  //       if (err.message.length > 0) LG.info(`${lclDb} *** Error? >${err}< *** `);
+
+  //   //    // LG.debug(`${lclDb} Initializing sequence counters `);
+  //   //    // const lastValueOptions = { descending: true, limit: 1 };
+  //   //    // query(databaseLocal, 'sequences/last_invoice_serial', lastValueOptions)
+  //   //    //   .then(s => LG.debug(`${lclDb} Sequence : ${JSON.stringify(s.rows, null, 2)} `));
+  //   //    // query(databaseLocal, 'sequences/last_invoice_id', lastValueOptions)
+  //   //    //   .then(s => LG.debug(`${lclDb} ID : ${JSON.stringify(s.rows, null, 2)} `));
+
+  //       LG.debug(`
+  // {
+  //   "_id": "_design/sequences",
+  //   "_rev": "1-7d4586c1649f86e4098bf3717afe6de0",
+  //   "views": {
+  //     "last_invoice_id": {
+  //       "map": "function(doc) {if (doc.data && doc.data.type === 'invoice' && !doc.data.metadata && !doc.meta) emit(doc.data.idib, data.codigo)}"
+  //     }
+  //   }
+  // }
+  // `);
+
+  //       databaseLocal.query(
+  //         'sequences/last_invoice_id',
+  //         { descending: true, limit: 1 },
+  //       ).then(rslt => LG.debug(`\nLAST ID : ${JSON.stringify(rslt, null, 2)} `));
+
+  //       databaseLocal.allDocs({
+  //         include_docs: true,
+  //         attachments: true,
+  //         descending: true,
+  //         endkey: 'Invoice_1_0000000000000000',
+  //         startkey: 'Invoice_3',
+  //         limit: 1,
+  //       })
+  //         .then(rslt => LG.debug(`\nLAST INVOICE ::\n${JSON.stringify(rslt, null, 2)} `))
+  //         .catch(error => LG.error(`UPDATE ERROR :: ${JSON.stringify(error, null, 2)}`));
+
+  //       startSecondaryReplications(initialReplicator);
+  // })
+
+  // .then((rslt) => {
+  //   LG.info(`${lclDb} *** ${filterLabel}
+  // INITIAL REPLICATION COMPLETE ***  (${JSON.stringify(rslt, null, 3)})`);
+
+  //     // const IDX_INV_CODE = 'invoice_codigo';
+  //     // const IDX_FLD_CODE = 'data.codigo';
+  //     // databaseLocal.createIndex({ index: { fields: [IDX_FLD_CODE], name: IDX_INV_CODE } })
+  //     //   .then((idxRslt) => {
+  //     //     LG.debug(`\nBuilt index ${IDX_INV_CODE}: ${JSON.stringify(idxRslt, null, 2)} `);
+  //     //     databaseLocal.find({
+  //     //       selector: {
+  //     //         $and: [
+  //     //           {
+  //     //             'data.codigo': {
+  //     //               $gte: '001-001-000000000',
+  //     //             },
+  //     //           },
+  //     //           {
+  //     //             'data.codigo': {
+  //     //               $lt: '999',
+  //     //             },
+  //     //           },
+  //     //         ],
+  //     //       },
+  //     //       sort: [
+  //     //         {
+  //     //           'data.codigo': 'desc',
+  //     //         },
+  //     //       ],
+  //     //     })
+  //     //       .then(qryRslt => LG.debug(`\nQuery result:\n${JSON.stringify(qryRslt, null, 2)} `))
+  //     //       .catch(err => LG.error(`Querying ${IDX_INV_CODE} -- ${err}`));
+  //     //   })
+  //     //   .catch(err => LG.error(`Building index ${IDX_INV_CODE} -- ${err}`));
+
+  //     // databaseLocal.query(
+  //     //   'sequences/last_invoice_id',
+  //     //   { descending: true, limit: 1 },
+  //     // ).then(last => LG.debug(`\nLAST ID : ${JSON.stringify(last, null, 2)} `));
+
+  //     // databaseLocal.allDocs({
+  //     //   include_docs: true,
+  //     //   attachments: true,
+  //     //   startkey: 'Invoice_1_0000000000000000',
+  //     //   endkey: 'Invoice_3',
+  //     //   // endkey: 'Invoice_1_0000000000000000',
+  //     //   // startkey: 'Invoice_3',
+  //     //   // limit: 1,
+  //     // })
+  //     //   .then(last => LG.debug(`\nLAST INVOICE ::\n${JSON.stringify(last, null, 2)} `));
+
+  //   //   startSecondaryReplications();
+  //   // })
+  //   // .catch(err => LG.error(`Database replication error ${err}`));
+  // .on('error', err => LG.error(`Database replication error ${err}`));
 
   /* eslint-disable max-len */
 

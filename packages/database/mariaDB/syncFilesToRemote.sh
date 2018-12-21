@@ -2,7 +2,7 @@ export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 source ${CONFIG_FILE};
 
 export SYNC_DIR="mariaDB";
-export SYNC_PATH="projects/offspwa-vue/packages/database";
+export SYNC_PATH="projects/vue-offlinefirst-spa-pwa/packages/database";
 export LOCAL_DIR="${HOME}/${SYNC_PATH}/${SYNC_DIR}";
 export REMOTE_DIR="/home/${MARIA_USR}/${SYNC_PATH}";
 

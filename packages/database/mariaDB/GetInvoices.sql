@@ -10,6 +10,9 @@ SELECT
           "idib", i.invoice_id
         , "type", "invoice"
         , "codigo", i.invoice_number
+        , "sucursal", SUBSTRING_INDEX(i.invoice_number, '-', 1)
+        , "pdv", SUBSTRING_INDEX(SUBSTRING_INDEX(i.invoice_number, '-', 2), '-', -1)
+        , "sequential", SUBSTRING_INDEX(SUBSTRING_INDEX(i.invoice_number, '-', 3), '-', -1)
         , "fecha",  i.invoice_creation_date
         , "idCliente",  i.partner_id
         , "nombreCliente",  p.partner_name
@@ -54,7 +57,7 @@ FROM
 --   i.invoice_id in (3561, 3562, 3587, 3603, 3612, 3613)
 GROUP BY i.invoice_id
 -- HAVING count > 2
-ORDER BY i.invoice_id
--- limit 2
+ORDER BY i.invoice_id desc
+limit 25
 ;
 
