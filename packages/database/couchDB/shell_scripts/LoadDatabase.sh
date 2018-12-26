@@ -76,6 +76,7 @@ if [[ 1 == 1 ]]; then # Database data
   export COUCH_GROUP_NAME='invoices';
   export COUCH_COLLECTION_NAME='invoice';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
 
   export COUCH_GROUP_NAME='products';
   export COUCH_COLLECTION_NAME='product';

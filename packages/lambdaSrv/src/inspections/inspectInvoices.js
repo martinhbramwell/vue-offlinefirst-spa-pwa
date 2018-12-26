@@ -67,13 +67,11 @@ export default async (req, res) => {
   const codeIndex = { name: 'invoice_code', category: CATEGORY_FIELD, indexer: CODE_INDEX };
 
   try {
-
     const { data: serial } = (await findMaxRow(databaseLocal, serialIndex));
     res.write(`</div>Query result -- Serial #${JSON.stringify(serial.sequential, null, 2)}</div>`);
 
     const { data: code } = (await findMaxRow(databaseLocal, codeIndex));
     res.write(`<br /></div>Query result -- Code #${JSON.stringify(code.idib, null, 2)}</div>`);
-
   } catch (err) {
     res.write(`</div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
   }

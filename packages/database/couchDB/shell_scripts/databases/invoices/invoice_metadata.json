@@ -1,0 +1,201 @@
+{
+  "docs": [
+    {
+      "_id": "Invoice_2_MetaData",
+      "data": {
+        "type": "invoice",
+        "metadata": true,
+        "enums": {
+          "StatusLookup": {
+            "S": "Pago Parcial",
+            "C": "Anulada",
+            "P": "Pagada",
+            "N": "No Pagada"
+          }
+        },
+        "columns": [
+          {
+            "meta": "Codigo",
+            "label": "COD",
+            "field": "codigo",
+            "centered": false,
+            "visible": true,
+            "width": 5,
+            "numeric": true,
+            "type": "integer",
+            "usage": "rw",
+            "idx": 0
+          },
+          {
+            "meta": "Fecha",
+            "label": "FECH",
+            "field": "fecha",
+            "centered": true,
+            "visible": true,
+            "width": 10,
+            "numeric": false,
+            "type": "date",
+            "usage": "rw",
+            "idx": 1
+          },
+          {
+            "meta": "Estado",
+            "label": "ESTS",
+            "field": "estado",
+            "centered": true,
+            "visible": false,
+            "width": 10,
+            "numeric": false,
+            "type": "text",
+            "usage": "rw",
+            "idx": 2
+          },
+          {
+            "meta": "Codigo Cliente",
+            "label": "CCLI",
+            "field": "idCliente",
+            "centered": true,
+            "visible": true,
+            "width": 6,
+            "numeric": false,
+            "type": "integer",
+            "usage": "rw",
+            "idx": 3
+          },
+          {
+            "meta": "Nombre Cliente",
+            "label": "CLNT",
+            "field": "nombreCliente",
+            "centered": false,
+            "visible": true,
+            "width": 70,
+            "numeric": false,
+            "type": "title",
+            "usage": "rw",
+            "idx": 4
+          },
+          {
+            "meta": "Lista de Items",
+            "label": "ITMS",
+            "field": "lista_de_items",
+            "centered": true,
+            "visible": false,
+            "width": 4,
+            "numeric": true,
+            "type": "JSON1",
+            "usage": "rw",
+            "idx": 5
+          },
+          {
+            "meta": "Subtotal IVA 12%",
+            "label": "IV12",
+            "field": "subTotalConImpuesto",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 6
+          },
+          {
+            "meta": "Subtotal IVA 0%",
+            "label": "IV00",
+            "field": "subTotalSinImpuesto",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 7
+          },
+          {
+            "meta": "Descuento Especial",
+            "label": "DESC",
+            "field": "descuento",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 8
+          },
+          {
+            "meta": "Subtotal Descontado",
+            "label": "STDC",
+            "field": "subTotal",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 9
+          },
+          {
+            "meta": "Total Impuesto",
+            "label": "IVA",
+            "field": "totalImpuesto",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 10
+          },
+          {
+            "meta": "Retenido",
+            "label": "RETN",
+            "field": "retenido",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 11
+          },
+          {
+            "meta": "Monto Final",
+            "label": "MNTO",
+            "field": "total",
+            "centered": false,
+            "visible": true,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 12
+          },
+          {
+            "meta": "Total Cobrado",
+            "label": "COBR",
+            "field": "total_cobrado",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "usd",
+            "usage": "rw",
+            "idx": 13
+          },
+          {
+            "meta": "Itemes",
+            "label": "DATA",
+            "field": "itemes",
+            "centered": false,
+            "visible": false,
+            "width": 12,
+            "numeric": true,
+            "type": "text",
+            "usage": "rw",
+            "idx": 13
+          }
+        ]
+      }
+    }
+  ]
+}
