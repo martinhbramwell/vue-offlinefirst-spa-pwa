@@ -35,19 +35,22 @@ const processInvoice = (elem, pyld) => {
     cy.get('#modal-lista-factura-partner_telf_primary')
     .then(e => invoice.data.telefono = e.text());
 
+                 debugger;
     invoice.data.itemes = [];
     let idx = 0;
     cy.get('#modal-lista-factura-table > tbody')
       .children('tr')
       .then(($item) => {
-        const itm = {
-          idItem: idx,
-          nombreProducto: $item[0].cells[0].innerText,
-          cantidad: $item[0].cells[1].innerText,
-          precio: $item[0].cells[2].innerText,
-          total: $item[0].cells[3].innerText,
-        };
-        invoice.data.itemes.push(itm);
+        for (let ii = 0; ii < $item.length; ii += 1) {
+          const itm = {
+            idItem: idx,
+            nombreProducto: $item[ii].cells[0].innerText,
+            cantidad: $item[ii].cells[1].innerText,
+            precio: $item[ii].cells[2].innerText,
+            total: $item[ii].cells[3].innerText,
+          };
+          invoice.data.itemes.push(itm);
+        }
 
         cy.log('~~~~~~~~~~~~~~~~~~~~~~');
         cy.log();
@@ -65,10 +68,10 @@ const processInvoice = (elem, pyld) => {
       invoice.data.count = invoice.data.itemes.length;
       invoice.data.subTotalConImpuesto = $totals[1].children[0].children[1].children[0].innerText;
       invoice.data.subTotalSinImpuesto = $totals[1].children[1].children[1].children[0].innerText;
-      invoice.data.descuento = $totals[1].children[2].children[1].children[0].innerText;
-      invoice.data.subTotal = $totals[1].children[3].children[1].children[0].innerText;
-      invoice.data.totalImpuesto = $totals[1].children[4].children[1].children[0].innerText;
-      invoice.data.total = $totals[1].children[5].children[1].children[0].innerText;
+      invoice.data.descuento =           $totals[1].children[2].children[1].children[0].innerText;
+      invoice.data.subTotal =            $totals[1].children[3].children[1].children[0].innerText;
+      invoice.data.totalImpuesto =       $totals[1].children[4].children[1].children[0].innerText;
+      invoice.data.total =               $totals[1].children[5].children[1].children[0].innerText;
       cy.log($totals[1].children[1].children[1]);
     });
 

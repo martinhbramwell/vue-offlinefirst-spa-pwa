@@ -15,6 +15,10 @@ const couchGetOpts = (query) => {
     method: "GET",
     followRedirect: true,
     failOnStatusCode: true,
+    headers: {
+      'pragma': 'no-cache',
+      'cache-control': 'no-cache'
+    }
   }
 };
 
@@ -56,4 +60,20 @@ const tightDate = () => {
 // };
 const uniqueRequest = () => `Request_2_${tightDate()}_Invoice`;
 
-export default { couchGetOpts, couchPutOpts, couchPayload, uniqueRequest, tightDate }
+const YR = 0;
+const MTH = YR + 1;
+const DAY = MTH + 1;
+const HR = DAY + 1;
+const MIN = HR + 1;
+const SEC = MIN + 1;
+
+const abbr = { YR, MTH, DAY, HR, MIN, SEC };
+
+export default {
+  abbr,
+  couchGetOpts,
+  couchPutOpts,
+  couchPayload,
+  uniqueRequest,
+  tightDate
+}
