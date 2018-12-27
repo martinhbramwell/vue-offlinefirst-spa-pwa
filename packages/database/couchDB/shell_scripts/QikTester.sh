@@ -3,7 +3,8 @@
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
 export COUCH_DATABASE=${1:-$COUCH_DATABASE};
-export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
+# export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 
 function usage() {
   echo "Usage: ./TestGet.sh \$COUCH_DATABASE";
@@ -136,7 +137,9 @@ if [[ 1 == 0 ]]; then # Database data
   curl -sH "Content-type: application/json" "${COUCH_URL}/${COUCH_DATABASE}/${QUERY}"
 fi;
 
-if [[ 1 == 1 ]]; then # Database data
+
+
+if [[ 1 == 0 ]]; then # Database data
 
   export ID="Request_2_$(timestamp)_Invoice";
 
@@ -192,13 +195,30 @@ EOF
   export QUERY_URL=${FULL_URL}/${ID};
   echo -e "Submitting new record '${ID}' to database '${COUCH_DATABASE}'..."
 
-  curl --silent --include \
+  echo -e "curl --silent --include \
     --header 'Accept: application/json' \
     --header 'Content-Type:application/json' \
     --request PUT \
-   --data "$(generatePutData)" ${QUERY_URL} >/dev/null;
+   --data "$(generatePutData)" ${QUERY_URL} >/dev/null";
 
   echo -e "... fetching result.";
-  curl -sH 'Content-type: application/json' ${QUERY_URL};
+  echo -e "curl -sH 'Content-type: application/json' ${QUERY_URL};"
 fi;
 
+
+if [[ 1 == 1 ]]; then # Database data
+
+  export DESIGN_NAME='BapuViews';
+
+  export VIEW_NAME='latestInvoice';
+  export UPD_VIEW='update=true';
+  export SORT_VIEW='&descending=true';
+  export LIMIT_VIEW='&limit=1';
+  export VIEWOPTIONS=${VIEW_NAME}?${UPD_VIEW}${SORT_VIEW}${LIMIT_VIEW};
+
+  export QUERY_URL=${FULL_URL}/_design/${DESIGN_NAME}/_view/${VIEWOPTIONS};
+
+  echo -e "... fetching from view WITH '${QUERY_URL}'.";
+  curl -sH 'Content-type: application/json' ${QUERY_URL};
+
+fi;

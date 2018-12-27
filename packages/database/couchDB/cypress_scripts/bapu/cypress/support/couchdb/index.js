@@ -1,6 +1,6 @@
 import { default as scrapeInvoice } from './ScrapeInvoice';
 import { default as utils } from './utils';
 
-const { couchPutOpts, couchPayload } = utils;
+const { couchGetOpts, couchPutOpts, couchPayload } = utils;
 
-export default { couchPutOpts, couchPayload, scrapeInvoice };
+export default { couchGetOpts, couchPutOpts, couchPayload, scrapeInvoice };

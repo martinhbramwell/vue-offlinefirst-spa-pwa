@@ -5,7 +5,16 @@ const couchPutOpts = (id) => {
     url: `${secrets.URL}/${id}`,
     method: "PUT",
     followRedirect: true,
-    failOnStatusCode: false,
+    failOnStatusCode: true,
+  }
+};
+
+const couchGetOpts = (query) => {
+  return {
+    url: `${secrets.URL}/${query}`,
+    method: "GET",
+    followRedirect: true,
+    failOnStatusCode: true,
   }
 };
 
@@ -47,4 +56,4 @@ const tightDate = () => {
 // };
 const uniqueRequest = () => `Request_2_${tightDate()}_Invoice`;
 
-export default { couchPutOpts, couchPayload, uniqueRequest, tightDate }
+export default { couchGetOpts, couchPutOpts, couchPayload, uniqueRequest, tightDate }
