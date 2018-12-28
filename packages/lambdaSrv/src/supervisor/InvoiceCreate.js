@@ -52,7 +52,8 @@ const CODE_INDEX = [
   },
 ];
 
-const serialIndex = { name: 'invoice_serial', category: CATEGORY_FIELD, indexer: SERIAL_INDEX };
+const serialIndexName = 'invoice_serial';
+const serialIndex = { name: serialIndexName, category: CATEGORY_FIELD, indexer: SERIAL_INDEX };
 const codeIndex = { name: 'invoice_code', category: CATEGORY_FIELD, indexer: CODE_INDEX };
 
 
@@ -78,24 +79,33 @@ export default class {
 
     CLG(`From ${categoryMetaData} to ${categoryName}`);
 
-    const { data: serial } = (await findMaxRow(this.lclDB, serialIndex));
-    const { sucursal, pdv } = serial;
-    const sequential = 1 + serial.sequential;
-    LG.info(`\n\nQuery result -- Serial #${JSON.stringify(sequential, null, 2)}\n`);
-    const { data: code } = (await findMaxRow(this.lclDB, codeIndex));
-    const idib = 1 + code.idib;
-    LG.info(`\n\nQuery result -- Code #${JSON.stringify(idib, null, 2)}\n`);
+    if (newRecord.data.idib && newRecord.data.codigo) {
+      LG.warn(`\n\nAssuming we are loading an existing invoice. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
+      newRecord._id = `Invoice_1_${newRecord.data.idib.toString().padStart(16, '0')}`;
+    } else {
+      const maxRow = (await findMaxRow(this.lclDB, serialIndex));
+      if (!maxRow.data) throw new Error(`Unable to get results using index ${serialIndexName}!`);
 
+      const { data: serial } = maxRow;
+      const { sucursal, pdv } = serial;
+      const sequential = 1 + serial.sequential;
+      LG.info(`\n\nQuery result -- Serial #${JSON.stringify(sequential, null, 2)}\n`);
+      const { data: code } = (await findMaxRow(this.lclDB, codeIndex));
+      const idib = 1 + code.idib;
+      LG.info(`\n\nQuery result -- Code #${JSON.stringify(idib, null, 2)}\n`);
 
-    newRecord._id = `Invoice_1_${idib.toString().padStart(16, '0')}`;
-    newRecord.data.pdv = pdv;
-    newRecord.data.idib = idib;
-    newRecord.data.sucursal = sucursal;
-    newRecord.data.sequential = sequential;
-    newRecord.data.codigo = `${sucursal.toString().padStart(3, '0')}`;
-    newRecord.data.codigo += `-${pdv.toString().padStart(3, '0')}`;
-    newRecord.data.codigo += `-${sequential.toString().padStart(9, '0')}`;
-    LG.debug(`Got newRecord:\n${JSON.stringify(newRecord, null, 2)}`);
+      newRecord.data.pdv = pdv;
+      newRecord.data.idib = idib;
+      newRecord.data.sucursal = sucursal;
+      newRecord.data.sequential = sequential;
+      newRecord.data.codigo = `${sucursal.toString().padStart(3, '0')}`;
+      newRecord.data.codigo += `-${pdv.toString().padStart(3, '0')}`;
+      newRecord.data.codigo += `-${sequential.toString().padStart(9, '0')}`;
+
+      newRecord._id = `Invoice_1_${idib.toString().padStart(16, '0')}`;
+
+      LG.debug(`Got newRecord:\n${JSON.stringify(newRecord, null, 2)}`);
+    }
 
     this.lclDB.put(newRecord)
       .then((newpers) => {

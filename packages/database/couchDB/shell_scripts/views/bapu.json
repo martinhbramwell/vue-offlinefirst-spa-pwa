@@ -1,0 +1,9 @@
+{
+  "_id": "_design/BapuViews",
+  "views": {
+    "latestInvoice": {
+      "map": "function (doc) {\n  if (doc.meta && doc.data && doc.data.fecha) { emit(doc.data.fecha, 1) };\n}"
+    }
+  },
+  "language": "javascript"
+}

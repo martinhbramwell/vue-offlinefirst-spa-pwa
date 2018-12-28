@@ -3,8 +3,9 @@ import secrets from '../secrets.js';
 // -- These are parent commands --
 Cypress.Commands.add("login", () => {
 
-  cy.get('#username').type(secrets.UID);
-  cy.get('body > div.middle-box.text-center.loginscreen.animated.fadeInDown > div > form > div:nth-child(2) > input').type(secrets.PWD);
+
+  cy.get('#username').type(secrets.EP_UID);
+  cy.get('body > div.middle-box.text-center.loginscreen.animated.fadeInDown > div > form > div:nth-child(2) > input').type(secrets.EP_PWD);
   cy.get('body > div.middle-box.text-center.loginscreen.animated.fadeInDown > div > form > button').click();
 
 })

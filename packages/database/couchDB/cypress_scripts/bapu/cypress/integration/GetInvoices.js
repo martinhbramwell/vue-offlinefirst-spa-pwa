@@ -1,5 +1,6 @@
 // import { couchPutOpts, couchPayload, scrapeInvoice, tightDate } from '../support/couchdb';
 import { couchGetOpts, processYear } from '../support/couchdb';
+import secrets from '../secrets.js';
 
 const years = [ '2016', '2017', '2018', '2019', '2020', '2021' ];
 
@@ -9,9 +10,7 @@ describe('BAPU Scraper', function() {
 
     cy.fixture('../fixtures/couch.json').as('couchData');
 
-    const query = `_design/BapuViews/_view/latestInvoice?stable=true&update=true&descending=true&limit=1`;
-
-    const opts = couchGetOpts(query);
+    const opts = couchGetOpts(secrets.CH_LATESTINVOICE);
 
     cy.log('-------------------');
     cy.log(JSON.stringify(opts, null, 2));
@@ -30,19 +29,19 @@ describe('BAPU Scraper', function() {
 
   it('Scrape BAPU', function() {
 
-    cy.get('@couchData').then((couch) => {
-      cy.log(`Processing from last invoice ${couch.lastInvoice}.`);
-    });
+    // cy.get('@couchData').then((couch) => {
+    //   cy.log(`Processing from last invoice ${couch.lastInvoice}.`);
+    // });
 
     cy.get('@latestInvoice').then((latest) => {
       cy.log(`Processing from last invoice ${JSON.stringify(latest, null, 2)}.`);
     });
 
-    cy.visit('http://www.iridiumblue.ec/erp/bapu/test/index.php')
+    cy.visit(secrets.ENDPNT);
 
     cy.login();
 
-    cy.visit('http://www.iridiumblue.ec/erp/bapu/test/index.php?m=invoice_control');
+    cy.visit(`${secrets.ENDPNT}?m=invoice_control`);
 
     cy.get('#form-status').select('Pagada Parcial');
 

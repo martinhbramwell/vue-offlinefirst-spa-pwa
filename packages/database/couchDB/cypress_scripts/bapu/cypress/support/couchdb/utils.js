@@ -2,7 +2,7 @@ import secrets from '../../secrets';
 
 const couchPutOpts = (id) => {
   return {
-    url: `${secrets.URL}/${id}`,
+    url: `${secrets.CH_URL}/${id}`,
     method: "PUT",
     followRedirect: true,
     failOnStatusCode: true,
@@ -11,7 +11,7 @@ const couchPutOpts = (id) => {
 
 const couchGetOpts = (query) => {
   return {
-    url: `${secrets.URL}/${query}`,
+    url: `${secrets.CH_URL}/${query}`,
     method: "GET",
     followRedirect: true,
     failOnStatusCode: true,

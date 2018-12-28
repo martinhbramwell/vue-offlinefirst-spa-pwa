@@ -16,7 +16,7 @@ if [[ ! -f ${CONFIG_FILE} ]]; then
   usage;
 fi;
 
-source ${CONFIG_FILE};
+# source ${CONFIG_FILE};
 
 if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
   usage;
