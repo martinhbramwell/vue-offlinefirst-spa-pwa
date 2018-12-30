@@ -35,7 +35,7 @@ const SERIAL_INDEX = [
   {
     fieldName: 'data.sequential',
     first: 0,
-    last: 9999,
+    last: 999999999,
   },
 ];
 
@@ -48,7 +48,7 @@ const CODE_INDEX = [
   {
     fieldName: 'data.idib',
     first: 0,
-    last: 9999,
+    last: 99999999,
   },
 ];
 
@@ -66,7 +66,7 @@ export default class {
 
   async process() {
     const operationName = 'process';
-    LG.info(`${moduleTitle}.${operationName} --> Process request ${JSON.stringify(this.request.doc.data, null, 2)};`);
+    // LG.info(`${moduleTitle}.${operationName} --> Process request ${JSON.stringify(this.request.doc.data, null, 2)};`);
     LG.debug(`${moduleTitle}.${operationName} --> Request is ${JSON.stringify(this.request.doc, null, 2)}`);
 
     const disposableRequest = Object.assign({}, this.request.doc);
@@ -79,10 +79,15 @@ export default class {
 
     CLG(`From ${categoryMetaData} to ${categoryName}`);
 
-    if (newRecord.data.idib && newRecord.data.codigo) {
-      LG.warn(`\n\nAssuming we are loading an existing invoice. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
+    const goodIbidIn = newRecord.data.idib && newRecord.data.idib > 10;
+    const goodCodigoIn = newRecord.data.codigo && newRecord.data.codigo.length > 10;
+
+    LG.warn(`\n\nAssuming we are loading a BAPU invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
+    if (goodIbidIn && goodCodigoIn) {
+      LG.warn(`\n\nAssuming we are loading a BAPU invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
       newRecord._id = `Invoice_1_${newRecord.data.idib.toString().padStart(16, '0')}`;
     } else {
+      LG.warn(`\n\nAssuming we are loading a VueSPPWA invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
       const maxRow = (await findMaxRow(this.lclDB, serialIndex));
       if (!maxRow.data) throw new Error(`Unable to get results using index ${serialIndexName}!`);
 
@@ -103,9 +108,8 @@ export default class {
       newRecord.data.codigo += `-${sequential.toString().padStart(9, '0')}`;
 
       newRecord._id = `Invoice_1_${idib.toString().padStart(16, '0')}`;
-
-      LG.debug(`Got newRecord:\n${JSON.stringify(newRecord, null, 2)}`);
     }
+    LG.debug(`\nBuilt newRecord:\n${JSON.stringify(newRecord, null, 2)}\n`);
 
     this.lclDB.put(newRecord)
       .then((newpers) => {
@@ -115,6 +119,9 @@ export default class {
           .then((delrq) => {
             LG.verbose(`Marked ${moduleTitle} Request Deleted`);
             LG.debug(`Deletion :: ${JSON.stringify(delrq, null, 2)}`);
+
+            const tmp = this.jobStack.pop();
+            if (tmp) tmp.process();
           })
           .catch(err => LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`));
       })

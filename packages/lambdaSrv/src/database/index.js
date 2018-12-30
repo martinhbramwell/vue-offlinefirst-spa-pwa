@@ -167,6 +167,12 @@ export default () => {
     action: supervisor,
   };
 
+  const invoicesReplicationFilter = {
+    name: 'post_processing/by_invoice',
+    label: 'INVOICE',
+    action: nullAction,
+  };
+
     // {
     //   name: 'post_processing/by_person_update',
     //   label: 'PERSON UPDATE REQUEST',
@@ -177,6 +183,7 @@ export default () => {
   const replicationFilters = [
     coreReplicationFilter,
     requestsReplicationFilter,
+    invoicesReplicationFilter,
   ];
 
   let secondaryReplicationsWaiting = true;
@@ -210,10 +217,17 @@ export default () => {
           replicatedEntityCounters[doc.data.type] += 1;
         }
         if (doc.filters) {
-          if (!replicatedEntityCounters[doc.filters]) {
-            replicatedEntityCounters[doc.filters] = 0;
+          let fname = '';
+          let spacer = '';
+          Object.keys(doc.filters).forEach((k) => {
+            fname += spacer + k;
+            spacer = ', ';
+          });
+          if (!replicatedEntityCounters[fname]) {
+            replicatedEntityCounters[fname] = 0;
           }
-          replicatedEntityCounters[doc.filters] += 1;
+          replicatedEntityCounters[fname] += 1;
+          LG.info(`Counted filter : ${JSON.stringify(fname, null, 2)}`);
         }
       });
       LG.info(`'from' counts by type : ${JSON.stringify(replicatedEntityCounters, null, 2)}`);

@@ -18,12 +18,13 @@ describe('BAPU Scraper', function() {
 
     cy.request(opts)
       .then((r) => {
+        // console.log(JSON.stringify(r, null, 2));
         if (r.body.total_rows > 0) return r.body.rows[0].key
                                             .replace(/-/g, '|')
                                             .replace(/ /, '|')
                                             .replace(/:/g, '|')
                                             .split('|');
-        return [2016, 0, 1, 0, 0, 0];
+        return [2018, 9, 1, 0, 0, 0];
       }).as('latestInvoice');
   });
 
@@ -43,7 +44,7 @@ describe('BAPU Scraper', function() {
 
     cy.visit(`${secrets.ENDPNT}?m=invoice_control`);
 
-    cy.get('#form-status').select('Pagada Parcial');
+    // cy.get('#form-status').select('Pagada Parcial');
 
     cy.get('@latestInvoice').then((lastAccess) => {
       const d = lastAccess;

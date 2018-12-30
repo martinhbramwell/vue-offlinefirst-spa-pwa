@@ -1,5 +1,5 @@
 {
-  "_id": "_design/BapuViews",
+  "_id": "_design/bapu",
   "views": {
     "latestInvoice": {
       "map": "function (doc) {\n  if (doc.meta && doc.data && doc.data.fecha) { emit(doc.data.fecha, 1) };\n}"

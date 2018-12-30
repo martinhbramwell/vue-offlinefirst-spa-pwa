@@ -1,6 +1,7 @@
 {
   "_id": "_design/post_processing",
   "filters": {
-    "by_request": "function(doc, req) { return doc._id === '_design/post_processing' || doc.meta && doc.meta.type && doc.meta.type == 'Request' }"
+    "by_request": "function(doc, req) { return doc._id === '_design/post_processing' || doc.meta && doc.meta.type && doc.meta.type == 'Request' }",
+    "by_invoice": "function(doc, req) { return doc._id === '_design/post_processing' || doc.data && doc.data.idib && doc.data.type && doc.data.type == 'invoice' && doc.data.codigo.length === 17 }"
   }
 }

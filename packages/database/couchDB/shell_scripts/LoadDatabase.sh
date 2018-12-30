@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 #
 
-export DOWNLOADS_DIR="${HOME}/Downloads";
-export SAFE_DIR="backup";
-export SOURCE_FILES_DIR="${DOWNLOADS_DIR}/${SAFE_DIR}";
-
-
 # export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
 source ${CONFIG_FILE};
+
+export DOWNLOADS_DIR="${HOME}/Downloads";
+export SAFE_DIR="backup";
+export SOURCE_FILES_DIR="${DOWNLOADS_DIR}/${SAFE_DIR}";
 
 export COUCH_DATABASE="${COUCH_DATABASE_NAME}_${VERSION}";
 export DATAFILES_TEMP_DIR="${HOME}/temp/databases";

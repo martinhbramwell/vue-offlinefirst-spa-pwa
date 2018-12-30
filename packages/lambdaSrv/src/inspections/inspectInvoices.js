@@ -46,7 +46,7 @@ export default async (req, res) => {
     {
       fieldName: 'data.sequential',
       first: 0,
-      last: 9999,
+      last: 999999999,
     },
   ];
 
@@ -59,21 +59,27 @@ export default async (req, res) => {
     {
       fieldName: 'data.idib',
       first: 0,
-      last: 9999,
+      last: 99999999,
     },
   ];
 
-  const serialIndex = { name: 'invoice_serial', category: CATEGORY_FIELD, indexer: SERIAL_INDEX };
-  const codeIndex = { name: 'invoice_code', category: CATEGORY_FIELD, indexer: CODE_INDEX };
+  const serialIndexName = 'invoice_serial';
+  const serialIndex = { name: serialIndexName, category: CATEGORY_FIELD, indexer: SERIAL_INDEX };
+  const codeIndexName = 'invoice_code';
+  const codeIndex = { name: codeIndexName, category: CATEGORY_FIELD, indexer: CODE_INDEX };
 
   try {
-    const { data: serial } = (await findMaxRow(databaseLocal, serialIndex));
+    const maxSerial = (await findMaxRow(databaseLocal, serialIndex));
+    if (!maxSerial.data) throw new Error(`Unable to get results using index ${serialIndexName}!`);
+    const { data: serial } = maxSerial;
     res.write(`</div>Query result -- Serial #${JSON.stringify(serial.sequential, null, 2)}</div>`);
 
-    const { data: code } = (await findMaxRow(databaseLocal, codeIndex));
+    const maxCode = (await findMaxRow(databaseLocal, codeIndex));
+    if (!maxCode.data) throw new Error(`Unable to get results using index ${codeIndexName}!`);
+    const { data: code } = maxCode;
     res.write(`<br /></div>Query result -- Code #${JSON.stringify(code.idib, null, 2)}</div>`);
   } catch (err) {
-    res.write(`</div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
+    res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
   }
 
   res.write('</body></html>');

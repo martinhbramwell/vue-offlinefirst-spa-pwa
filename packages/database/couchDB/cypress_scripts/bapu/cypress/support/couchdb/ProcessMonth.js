@@ -14,7 +14,6 @@ for (let cnt = 0; cnt < 44 ; cnt += 1) {
 
 const processMonth = (pyld) => {
   const { acc, year, month, lastTime: L, testTime: T} = pyld;
-// debugger;
   cy.log(`###### Last: ${L} > Test ${T}? ${L > T} ######`);
   if(L > T) return;
   cy.log(`###### Working from here ######`);
@@ -22,35 +21,33 @@ const processMonth = (pyld) => {
     .select(month)
     .then(() => {
       cy.log(`************* MONTH : ${year}/${month}.`);
-                 // debugger;
-      // let lMth = parseInt(L[1]);
-      // lMth -= 1;
-      // const lastDate = new Date(L[0], lMth, L[2], L[3], L[4], L[5]);
-      // cy.log(`###################### Last ${lastDate} #######################`);
-      // cy.log(`###################### Last ${testDate} #######################`);
       acc[year][month] = {};
       cy.get('#por_facturar > tbody').children()
-        .each(($row) => {
-          const serialNumber = $row.children().eq(2).text();
-          let date = $row.children().eq(1).children().eq(2).text();
-          date = new Date(date.substring('Facturado '.length))
-          cy.log(`~~~~~~ Invoice date: ${date} > Last run date: ${L}? ${date > L} ~~~~~~`);
-          if(date > L) {
-            cy.log(`~~~~~~ Working from here ~~~~~~`);
-            if (serialNumber) {
-              cy.log(`============= Row : ${JSON.stringify(serialNumber, null, 2)}.`);
+        .then((invoices) => {
+          if (invoices.length > 0 && invoices[0].innerText.indexOf('undefined') < 0) {
+            // cy.log(`Invoice table: \n${JSON.stringify(invoices, null, 2)}`);
+            cy.log(`Last row : ${JSON.stringify(invoices[invoices.length - 1], null, 2)}.`);
+            for (let ii = invoices.length -1; ii > -1; ii -= 1) {
+              debugger;
+              const serialNumber = invoices[ii].children[2].innerText;
+              const date = new Date(invoices[ii].children[1].children[2].children[0].innerText);
+              // cy.wrap(invoices[ii]).children().eq(1).within((td) => {
+              //   const date = new Date(td[0].children[2].children[0].textContent);
+              cy.log(`~~~~~~ Invoice date: ${date} > Last run date: ${L}? ${date > L} ~~~~~~`);
+              if(date > L) {
 
-              const invoice = {
-                meta: { type: "Request", handler: "InvoiceCreate" },
-                data: { type: "invoice", codigo: serialNumber, count: 0, itemes: [] },
+                const invoice = {
+                  meta: { type: "Request", handler: "InvoiceCreate" },
+                  data: { type: "invoice", codigo: serialNumber, count: 0, itemes: [] },
+                };
+                cy.log(`~~~~~~ Working from here ~~~~~~\n${JSON.stringify(invoice, null, 2)}`);
+
+                acc[year][month][serialNumber] = invoice;
+                pyld.codigo = serialNumber;
+                scrapeInvoice(invoices[ii], pyld);
               };
-
-              acc[year][month][serialNumber] = invoice;
-              pyld.codigo = serialNumber;
-              scrapeInvoice($row[0], pyld);
-            } else {
-              cy.log(`Skipped ahead. No data.`);
-            };
+              // });
+            }
           }
         });
     });

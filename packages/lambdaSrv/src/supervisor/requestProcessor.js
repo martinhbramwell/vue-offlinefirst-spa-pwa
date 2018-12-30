@@ -17,7 +17,7 @@ const processRequests = (parms) => {
     let numOfRequests = 0;
     rslt.rows.filter((request) => {
       const idReq = request.doc._id; // eslint-disable-line no-underscore-dangle
-      LG.debug(`Getting only new ${name}s :: ${idReq}`);
+      // LG.debug(`Getting only new ${name}s :: ${idReq}`);
       if (ignoreList.includes(idReq)) return false;
       ignoreList.push(idReq);
       numOfRequests += 1;
@@ -30,7 +30,7 @@ const processRequests = (parms) => {
       const jobStack = [];
       rslt.rows.forEach((request) => {
         const { handler } = request.doc.meta;
-        LG.verbose(`\nStacking ${name}s :: ${handler} ${request.id}\n`);
+        // LG.verbose(`\nStacking ${name}s :: ${handler} ${request.id}\n`);
         if (!actions[handler]) throw new Error(`Request action handler "${handler}" is undefined.`);
         jobStack.push(new actions[handler](request, database, jobStack));
       });

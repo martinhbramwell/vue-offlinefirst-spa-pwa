@@ -52,14 +52,14 @@ export default async (db, options) => {
     qry: { selector, limit, sort, use_index }, // eslint-disable-line object-curly-newline
   };
 
-  LG.debug(`Index and query options ... \n${JSON.stringify(opts, null, 2)}`);
+  // LG.debug(`Index and query options ... \n${JSON.stringify(opts, null, 2)}`);
 
   try {
     if (category.purge) {
       const tmp = await db.getIndexes();
       const ourIndex = tmp.indexes.filter(idx => idx.name === name)[0];
       if (ourIndex) {
-        LG.debug(`Our index ... \n${JSON.stringify(ourIndex, null, 2)}`);
+        // LG.debug(`Purging old index ... \n${JSON.stringify(ourIndex, null, 2)}`);
         delete ourIndex.def;
         await db.deleteIndex(ourIndex);
       }
@@ -72,9 +72,9 @@ export default async (db, options) => {
     LG.debug(`Explain index ... \n${JSON.stringify(explainResult, null, 2)}`);
 
     const queryResult = await db.find(opts.qry);
-    LG.debug(`Query result ... \n${JSON.stringify(queryResult, null, 2)}`);
+    // LG.debug(`Query result ... \n${JSON.stringify(queryResult, null, 2)}`);
 
-    result = queryResult.docs[0]; // eslint-disable-line prefer-destructuring
+    result = queryResult.docs.length > 0 ? queryResult.docs[0] : 'none'; // eslint-disable-line prefer-destructuring
   } catch (err) {
     LG.error(`Indexing error ... \n${JSON.stringify(err, null, 2)}`);
     CLG(err);

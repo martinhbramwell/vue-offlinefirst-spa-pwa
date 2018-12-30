@@ -206,9 +206,30 @@ EOF
 fi;
 
 
+# if [[ 1 == 1 ]]; then # Database data
+
+#   echo -e "
+#   Ready to purge CouchDb database '${COUCH}'!!
+#   -----------------------------------------$(head -c ${#COUCH} < /dev/zero | tr '\0' '-')---
+#   ";
+#   read -p "Type 'y' to confirm? " -n 1 -r
+#   echo    # (optional) move to a new line
+#   if [[ ! $REPLY =~ ^[Yy]$ ]]
+#   then
+#     echo -e "Quitting..."
+#     exit 0;
+#   fi
+
+#   export QUERY_URL=${FULL_URL}/_purge;
+
+#   echo -e "... purging  '${QUERY_URL}'.";
+#   curl -sH 'Content-type: application/json' -X POST ${QUERY_URL};
+
+# fi;
+
 if [[ 1 == 1 ]]; then # Database data
 
-  export DESIGN_NAME='BapuViews';
+  export DESIGN_NAME='bapu';
 
   export VIEW_NAME='latestInvoice';
   export UPD_VIEW='update=true';

@@ -25,9 +25,15 @@ const processInvoice = (elem, pyld) => {
 
   cy.get('#modal-lista-factura').within(($modal) => {
     cy.get('#modal-lista-factura-invoice_number')
-    .then(e => invoice.data.codigo = e.text());
+    .then((e) => {
+      invoice.data.codigo = e.text();
+      var bits = e.text().split('-');
+      invoice.data.sucursal = parseInt(bits[0]);
+      invoice.data.pdv = parseInt(bits[1]);
+      invoice.data.sequential = parseInt(bits[2]);
+    });
     cy.get('#modal-lista-factura-invoice_id')
-    .then(e => invoice.data.ibid = e.text());
+    .then(e => invoice.data.idib = parseInt(e.text()));
     cy.get('#modal-lista-factura-street_res')
     .then(e => invoice.data.direccion = e.text());
     cy.get('#modal-lista-factura-partner_legal_id')
@@ -35,7 +41,6 @@ const processInvoice = (elem, pyld) => {
     cy.get('#modal-lista-factura-partner_telf_primary')
     .then(e => invoice.data.telefono = e.text());
 
-                 debugger;
     invoice.data.itemes = [];
     let idx = 0;
     cy.get('#modal-lista-factura-table > tbody')
