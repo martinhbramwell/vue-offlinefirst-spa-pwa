@@ -1,7 +1,10 @@
 import { databaseLocal } from '../database';
 import findMaxRow from '../utils/findMaxRow';
+import getInvoice from '../digitalDocuments/invoice';
 
-const LG = console.log; // eslint-disable-line no-unused-vars, no-console
+import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
+
+const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 
 /* eslint-disable max-len */
 // let theMovement = {};
@@ -19,7 +22,7 @@ const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 export default async (req, res) => {
   /* Get last invoice serial number  */
 
-  res.write('<html><body  text="lightyellow" bgcolor="#000007">');
+  res.write('<html><body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
 
   const CATEGORY_FIELD = {
     fieldName: 'data.type',
@@ -69,15 +72,27 @@ export default async (req, res) => {
   const codeIndex = { name: codeIndexName, category: CATEGORY_FIELD, indexer: CODE_INDEX };
 
   try {
+    const bbb = [];
+    res.write(`Checked something :: ${Array.isArray(bbb)}<br /><br />`);
+
     const maxSerial = (await findMaxRow(databaseLocal, serialIndex));
     if (!maxSerial.data) throw new Error(`Unable to get results using index ${serialIndexName}!`);
     const { data: serial } = maxSerial;
-    res.write(`</div>Query result -- Serial #${JSON.stringify(serial.sequential, null, 2)}</div>`);
+    res.write(`</div>IB ID       :: ${JSON.stringify(serial.sequential, null, 2)}</div>`);
 
     const maxCode = (await findMaxRow(databaseLocal, codeIndex));
     if (!maxCode.data) throw new Error(`Unable to get results using index ${codeIndexName}!`);
     const { data: code } = maxCode;
-    res.write(`<br /></div>Query result -- Code #${JSON.stringify(code.idib, null, 2)}</div>`);
+
+    const invoice = `Invoice_1_${code.idib.toString().padStart(16, '0')}`;
+    res.write(`<br /></div>Couch _id key :: ${JSON.stringify(invoice, null, 2)}</div>`);
+
+    const digitalInvoice = (await getInvoice(databaseLocal, invoice));
+    if (!digitalInvoice) throw new Error(`Unable to get invoice ${invoice}!`);
+    // res.write('<br /><br /><div><textarea rows="140" cols="100" style="color:lightyellow;background-color:#000007;font-size:7pt">');
+    // res.write(`<br /><br />Invoice is: \n${JSON.stringify(digitalInvoice, null, 2)}`);
+    // res.write('</textarea></div>');
+    LG.info(digitalInvoice);
   } catch (err) {
     res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
   }

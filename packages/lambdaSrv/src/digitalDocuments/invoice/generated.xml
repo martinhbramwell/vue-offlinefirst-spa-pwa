@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<factura xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="file:factura_2_1_0.xsd" id="comprobante" version="2.1.0">
+
+    <infoTributaria>
+        <ambiente>1</ambiente>
+        <tipoEmision>1</tipoEmision>
+        <razonSocial>LOGICHEM SOLUTIONS S.A</razonSocial>
+        <nombreComercial>Iridium Blue</nombreComercial>
+        <ruc>1792177758001</ruc>
+        <claveAcceso>CLAVE ACCESSO</claveAcceso>
+        <codDoc>01</codDoc>
+        <estab>1</estab>
+        <ptoEmi>1</ptoEmi>
+        <secuencial>9861</secuencial>
+        <dirMatriz>   LEO!  CUAL ES SU NUEVA DIRECCION?   </dirMatriz>
+    </infoTributaria>
+    <infoFactura>
+        <fechaEmision>2018-09-18 11:40:58</fechaEmision>
+        <dirEstablecimiento>matriz</dirEstablecimiento>
+        <contribuyenteEspecial>contribuyente</contribuyenteEspecial>
+        <obligadoContabilidad>SI</obligadoContabilidad>
+
+
+
+
+
+
+
+
+        <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+
+        <razonSocialComprador>Luis Eduardo Cordovez</razonSocialComprador>
+        <identificacionComprador>1710213222001</identificacionComprador>
+        <direccionComprador></direccionComprador>
+        <totalSinImpuestos>54.46</totalSinImpuestos>
+
+
+        <totalDescuento>3</totalDescuento>
+
+
+
+
+        <totalConImpuestos>
+            <totalImpuesto>
+                <codigo>2</codigo>
+                <codigoPorcentaje>2</codigoPorcentaje>
+                <descuentoAdicional>0.00</descuentoAdicional>
+                <baseImponible>51.46</baseImponible>
+
+                <valor>6.18</valor>
+
+
+
+
+
+
+
+
+
+
+            </totalImpuesto>
+        </totalConImpuestos>
+
+
+
+
+
+
+
+
+
+
+
+
+        <propina>0.00</propina>
+
+
+
+
+        <importeTotal>57.64</importeTotal>
+        <moneda>moneda0</moneda>
+
+        <pagos>
+            <pago>
+                <formaPago>01</formaPago>
+                <total>57.64</total>
+                <plazo>0</plazo>
+                <unidadTiempo>dias</unidadTiempo>
+            </pago>
+
+
+
+
+
+
+        </pagos>
+
+
+    </infoFactura>
+    <detalles>
+        <detalle>
+            <codigoPrincipal>0</codigoPrincipal>
+
+            <descripcion>Agua IridiumbLue</descripcion>
+            <unidadMedida>unidad</unidadMedida>
+            <cantidad>6</cantidad>
+            <precioUnitario>5.75</precioUnitario>
+
+            <descuento>0.00</descuento>
+            <precioTotalSinImpuesto>34.50</precioTotalSinImpuesto>
+
+
+
+
+            <impuestos>
+                <impuesto>
+                    <codigo>2</codigo>
+                    <codigoPorcentaje>2</codigoPorcentaje>
+                    <tarifa>12</tarifa>
+                    <baseImponible>34.50</baseImponible>
+                    <valor>4.14</valor>
+
+
+
+
+
+
+                </impuesto>
+            </impuestos>
+        </detalle>
+        <detalle>
+            <codigoPrincipal>0</codigoPrincipal>
+
+            <descripcion>Envase 5 gl IB2017</descripcion>
+            <unidadMedida>unidad</unidadMedida>
+            <cantidad>2</cantidad>
+            <precioUnitario>8.48</precioUnitario>
+            <descuento>0.00</descuento>
+            <precioTotalSinImpuesto>16.96</precioTotalSinImpuesto>
+
+
+
+
+
+            <impuestos>
+                <impuesto>
+                    <codigo>2</codigo>
+                    <codigoPorcentaje>2</codigoPorcentaje>
+                    <tarifa>12</tarifa>
+                    <baseImponible>16.96</baseImponible>
+                    <valor>2.04</valor>
+
+
+
+
+
+
+
+
+                </impuesto>
+            </impuestos>
+        </detalle>
+    </detalles>
+</factura>
