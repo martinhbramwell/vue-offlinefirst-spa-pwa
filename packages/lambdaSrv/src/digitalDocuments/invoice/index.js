@@ -44,6 +44,13 @@ const toXML = (inv, lvl = 1, inAry = false) => {
 };
 
 
+const checkDigit11 = (src) => {
+  const res = src.toString().split( '' ).reverse()
+    .map( ( elem, idx ) => elem * ( ( idx % 6 ) + 2 ) )
+    .reduce( ( acc, val ) => acc + val ) % 11;
+  return res === 0 ? 0 : 11 - res;
+};
+
 const specialCase = {
 
   impuestos(item) {
@@ -67,7 +74,36 @@ const specialCase = {
   },
   claveAcceso(item) {
     LG.info(`\n claveAcceso :: ${JSON.stringify(item, null, 2)}`);
-    return 'CLAVE ACCESSO';
+
+    const dt = new Date(item.fecha);
+    const d = dt.getDate().toString().padStart(2, '0');
+    const m = (1 + dt.getMonth()).toString().padStart(2, '0');
+    const y = dt.getFullYear();
+
+    CLG(`template :: ${JSON.stringify(template.infoTributaria.codDoc, null, 2)}`);
+    const codigoNumerico = 99999999;
+
+    let clave = '';
+    clave = `${clave}${d}${m}${y}`;
+    clave = `${clave}${template.infoTributaria.codDoc}`;
+    clave = `${clave}${template.infoTributaria.ruc}`;
+    clave = `${clave}${template.infoTributaria.ambiente}`;
+    clave = `${clave}${item.sucursal.toString().padStart(3, '0')}`;
+    clave = `${clave}${item.pdv.toString().padStart(3, '0')}`;
+    clave = `${clave}${item.sequential.toString().padStart(9, '0')}`;
+    clave = `${clave}${'38827179'}`;
+    clave = `${clave}${checkDigit11(clave)}`;
+
+
+    CLG(`clave :: ${clave}`);
+
+
+    // 2110201101179214673900110020010000000011234567813
+    // 21102011 01 1792146739001 1 002 001 000000001 12345678 1 3
+    // 18092018 01 1792177758001 1 001 001 000009861 79217775 1
+
+
+    return clave;
   },
   tipoIdentificacionComprador(item) {
     LG.info(`\n tipoIdentificacionComprador :: ${JSON.stringify(item, null, 2)}`);
@@ -118,7 +154,7 @@ const recursivePopulate = (data, _tmplt, lvl = 0, inArray = false) => {
     }
 
     Object.keys(tmplt).forEach((k) => { // eslint-disable-line
-      LG.info(`Lvl :: ${lvl}  Ary: ${inArray}  Key :: ${k} Val :: ${tmplt[k]} Type :: ${typeof tmplt[k]}`);
+      LG.debug(`Lvl :: ${lvl}  Ary: ${inArray}  Key :: ${k} Val :: ${tmplt[k]} Type :: ${typeof tmplt[k]}`);
       if (k === 'details') {
         LG.info(`\nVal :: ${JSON.stringify(tmplt[k], null, 2)}`);
       }
@@ -175,6 +211,8 @@ export default async (db, startkey) => {
 
 
   const test = recursivePopulate(inv, JSON.parse(JSON.stringify(template)));
+
+  CLG(`\nDone :: ${JSON.stringify(test, null, 2)}`);
 
   const infoFactura = `${HEAD}${toXML(test)}${FOOT}`;
   // const infoFactura = test;
