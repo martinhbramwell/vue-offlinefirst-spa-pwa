@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import { databaseLocal } from '../database';
 import findMaxRow from '../utils/findMaxRow';
 import getInvoice from '../digitalDocuments/invoice';
@@ -6,16 +8,38 @@ import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 
-/* eslint-disable max-len */
-// let theMovement = {};
+const HEAD = `
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<factura id="comprobante" version="1.0.0">`;
+const FOOT = `
+</factura>`;
 
-// let invPers = {};
-// let invPersMoves = {};
+const sep = '\n';
+const toXML = (inv, lvl = 1, inAry = false) => {
+  const lt = '<';
+  const gt = '>';
+  const indent = '    '.repeat(lvl);
 
-// let custPers = {};
-// let custPersMoves = {};
+  const dt = 'detalle';
 
-// const theBottles = [];
+  let doc = '';
+
+  if (inAry) {
+    inv.forEach((det) => {
+      doc = `${doc}${sep}${indent}${lt}${dt}${gt}${toXML(det, lvl + 1)}${sep}${indent}${lt}/${dt}${gt}`;
+    });
+  } else {
+    Object.keys(inv).forEach((k) => {
+      const tag = inv[k];
+      if (typeof tag === 'object') {
+        doc = `${doc}${sep}${indent}${lt}${k}${gt}${toXML(tag, lvl + 1, Array.isArray(tag))}${sep}${indent}${lt}/${k}${gt}`;
+      } else {
+        doc = `${doc}${sep}${indent}${lt}${k}${gt}${tag}${lt}/${k}${gt}`;
+      }
+    });
+  }
+  return doc;
+};
 
 
 /* e s l int-disable max-len, indent, no-unused-vars, object-curly-newline */
@@ -87,12 +111,22 @@ export default async (req, res) => {
     const invoice = `Invoice_1_${code.idib.toString().padStart(16, '0')}`;
     res.write(`<br /></div>Couch _id key :: ${JSON.stringify(invoice, null, 2)}</div>`);
 
-    const digitalInvoice = (await getInvoice(databaseLocal, invoice));
-    if (!digitalInvoice) throw new Error(`Unable to get invoice ${invoice}!`);
-    // res.write('<br /><br /><div><textarea rows="140" cols="100" style="color:lightyellow;background-color:#000007;font-size:7pt">');
-    // res.write(`<br /><br />Invoice is: \n${JSON.stringify(digitalInvoice, null, 2)}`);
-    // res.write('</textarea></div>');
+    const jsonInvoice = (await getInvoice(databaseLocal, invoice));
+    if (!jsonInvoice) throw new Error(`Unable to get invoice ${invoice}!`);
+    const uniqueId = jsonInvoice.infoTributaria.claveAcceso;
+    LG.info(`Got invoice ${uniqueId}`);
+
+    const digitalInvoice = `${HEAD}${toXML(jsonInvoice)}${FOOT}`;
+
     LG.info(digitalInvoice);
+
+    fs.writeFile(`/tmp/${uniqueId}.xml`, digitalInvoice, (err) => {
+      // throws an error, you could also catch it here
+      if (err) throw err;
+
+      // success case, the file was saved
+      LG.info('Invoice saved!');
+    });
   } catch (err) {
     res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
   }

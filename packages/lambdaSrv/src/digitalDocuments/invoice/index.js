@@ -6,49 +6,31 @@ const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const IVA = '0.12';
 const fpIVA = parseFloat(IVA);
 const pctIVA = fpIVA * 100;
-const sep = '\n';
-
-const HEAD = `
-<?xml version="1.0" encoding="UTF-8"?>
-<factura xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="file:factura_2_1_0.xsd" id="comprobante" version="2.1.0">
-`;
-const FOOT = `
-</factura>`;
-const toXML = (inv, lvl = 1, inAry = false) => {
-  const lt = '<';
-  const gt = '>';
-  const indent = '    '.repeat(lvl);
-
-  const dt = 'detalle';
-
-  let doc = '';
-
-  if (inAry) {
-    inv.forEach((det) => {
-      doc = `${doc}${sep}${indent}${lt}${dt}${gt}${toXML(det, lvl + 1)}${sep}${indent}${lt}/${dt}${gt}`;
-    });
-  } else {
-    Object.keys(inv).forEach((k) => {
-      const tag = inv[k];
-      if (typeof tag === 'object') {
-        // doc = `${doc}${sep}${indent}${lt}${k}${gt}${toXML(tag, lvl + 1, Array.isArray(tag))}${sep}${indent}${lt}/${k}${gt}`;
-        doc = `${doc}${sep}${indent}${lt}${k}${gt}${toXML(tag, lvl + 1, Array.isArray(tag))}${sep}${indent}${lt}/${k}${gt}`;
-      } else {
-        doc = `${doc}${sep}${indent}${lt}${k}${gt}${tag}${lt}/${k}${gt}`;
-      }
-    });
-  }
-  return doc;
-};
-
 
 const checkDigit11 = (src) => {
-  const res = src.toString().split( '' ).reverse()
-    .map( ( elem, idx ) => elem * ( ( idx % 6 ) + 2 ) )
-    .reduce( ( acc, val ) => acc + val ) % 11;
+  const res = src.toString().split('').reverse()
+    .map((elem, idx) => elem * ((idx % 6) + 2))
+    .reduce((acc, val) => acc + val) % 11;
   return res === 0 ? 0 : 11 - res;
+};
+
+const usDate = (date) => {
+  const dt = new Date(date);
+  const d = dt.getDate().toString().padStart(2, '0');
+  const m = (1 + dt.getMonth()).toString().padStart(2, '0');
+  const y = dt.getFullYear();
+
+  return { d, m, y };
+};
+
+const usDateCode = (date) => {
+  const { d, m, y } = usDate(date);
+  return `${d}${m}${y}`;
+};
+
+const usDateOblique = (date) => {
+  const { d, m, y } = usDate(date);
+  return `${d}/${m}/${y}`;
 };
 
 const specialCase = {
@@ -68,6 +50,22 @@ const specialCase = {
     LG.info(`\n baseImponible :: ${JSON.stringify(item, null, 2)}`);
     return item.subTotal;
   },
+  fecha(item) {
+    LG.info(`\n valor :: ${JSON.stringify(item, null, 2)}`);
+    return usDateOblique(item.fecha);
+  },
+  sucursal(item) {
+    LG.info(`\n valor :: ${JSON.stringify(item, null, 2)}`);
+    return item.sucursal.toString().padStart(3, '0');
+  },
+  pdv(item) {
+    LG.info(`\n valor :: ${JSON.stringify(item, null, 2)}`);
+    return item.pdv.toString().padStart(3, '0');
+  },
+  sequential(item) {
+    LG.info(`\n valor :: ${JSON.stringify(item, null, 2)}`);
+    return item.sequential.toString().padStart(9, '0');
+  },
   valor(item) {
     LG.info(`\n valor :: ${JSON.stringify(item, null, 2)}`);
     return Number((item.subTotal * fpIVA).toFixed(2)).toString();
@@ -75,16 +73,10 @@ const specialCase = {
   claveAcceso(item) {
     LG.info(`\n claveAcceso :: ${JSON.stringify(item, null, 2)}`);
 
-    const dt = new Date(item.fecha);
-    const d = dt.getDate().toString().padStart(2, '0');
-    const m = (1 + dt.getMonth()).toString().padStart(2, '0');
-    const y = dt.getFullYear();
-
     CLG(`template :: ${JSON.stringify(template.infoTributaria.codDoc, null, 2)}`);
-    const codigoNumerico = 99999999;
 
     let clave = '';
-    clave = `${clave}${d}${m}${y}`;
+    clave = `${clave}${usDateCode(item.fecha)}`;
     clave = `${clave}${template.infoTributaria.codDoc}`;
     clave = `${clave}${template.infoTributaria.ruc}`;
     clave = `${clave}${template.infoTributaria.ambiente}`;
@@ -210,11 +202,12 @@ export default async (db, startkey) => {
   }
 
 
-  const test = recursivePopulate(inv, JSON.parse(JSON.stringify(template)));
+  const jsonInvoice = recursivePopulate(inv, JSON.parse(JSON.stringify(template)));
 
-  CLG(`\nDone :: ${JSON.stringify(test, null, 2)}`);
+  CLG(`\nDone :: ${JSON.stringify(jsonInvoice, null, 2)}`);
 
-  const infoFactura = `${HEAD}${toXML(test)}${FOOT}`;
-  // const infoFactura = test;
-  return infoFactura;
+  // const infoFactura = `${HEAD}${toXML(test)}${FOOT}`;
+  // return infoFactura;
+
+  return jsonInvoice;
 };

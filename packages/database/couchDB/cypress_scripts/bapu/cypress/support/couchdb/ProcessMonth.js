@@ -28,7 +28,7 @@ const processMonth = (pyld) => {
             // cy.log(`Invoice table: \n${JSON.stringify(invoices, null, 2)}`);
             cy.log(`Last row : ${JSON.stringify(invoices[invoices.length - 1], null, 2)}.`);
             for (let ii = invoices.length -1; ii > -1; ii -= 1) {
-              debugger;
+              // debugger;
               const serialNumber = invoices[ii].children[2].innerText;
               const date = new Date(invoices[ii].children[1].children[2].children[0].innerText);
               // cy.wrap(invoices[ii]).children().eq(1).within((td) => {

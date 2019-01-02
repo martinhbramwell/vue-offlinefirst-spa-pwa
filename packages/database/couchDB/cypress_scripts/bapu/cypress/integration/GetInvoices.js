@@ -24,11 +24,11 @@ describe('BAPU Scraper', function() {
                                             .replace(/ /, '|')
                                             .replace(/:/g, '|')
                                             .split('|');
-        return [2018, 9, 1, 0, 0, 0];
+        return [2018, 12, 20, 0, 0, 0];
       }).as('latestInvoice');
   });
 
-  it('Scrape BAPU', function() {
+  it('Scrapes BAPU for Invoices', function() {
 
     // cy.get('@couchData').then((couch) => {
     //   cy.log(`Processing from last invoice ${couch.lastInvoice}.`);
