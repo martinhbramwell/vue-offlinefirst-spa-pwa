@@ -51,25 +51,11 @@ if [[ 1 == 1 ]]; then # Database data
   ./PutSecurity.sh;
   ./PutUsers.sh;
 
-
-  export COUCH_GROUP_NAME='persons';
-  export COUCH_COLLECTION_NAME='person';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
-  ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
-  export COUCH_COLLECTION_NAME='address';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
-  export COUCH_COLLECTION_NAME='profile';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
-  export COUCH_COLLECTION_NAME='person_bottle_move';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
-
-
   export COUCH_GROUP_NAME='bottles';
   export COUCH_COLLECTION_NAME='bottle';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
   export COUCH_COLLECTION_NAME='bottle_move';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
-
 
   export COUCH_GROUP_NAME='movements';
   export COUCH_COLLECTION_NAME='movementsIn';
@@ -77,15 +63,26 @@ if [[ 1 == 1 ]]; then # Database data
   export COUCH_COLLECTION_NAME='movementsOut';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
 
-  export COUCH_GROUP_NAME='invoices';
-  export COUCH_COLLECTION_NAME='invoice';
-  ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
-  ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
-
   export COUCH_GROUP_NAME='products';
   export COUCH_COLLECTION_NAME='product';
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
   ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
+
+  # export COUCH_GROUP_NAME='persons';
+  # export COUCH_COLLECTION_NAME='person';
+  # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  # ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
+  # export COUCH_COLLECTION_NAME='address';
+  # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  # export COUCH_COLLECTION_NAME='profile';
+  # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  # export COUCH_COLLECTION_NAME='person_bottle_move';
+  # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+
+  # export COUCH_GROUP_NAME='invoices';
+  # export COUCH_COLLECTION_NAME='invoice';
+  # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
+  # ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
 
 fi;
 

@@ -68,8 +68,8 @@ export default async (db, options) => {
     await db.createIndex(opts.idx);
     await db.viewCleanup();
 
-    const explainResult = await db.explain(opts.qry);
-    LG.debug(`Explain index ... \n${JSON.stringify(explainResult, null, 2)}`);
+    // const explainResult = await db.explain(opts.qry);
+    // LG.debug(`Explain index ... \n${JSON.stringify(explainResult, null, 2)}`);
 
     const queryResult = await db.find(opts.qry);
     // LG.debug(`Query result ... \n${JSON.stringify(queryResult, null, 2)}`);

@@ -9,8 +9,8 @@ export default {
     ruc: '1792177758001',
     claveAcceso: { specialCase: 'claveAcceso' },
     codDoc: '01',
-    estab: { specialCase: 'sucursal' },
-    ptoEmi: { specialCase: 'pdv' },
+    estab: '001',
+    ptoEmi: '002',
     secuencial: { specialCase: 'sequential' },
     dirMatriz: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMIÑA',
   },
@@ -25,8 +25,8 @@ export default {
 
     direccionComprador: { alias: 'direccion' },
 
-    totalSinImpuestos: { alias: 'subTotalConImpuesto' },
-    totalDescuento: { alias: 'descuento' },
+    totalSinImpuestos: { specialCase: 'baseImponible' },
+    totalDescuento: '0.00',
 
     totalConImpuestos: {
       totalImpuesto: {
@@ -49,6 +49,7 @@ export default {
   },
   detalles: [
     {
+      type: 'twig',
       alias: 'itemes',
       detalle: {
         codigoPrincipal: { alias: 'idItem' },
@@ -62,7 +63,36 @@ export default {
       },
     },
   ],
+  infoAdicional: [
+    {
+      type: 'attrLeaf',
+      extra: 'campoAdicional',
+      campoAdicional: [
+        {
+          attribute: { name: 'nombre', value: 'Dirección' },
+          alias: 'direccion',
+        },
+        {
+          attribute: { name: 'nombre', value: 'Teléfono' },
+          specialCase: 'telefono',
+        },
+        {
+          attribute: { name: 'nombre', value: 'Email' },
+          alias: 'email',
+        },
+      ],
+    },
+  ],
 };
+
+// {
+//   extra: 'telefono',
+//   campoAdicional: { attribute: { nombre: '' } },
+// },
+// {
+//   alias: 'email',
+//   campoAdicional: { attribute: { nombre: 'Email' } },
+// },
 
 // LG('Factura');
 // LG(factura);

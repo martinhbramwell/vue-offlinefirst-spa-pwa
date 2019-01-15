@@ -76,16 +76,25 @@ export default class {
 
     const newRecord = {};
     newRecord.data = Object.assign({}, this.request.doc.data);
+    newRecord.data.nombreCliente = newRecord.data.nombreCliente.trim();
 
     CLG(`From ${categoryMetaData} to ${categoryName}`);
 
     const goodIbidIn = newRecord.data.idib && newRecord.data.idib > 10;
     const goodCodigoIn = newRecord.data.codigo && newRecord.data.codigo.length > 10;
 
-    LG.warn(`\n\nAssuming we are loading a BAPU invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
     if (goodIbidIn && goodCodigoIn) {
       LG.warn(`\n\nAssuming we are loading a BAPU invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
       newRecord._id = `Invoice_1_${newRecord.data.idib.toString().padStart(16, '0')}`;
+
+      const slctr = {
+        'data.type': 'person',
+        'data.nombre': newRecord.data.nombreCliente,
+        meta: { '$exists': false }, // eslint-disable-line quote-props
+      };
+      const lclPerson = await this.lclDB.find({ selector: slctr });
+      LG.info(`Person : ${lclPerson.docs[0].data.nombre} has email  ${lclPerson.docs[0].data.email}`);
+      newRecord.data.email = lclPerson.docs[0].data.email;
     } else {
       LG.warn(`\n\nAssuming we are loading a VueSPPWA invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
       const maxRow = (await findMaxRow(this.lclDB, serialIndex));

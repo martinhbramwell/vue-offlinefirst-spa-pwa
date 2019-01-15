@@ -1,6 +1,5 @@
 // import { couchPutOpts, couchPayload, scrapeInvoice, tightDate } from '../support/couchdb';
 import { couchGetOpts, processYear } from '../support/couchdb';
-import secrets from '../secrets.js';
 
 const years = [ '2016', '2017', '2018', '2019', '2020', '2021' ];
 
@@ -10,7 +9,7 @@ describe('BAPU Scraper', function() {
 
     cy.fixture('../fixtures/couch.json').as('couchData');
 
-    const opts = couchGetOpts(secrets.CH_LATESTINVOICE);
+    const opts = couchGetOpts(Cypress.env('CH_LATESTINVOICE'));
 
     cy.log('-------------------');
     cy.log(JSON.stringify(opts, null, 2));
@@ -24,11 +23,13 @@ describe('BAPU Scraper', function() {
                                             .replace(/ /, '|')
                                             .replace(/:/g, '|')
                                             .split('|');
-        return [2018, 12, 20, 0, 0, 0];
+        return [2018, 12, 31, 0, 0, 0];
       }).as('latestInvoice');
   });
 
   it('Scrapes BAPU for Invoices', function() {
+
+    // cy.log('DISABLED');
 
     // cy.get('@couchData').then((couch) => {
     //   cy.log(`Processing from last invoice ${couch.lastInvoice}.`);
@@ -38,11 +39,11 @@ describe('BAPU Scraper', function() {
       cy.log(`Processing from last invoice ${JSON.stringify(latest, null, 2)}.`);
     });
 
-    cy.visit(secrets.ENDPNT);
+    cy.visit(Cypress.env('ENDPNT'));
 
     cy.login();
 
-    cy.visit(`${secrets.ENDPNT}?m=invoice_control`);
+    cy.visit(`${Cypress.env('ENDPNT')}?m=invoice_control`);
 
     // cy.get('#form-status').select('Pagada Parcial');
 

@@ -8,6 +8,7 @@ import supervisor from '../supervisor';
 
 import { logger as LG } from '../utils';
 import query from '../utils/query'; // eslint-disable-line no-unused-vars
+import testMango from '../../test/mango'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 
@@ -141,19 +142,19 @@ export default () => {
         // LG.debug(`The request(s) : ${JSON.stringify(docs, null, 2)}`);
       })
       .on('active', () => {
-        LG.info(`${lclDb} ${name} *** ${label} sync resumed *** `);
+        // LG.info(`${lclDb} ${name} *** ${label} sync resumed *** `);
       })
       .on('paused', () => {
-        LG.info(`${lclDb} ${name}  *** ${label} sync on hold *** `);
+        // LG.info(`${lclDb} ${name}  *** ${label} sync on hold *** `);
         action(db);
       })
       .on('denied', (info) => {
-        LG.info(`${lclDb}/${name} *** ${label} sync denied *** ${info}`);
+        LG.warn(`${lclDb}/${name} *** ${label} sync denied *** ${info}`);
       })
       .on('error', err => LG.error(`Database error ${err}`));
   };
 
-  const nullAction = () => { LG.info(' no special action required '); };
+  const nullAction = () => { LG.debug(' no special action required '); };
 
   const coreReplicationFilter = {
     name: 'core_data/by_entities',
@@ -173,12 +174,6 @@ export default () => {
     action: nullAction,
   };
 
-    // {
-    //   name: 'post_processing/by_person_update',
-    //   label: 'PERSON UPDATE REQUEST',
-    //   action: processPersonUpdateRequests,
-    //   direction: 'from',
-    // },
 
   const replicationFilters = [
     coreReplicationFilter,
@@ -520,3 +515,8 @@ export default () => {
 
   // End of filters
 };
+
+/*                                      SAVED FOR A RAINY DAY
+const options = { db: databaseLocal };
+testMango(options);
+*/

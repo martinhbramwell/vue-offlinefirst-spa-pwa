@@ -10,8 +10,12 @@ const processInvoice = (elem, pyld) => {
 
   const row = cy.wrap(elem).within(($row) => {
 
-    cy.get('.project-title').get('a').invoke('text')
-      .then(v => invoice.data.nombreCliente = v);
+    cy.get('.project-title').get('a').eq(0).invoke('text')
+      .then((v) => {
+        console.log('nombreCliente');
+        console.log(v);
+        invoice.data.nombreCliente = v.replace(/\s\s+/g, ' ').trim();
+      });
     cy.get('.project-title').get('span').eq(1).invoke('text')
       .then(v => invoice.data.fecha = v);
     cy.get('.project-status').get('span').eq(0).invoke('text')
@@ -37,7 +41,7 @@ const processInvoice = (elem, pyld) => {
     cy.get('#modal-lista-factura-street_res')
     .then(e => invoice.data.direccion = e.text());
     cy.get('#modal-lista-factura-partner_legal_id')
-    .then(e => invoice.data.legalId = e.text());
+    .then(e => invoice.data.legalId = `[${e.text()}]`);
     cy.get('#modal-lista-factura-partner_telf_primary')
     .then(e => invoice.data.telefono = e.text());
 
@@ -87,7 +91,7 @@ const processInvoice = (elem, pyld) => {
       invoice.data.pdv = parseInt(parts[1], 10);
       invoice.data.sequential = parseInt(parts[2], 10);
 
-      const id = uniqueRequest();
+      const id = uniqueRequest(invoice.data.idib);
       const opts = Object.assign(
         couchPutOpts(id),
         couchPayload(id, invoice.data)

@@ -3,6 +3,8 @@ import { Router } from 'express';
 import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
 import inspectInvoices from './inspections/inspectInvoices';
+import inspectPersons from './inspections/inspectPersons';
+import inspectTest from './inspections/inspectTest';
 
 const routes = Router();
 const BY_BOTTLE = 'byBottle';
@@ -60,6 +62,14 @@ routes.get('/inspect', (req, res, next) => {
 
 routes.get('/invoices', (req, res, next) => {
   inspectInvoices(req, res, next);
+});
+
+routes.get('/try', (req, res, next) => {
+  inspectTest(req, res, next);
+});
+
+routes.get('/persons', (req, res, next) => {
+  inspectPersons(req, res, next);
 });
 
 export default routes;

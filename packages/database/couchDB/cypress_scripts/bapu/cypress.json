@@ -1,5 +1,8 @@
 {
   "animationDistanceThreshold": 20,
-  "viewportHeight": 768,
-  "viewportWidth": 1024
+  "viewportHeight": 1024,
+  "viewportWidth": 1366,
+  "numTestsKeptInMemory": 5,
+  "video": false,
+  "videoUploadOnPasses": false
 }

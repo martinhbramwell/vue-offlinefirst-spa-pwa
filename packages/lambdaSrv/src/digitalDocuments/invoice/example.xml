@@ -297,7 +297,8 @@
         <correo>correo0</correo>
     </tipoNegociable>
     <infoAdicional>
-        <campoAdicional nombre="nombre4">campoAdicional0</campoAdicional>
-        <campoAdicional nombre="nombre5">campoAdicional1</campoAdicional>
+        <campoAdicional nombre="Dirección">Joaquin E3-134 y Salazar casa 2</campoAdicional>
+        <campoAdicional nombre="Teléfono">2379108</campoAdicional>
+        <campoAdicional nombre="Email">sandriarciniegas@yahoo.com</campoAdicional>
     </infoAdicional>
 </factura>

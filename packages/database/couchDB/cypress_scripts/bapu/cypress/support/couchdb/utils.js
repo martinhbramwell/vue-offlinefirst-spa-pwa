@@ -1,8 +1,6 @@
-import secrets from '../../secrets';
-
 const couchPutOpts = (id) => {
   return {
-    url: `${secrets.CH_URL}/${id}`,
+    url: `${Cypress.env('CH_URL')}/${id}`,
     method: "PUT",
     followRedirect: true,
     failOnStatusCode: true,
@@ -11,7 +9,7 @@ const couchPutOpts = (id) => {
 
 const couchGetOpts = (query) => {
   return {
-    url: `${secrets.CH_URL}/${query}`,
+    url: `${Cypress.env('CH_URL')}/${query}`,
     method: "GET",
     followRedirect: true,
     failOnStatusCode: true,
@@ -58,7 +56,7 @@ const tightDate = () => {
 // const scrapeInvoice = () => {
 //   cy.log('-------- INVOICE ---------');
 // };
-const uniqueRequest = () => `Request_2_${tightDate()}_Invoice`;
+const uniqueRequest = (k) => `Request_2_${tightDate()}_${k}`;
 
 const YR = 0;
 const MTH = YR + 1;

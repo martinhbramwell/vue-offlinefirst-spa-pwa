@@ -2,7 +2,7 @@
   "_id": "_design/bapu",
   "views": {
     "latestInvoice": {
-      "map": "function (doc) {\n  if (doc.meta && doc.data && doc.data.fecha) { emit(doc.data.fecha, 1) };\n}"
+      "map": "function (doc) {\n  if ((doc.meta && doc.meta.handler && doc.meta.handler === 'InvoiceCreate') || (doc.data && doc.data.type && doc.data.type === 'invoice') && doc.data.fecha) { emit(doc.data.fecha, 1) };\n}"
     }
   },
   "language": "javascript"
