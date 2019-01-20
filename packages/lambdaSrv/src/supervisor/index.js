@@ -3,9 +3,9 @@ import BottleExchange from './BottleExchange';
 import PersonUpdate from './Person/PersonUpdate';
 import PersonCreate from './Person/PersonCreate';
 import PersonMerge from './Person/PersonMerge';
-import InvoiceCreate from './InvoiceCreate';
+import InvoiceCreate from './Invoice/InvoiceCreate';
 
-const CLG = console.log; // eslint-disable-line no-console, no-unused-vars
+const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 
 const actions = {
   BottleExchange,

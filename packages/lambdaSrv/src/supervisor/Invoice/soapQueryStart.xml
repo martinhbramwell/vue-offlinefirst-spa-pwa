@@ -1,0 +1,5 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ec="http://ec.gob.sri.ws.autorizacion">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <ec:autorizacionComprobante>
+      <claveAccesoComprobante>

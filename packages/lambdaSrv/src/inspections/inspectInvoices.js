@@ -26,7 +26,7 @@ const toXML = (inv, lvl = 1, inAry = false) => {
     if (inv[0].extra) {
       const xt = inv[0].extra;
       inv[0][xt].forEach((ext) => {
-        CLG(`Extra :: ${JSON.stringify(ext, null, 2)}`);
+        // CLG(`Extra :: ${JSON.stringify(ext, null, 2)}`);
         const { name, value } = ext.attribute;
         const { text } = ext;
         doc = `${doc}${sep}${indent}${lt}${xt} ${name}="${value}"${gt}`;

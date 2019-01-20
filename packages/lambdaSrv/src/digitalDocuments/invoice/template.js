@@ -12,15 +12,15 @@ export default {
     estab: '001',
     ptoEmi: '002',
     secuencial: { specialCase: 'sequential' },
-    dirMatriz: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMIÑA',
+    dirMatriz: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMINA',
   },
   infoFactura: {
     fechaEmision: { specialCase: 'fecha' },
-    dirEstablecimiento: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMIÑA',
+    dirEstablecimiento: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMINA',
     obligadoContabilidad: 'SI',
     tipoIdentificacionComprador: { specialCase: 'tipoIdentificacionComprador' },
-    razonSocialComprador: { alias: 'nombreCliente' },
-    identificacionComprador: { alias: 'legalId' },
+    razonSocialComprador: { specialCase: 'nombreCliente' },
+    identificacionComprador: { specialCase: 'legalId' },
 
 
     direccionComprador: { alias: 'direccion' },
@@ -54,7 +54,7 @@ export default {
       detalle: {
         codigoPrincipal: { alias: 'idItem' },
 
-        descripcion: { alias: 'nombreProducto' },
+        descripcion: { specialCase: 'nombreProducto' },
         cantidad: { alias: 'cantidad' },
         precioUnitario: { alias: 'precio' },
         descuento: '0.00',

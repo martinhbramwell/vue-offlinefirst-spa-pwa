@@ -1,8 +1,16 @@
-import { logger as LG } from '../utils';
+/* eslint-disable no-underscore-dangle */
+import { Queue, logger as LG } from '../utils';
 
 const name = 'Request';
 
-const ignoreList = [];
+const ignoreList = new Queue();
+const ignoreHandler = (item) => {
+  if (ignoreList.includes(item)) return false;
+  ignoreList.push(item);
+  while (ignoreList.length > 200) ignoreList.shift();
+  return true;
+};
+
 const processRequests = (parms) => {
   const {
     actions,
@@ -16,15 +24,12 @@ const processRequests = (parms) => {
   }).then((rslt) => {
     let numOfRequests = 0;
     rslt.rows.filter((request) => {
-      const idReq = request.doc._id; // eslint-disable-line no-underscore-dangle
-      // LG.debug(`Getting only new ${name}s :: ${idReq}`);
-      if (ignoreList.includes(idReq)) return false;
-      ignoreList.push(idReq);
+      if (!ignoreHandler(request.doc._id)) return false;
       numOfRequests += 1;
       return true;
     });
-    LG.info(`${numOfRequests} new ${name}s`);
-    LG.debug(`Ignore list contains ... \n${JSON.stringify(ignoreList, null, 2)}`);
+    if (numOfRequests) LG.info(`${numOfRequests} new ${name}s`);
+    // LG.debug(`Ignore list contains ... \n${JSON.stringify(ignoreList, null, 2)}`);
 
     if (numOfRequests > 0) {
       const jobStack = [];
