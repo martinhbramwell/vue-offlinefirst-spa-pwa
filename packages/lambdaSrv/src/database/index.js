@@ -5,13 +5,11 @@ import finder from 'pouchdb-find';
 import adptrMemory from 'pouchdb-adapter-memory';
 
 import supervisor from '../supervisor';
-import processNewInvoices from '../supervisor/Invoice/processNewInvoices'; // eslint-disable-line no-unused-vars
-import signInvoices from '../supervisor/Invoice/signInvoices'; // eslint-disable-line no-unused-vars
-import sendInvoices from '../supervisor/Invoice/sendInvoices'; // eslint-disable-line no-unused-vars
 
 import { logger as LG } from '../utils';
 import query from '../utils/query'; // eslint-disable-line no-unused-vars
 import testMango from '../../test/mango'; // eslint-disable-line no-unused-vars
+
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 
@@ -24,7 +22,6 @@ const rmtDbHost = process.env.COUCH_HOST;
 // LG.verbose(`UTILS : ${JSON.stringify(logger, null, 2)}`)
 LG.info(`Logs written to ${process.env.LOG_DIR}`);
 LG.info(`Local :: ${lclDb}`);
-// LG.verbose(`Remote :: ${process.env.REMOTE_DB}`);
 
 PouchDB.plugin(finder);
 PouchDB.plugin(relater);
@@ -36,6 +33,22 @@ export const databaseRemote = new PouchDB(rmtDb);
 export const databaseLocal = new PouchDB(lclDb, { adapter });
 
 LG.info(` ***  User Agent *** ${userId}`);
+
+const { requestsHandler, changesProcessor } = supervisor; // eslint-disable-line no-unused-vars
+
+databaseLocal.changes({
+  since: 'now',
+  live: true,
+  include_docs: true,
+}).on('change', (change) => {
+  changesProcessor(databaseLocal, change);
+  // LG.info(`\n@@@@@@@@@@@@@\n${JSON.stringify(change, null, 2)}\n@@@@@@@@@@@@@`);
+}).on('complete', (info) => {
+  LG.info(`\n#############\n${JSON.stringify(info, null, 2)}\n#############`);
+}).on('error', (err) => {
+  LG.error(`Failure of changes monitor ${err}`);
+});
+
 
 /*  MAKE FINDER INDEXES */
 const makeFinderIndexes = async (db) => {
@@ -144,17 +157,6 @@ export default () => {
   ]);
 
 
-  let supervisoryTasksWaiting = true;
-  const startSupervisoryTasks = () => { // eslint-disable-line no-unused-vars
-    if (supervisoryTasksWaiting) {
-      LG.info('\n--------------------\nStart Invoice Transformers\n--------------------');
-      processNewInvoices(databaseLocal);
-      signInvoices(databaseLocal);
-      sendInvoices(databaseLocal);
-      supervisoryTasksWaiting = false;
-    }
-  };
-
   const replicatedEntityCounters = {};
   const launchSyncs = (db, filter) => { // eslint-disable-line no-unused-vars
     const {
@@ -191,7 +193,6 @@ export default () => {
       .on('paused', () => {
         // LG.info(`${lclDb} ${name}  *** ${label} sync on hold *** `);
         action(db);
-        startSupervisoryTasks();
       })
       .on('denied', (info) => {
         LG.warn(`${lclDb}/${name} *** ${label} sync denied *** ${info}`);
@@ -211,7 +212,7 @@ export default () => {
   const requestsReplicationFilter = {
     name: 'post_processing/by_request',
     label: 'CHANGE REQUEST',
-    action: supervisor,
+    action: requestsHandler,
   };
 
   const invoicesReplicationFilter = {
@@ -230,7 +231,7 @@ export default () => {
   let secondaryReplicationsWaiting = true;
   const startSecondaryReplications = () => { // eslint-disable-line no-unused-vars
     if (secondaryReplicationsWaiting) {
-      LG.info('\n--------------------\nStart Secondary Replicators\n--------------------');
+      LG.info('\n--------------------\nStart Secondary Replicators\n---------------------');
       replicationFilters.forEach((filter) => {
         launchSyncs(databaseLocal, filter);
       });

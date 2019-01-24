@@ -34,6 +34,7 @@
     "Serverless"
   ],
   "dependencies": {
+    "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -52,7 +53,8 @@
     "queue": "^4.5.0",
     "relational-pouch": "^3.1.0",
     "rimraf": "^2.6.2",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "xmldom": "^0.1.27"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.3",

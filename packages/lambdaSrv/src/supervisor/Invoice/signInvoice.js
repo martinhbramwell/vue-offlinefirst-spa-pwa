@@ -92,8 +92,6 @@ function firmarComprobante(p12cert, p12pwd, comprobante) {
 
   const modulus = bigint2base64(key.n);
 
-  CLG(p12pwd);
-
   const encodingHeader = '<?xml version="1.0" encoding="UTF-8"?>\n';
   const comp = comprobante.replace(encodingHeader, '');
 
@@ -306,15 +304,16 @@ function firmarComprobante(p12cert, p12pwd, comprobante) {
   return comprobante.replace(/(<[^<]+)$/, `${xadesBes}$1`);
 }
 
-const sign = async (inv, args) => {
-  const { db, cert, pwd } = args;
+const sign = async (args) => {
+  const { doc: inv, db, cert, pwd } = args; // eslint-disable-line object-curly-newline
 
   LG.verbose(`
     Invoice to sign :: ${JSON.stringify(inv.data.idib, null, 2)}
     `);
 
-  if (inv.data.idib !== 4260) return;
+  // if ((inv.data.idib > 4257) && (inv.data.idib < 4260)) return;
 
+  let fresh = null;
   let invoice = null;
   try {
     const blobOrBuffer = await db.getAttachment(inv._id, 'invoiceXml'); // eslint-disable-line no-underscore-dangle
@@ -322,14 +321,19 @@ const sign = async (inv, args) => {
       .toString()
       .replace(' standalone="yes"', '');
 
+    LG.verbose(`
+      Got XML invoice for signing :: ${JSON.stringify(inv.data.idib, null, 2)}
+    `);
     const invSigned = firmarComprobante(cert, pwd, invoice);
 
     const attachment = (Buffer.from(invSigned, 'utf-8')).toString('base64');
 
-    const result = await db.putAttachment(inv._id, 'invoiceSigned', inv._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
-    LG.info(`Saved with attachment ${JSON.stringify(result, null, 2)}`);
+    fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+    LG.info(`Will save signed invoice as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
+    const result = await db.putAttachment(fresh._id, 'invoiceSigned', fresh._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
+    LG.info(`Saved signed invoice as attachment ${JSON.stringify(result, null, 2)}`);
   } catch (err) {
-    LG.error(err);
+    LG.error(`Error saving signed invoice  Id :: ${inv._id}/${fresh._id}. Rev :: ${fresh._rev} :: ${err}`); // eslint-disable-line no-underscore-dangle
   }
 };
 

@@ -12,7 +12,7 @@ export default class {
   }
 
   async process() {
-    LG.info(`Process request ${this.request.doc.data.id}; status = ${this.request.doc.data.status}`);
+    LG.verbose(`Process person merge request ${this.request.doc.data.nombre}; status = ${this.request.doc.data.status}`);
     // LG.debug(`PersonMerge Request is ${JSON.stringify(this.request.doc, null, 2)}`);
 
     const upsertRequest = this.request.doc;
@@ -24,7 +24,7 @@ export default class {
     const personId = upsertPerson.data.id.toString();
     const recordId = `aPerson_1_${personId.toString().padStart(16, '0')}`;
 
-    LG.info(`Searching for record :: ${JSON.stringify(recordId, null, 2)}`);
+    LG.verbose(`Searching for record :: ${JSON.stringify(recordId, null, 2)}`);
 
     try {
       const result = await this.lclDB.allDocs({
@@ -46,7 +46,7 @@ export default class {
         this.lclDB,
         this.jobStack);
       } else {
-        LG.info(`Ready to insert ${upsertPerson.data.nombre}`);
+        LG.info(`Inserting ${upsertPerson.data.nombre}`);
         create({
           request: upsertRequest,
           newRec: upsertPerson,

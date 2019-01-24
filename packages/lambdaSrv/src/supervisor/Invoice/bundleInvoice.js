@@ -51,7 +51,7 @@ const toXML = (inv, lvl = 1, inAry = false) => {
 };
 
 const bundle = async (args) => {
-  const { inv, db } = args;
+  const { doc: inv, db } = args;
 
   LG.verbose(`\n\nInvoice to process:: ${JSON.stringify(inv.data.idib, null, 2)}  `);
 
@@ -60,16 +60,21 @@ const bundle = async (args) => {
     _tmplt: JSON.parse(JSON.stringify(template)),
   });
 
+  const accessKey = jsonInvoice.infoTributaria.claveAcceso;
   // LG.verbose(` Converted invoice :: ${JSON.stringify(jsonInvoice, null, 2)}  `);
-  LG.info(`Got JSON invoice ${jsonInvoice.infoTributaria.claveAcceso}`);
+  LG.info(`Got JSON invoice ${accessKey}`);
 
   const invXml = `${HEAD}${toXML(jsonInvoice)}${FOOT}`;
   LG.verbose(` Ready to save XML invoice as base64 attachment :: ${inv._id} >> ${inv._rev}  `);
 
   try {
     const attachment = (Buffer.from(invXml, 'utf-8')).toString('base64');
-    const result = await db.putAttachment(inv._id, 'invoiceXml', inv._rev, attachment, 'text/plain');
-    LG.info(`Saved with attachment ${JSON.stringify(result, null, 2)}`);
+    const attch = await db.putAttachment(inv._id, 'invoiceXml', inv._rev, attachment, 'text/plain');
+    LG.info(`Result of attaching XML : ${JSON.stringify(attch, null, 2)}`);
+    const doc = await db.get(inv._id);
+    doc.accessKey = accessKey;
+    const pt = await db.put(doc);
+    LG.info(`Result of putting accessKey : ${JSON.stringify(pt, null, 2)}`);
   } catch (err) {
     LG.error(`Save with attachment failed :: ${JSON.stringify(err, null, 2)}`);
   }

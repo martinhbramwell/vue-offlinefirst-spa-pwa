@@ -1,4 +1,6 @@
 import fs from 'fs';
+import EventEmitter from 'events';
+
 import { createLogger, format, transports } from 'winston';
 
 const {
@@ -77,12 +79,15 @@ export const logger = createLogger({
 });
 
 export class Queue {
-  constructor(...elements) {
+  constructor(emitter, ...elements) {
     this.elements = [...elements];
+    this.emitter = emitter;
   }
 
   push(...args) {
-    return this.elements.push(...args);
+    const itm = this.elements.push(...args);
+    if (this.emitter) this.emitter.emit('itemAdded');
+    return itm;
   }
 
   shift(...args) {
@@ -101,6 +106,12 @@ export class Queue {
     return this.elements.length = length; // eslint-disable-line no-return-assign
   }
 }
+
+class Emitter extends EventEmitter {}
+const queueEmitter = new Emitter();
+export const emitters = {
+  queueEmitter,
+};
 
 
 const Latinise = {};

@@ -136,7 +136,7 @@ export const create = async (args, db, jobStack) => {
     try {
       const newpers = await db.put(newRecord);
       // LG.verbose('Person Created');
-      LG.info(`Created :: ${JSON.stringify(newpers, null, 2)}`);
+      LG.verbose(`Created :: ${JSON.stringify(newpers, null, 2)}`);
       // LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
     } catch (err) {
       LG.error(`INSERT ERROR :: ${JSON.stringify(err, null, 2)}`);

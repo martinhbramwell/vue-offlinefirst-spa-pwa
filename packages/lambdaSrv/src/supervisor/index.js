@@ -1,4 +1,5 @@
-import processor from './requestProcessor';
+import requestsProcessor from './requestProcessor';
+import changesProcessor from './changesProcessor';
 import BottleExchange from './BottleExchange';
 import PersonUpdate from './Person/PersonUpdate';
 import PersonCreate from './Person/PersonCreate';
@@ -17,10 +18,15 @@ const actions = {
 
 const requestsHandler = (database) => {
   // CLG('Handling Change Request');
-  processor({
+  requestsProcessor({
     database,
     actions,
   });
 };
 
-export default requestsHandler;
+const supervisor = {
+  requestsHandler,
+  changesProcessor,
+};
+
+export default supervisor;

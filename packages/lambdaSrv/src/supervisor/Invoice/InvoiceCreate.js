@@ -79,19 +79,17 @@ export default class {
       const disposableRequest = Object.assign({}, this.request.doc);
       disposableRequest._deleted = true;
 
-      LG.verbose(`${moduleTitle}.${operationName} --> Disposable Request is :: ${JSON.stringify(disposableRequest, null, 2)}`);
+      // LG.verbose(`${moduleTitle}.${operationName} --> Disposable Request is :: ${JSON.stringify(disposableRequest, null, 2)}`);
 
       const newRecord = {};
       newRecord.data = Object.assign({}, this.request.doc.data);
       newRecord.data.nombreCliente = newRecord.data.nombreCliente.trim();
 
-      CLG(`From ${categoryMetaData} to ${categoryName}`);
-
       const goodIbidIn = newRecord.data.idib && newRecord.data.idib > 10;
       const goodCodigoIn = newRecord.data.codigo && newRecord.data.codigo.length > 10;
 
       if (goodIbidIn && goodCodigoIn) {
-        LG.warn(`\n\nAssuming we are loading a BAPU invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
+        // LG.warn(`\n\nAssuming we are loading a BAPU invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
         const slctr = {
           'data.type': 'person',
           'data.nombre': newRecord.data.nombreCliente,
@@ -142,11 +140,11 @@ export default class {
       this.lclDB.put(newRecord)
         .then((newpers) => {
           LG.verbose(`Invoice Created :: ${JSON.stringify(newpers, null, 2)}`);
-          LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
+          // LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
           this.lclDB.put(disposableRequest)
             .then((delrq) => {
               LG.verbose(`Marked ${moduleTitle} Request Deleted`);
-              LG.debug(`Deletion :: ${JSON.stringify(delrq, null, 2)}`);
+              // LG.debug(`Deletion :: ${JSON.stringify(delrq, null, 2)}`);
 
               const tmp = this.jobStack.pop();
               if (tmp) tmp.process();

@@ -15,7 +15,7 @@ export default class {
 
   async process() {
     const operationName = 'process';
-    LG.info(`${moduleTitle}.${operationName} --> Process request ${JSON.stringify(this.request.doc.data, null, 2)};`);
+    LG.verbose(`${moduleTitle}.${operationName} --> Process request ${JSON.stringify(this.request.doc.data, null, 2)};`);
     LG.debug(`${moduleTitle}.${operationName} --> Request is ${JSON.stringify(this.request.doc, null, 2)}`);
 
     const disposableRequest = Object.assign({}, this.request.doc);

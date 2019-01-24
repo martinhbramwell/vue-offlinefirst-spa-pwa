@@ -1,4 +1,4 @@
-import sendInvoice from './sendInvoice';
+import queryAuthorization from './queryAuthorization';
 
 import { logger as LG } from '../../utils';
 
@@ -11,7 +11,7 @@ const processing = async (args) => {
     const result = await db.find({
       selector: {
         type: 'invoice',
-        accepted: { $exists: false },
+        accepted: { $exists: true },
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: true },
         '_attachments.invoiceSigned': { $exists: true },
@@ -21,12 +21,12 @@ const processing = async (args) => {
       },
     });
     LG.info(`\n
-      Unsent invoices :: ${JSON.stringify(result.docs.length, null, 3)}\n
+      Sent invoices not yet queried :: ${JSON.stringify(result.docs.length, null, 3)}\n
     `);
 
-    result.docs.forEach(inv => sendInvoice({ inv, db }));
+    result.docs.forEach(inv => queryAuthorization({ inv, db }));
   } catch (err) {
-    LG.error(`Error signing invoices: ${JSON.stringify(err, null, 3)}`);
+    LG.error(`Error querying authorizations : ${JSON.stringify(err, null, 3)}`);
   }
 };
 
