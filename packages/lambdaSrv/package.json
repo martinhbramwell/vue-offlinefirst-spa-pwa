@@ -57,6 +57,7 @@
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.7.0",
     "babel-eslint": "^8.2.3",
     "babel-jest": "^21.2.0",
     "babel-register": "^6.26.0",
