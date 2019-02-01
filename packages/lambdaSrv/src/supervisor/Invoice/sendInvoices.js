@@ -24,7 +24,16 @@ const processing = async (args) => {
       Unsent invoices :: ${JSON.stringify(result.docs.length, null, 3)}\n
     `);
 
-    result.docs.forEach(inv => sendInvoice({ inv, db }));
+
+    /* eslint-disable no-restricted-syntax */
+    // result.docs.forEach(doc => sendInvoice({ doc, db }));
+    const proms = [];
+    for (const doc of result.docs) {
+      proms.push(sendInvoice({ doc, db }));
+    }
+    /* eslint-enable no-restricted-syntax */
+
+    await Promise.all(proms);
   } catch (err) {
     LG.error(`Error signing invoices: ${JSON.stringify(err, null, 3)}`);
   }

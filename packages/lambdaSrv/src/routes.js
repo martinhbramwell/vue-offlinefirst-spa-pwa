@@ -2,6 +2,9 @@ import { Router } from 'express';
 
 import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
+
+import manageInvoices from './admin/manageInvoices';
+
 import inspectInvoices from './inspections/inspectInvoices';
 import inspectPersons from './inspections/inspectPersons';
 import inspectTest from './inspections/inspectTest';
@@ -70,6 +73,14 @@ routes.get('/try', (req, res, next) => {
 
 routes.get('/persons', (req, res, next) => {
   inspectPersons(req, res, next);
+});
+
+routes.get('/gestionDeFacturas', (req, res, next) => {
+  manageInvoices(req, res, next);
+});
+
+routes.post('/gestionDeFacturas', (req, res, next) => {
+  manageInvoices(req, res, next);
 });
 
 export default routes;

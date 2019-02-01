@@ -17,9 +17,7 @@ import {
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
-const extractTimestamp = (args) => {
-  const { inv: xml } = args;
-
+const extractTimestamp = (xml) => {
   try {
     // const srlzr = new XMLSerializer();
     const dom = new DOMParser().parseFromString(xml.data);
@@ -51,7 +49,8 @@ const extractTimestamp = (args) => {
   }
 };
 
-const query = async (inv, db) => { // eslint-disable-line no-unused-vars
+const query = async (args) => { // eslint-disable-line no-unused-vars
+  const { doc: inv, db } = args;
   LG.verbose(`
     Invoice authorization to query :: ${JSON.stringify(inv.data.idib, null, 2)}
     `);

@@ -28,7 +28,7 @@ export default async (db, startkey) => {
     _tmplt: JSON.parse(JSON.stringify(template)),
   });
 
-  CLG(`\nDone :: ${JSON.stringify(jsonInvoice, null, 2)}`);
+  LG.debug(`\nDone :: ${JSON.stringify(jsonInvoice, null, 2)}`);
 
   // const infoFactura = `${HEAD}${toXML(test)}${FOOT}`;
   // return infoFactura;

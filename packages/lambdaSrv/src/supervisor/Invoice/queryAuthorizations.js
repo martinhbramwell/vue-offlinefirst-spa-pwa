@@ -24,7 +24,15 @@ const processing = async (args) => {
       Sent invoices not yet queried :: ${JSON.stringify(result.docs.length, null, 3)}\n
     `);
 
-    result.docs.forEach(inv => queryAuthorization({ inv, db }));
+    /* eslint-disable no-restricted-syntax */
+    // result.docs.forEach(inv => queryAuthorization({ doc, db }));
+    const proms = [];
+    for (const doc of result.docs) {
+      proms.push(queryAuthorization({ doc, db }));
+    }
+    /* eslint-enable no-restricted-syntax */
+
+    await Promise.all(proms);
   } catch (err) {
     LG.error(`Error querying authorizations : ${JSON.stringify(err, null, 3)}`);
   }

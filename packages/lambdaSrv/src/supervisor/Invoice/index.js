@@ -40,51 +40,51 @@ const invoices = (ctx) => {
   acc |= doc.accessKey && 2;
   acc |= doc._attachments && doc._attachments.invoiceSigned && 4;
   acc |= doc.accepted && 8;
-  acc |= doc.authorized && 16;
-  /* eslint-enable no-bitwise, no-underscore-dangle */
+  acc |= doc.rejected && 16;
+  acc |= doc.authorized && 32;
+  acc |= doc.void && 64;
+  acc |= doc.hold && 128;
 
 
+  let msg = '';
   let task = '';
   switch (acc) {
-    case 0:
-      task = 'bundleInvoice';
-      break;
-    case 3:
-      task = 'signInvoice';
-      args.cert = fs.readFileSync(process.env.CERT, { flag: 'r' });
-      args.pwd = process.env.CERTPWD;
-      break;
-    case 7:
-      task = 'sendInvoice';
-      break;
-    case 15:
-      task = 'queryAuthorization';
-      break;
-    case 31:
+    // case 0:
+    //   task = 'bundleInvoice';
+    //   break;
+    // case 3:
+    //   task = 'signInvoice';
+    //   args.cert = fs.readFileSync(process.env.CERT, { flag: 'r' });
+    //   args.pwd = process.env.CERTPWD;
+    //   break;
+    // case 7:
+    //   task = 'sendInvoice';
+    //   break;
+    // case 15:
+    //   task = 'queryAuthorization';
+    //   break;
+    case 23:
       task = 'nothing';
+      msg = 'Rejected';
+      break;
+    case 47:
+      task = 'nothing';
+      msg = 'Fully authorized';
+      break;
+    case 64:
+    case 65:
+    case 67:
+    case 71:
+      task = 'nothing';
+      msg = '  ** VOID **';
       break;
     default:
       task = 'nothing';
-      LG.warn(`Can't do anything with :: ${acc}`);
+      msg = (acc & 128) ? 'Can do nothing with' : 'Invoice on hold';
   }
+  LG.warn(`\n\n${msg} :: ${acc}\n\n`);
+  /* eslint-enable no-bitwise, no-underscore-dangle */
 
-  // if (!doc._attachments) { // eslint-disable-line no-underscore-dangle
-  //   task = 'bundleInvoice';
-  // } else if (!doc._attachments.invoiceXml) { // eslint-disable-line no-underscore-dangle
-  //   task = 'bundleInvoice';
-  // } else if (doc._attachments.invoiceXml
-  //     && doc.accessKey
-  //     && !doc._attachments.invoiceSigned) { // eslint-disable-line no-underscore-dangle
-  //   task = 'signInvoice';
-  //   args.cert = fs.readFileSync(process.env.CERT, { flag: 'r' });
-  //   args.pwd = process.env.CERTPWD;
-  // } else if (!doc.accepted) {
-  //   task = 'sendInvoice';
-  // } else if (!doc.authorized) {
-  //   task = 'queryAuthorization';
-  // } else {
-  //   return;
-  // }
 
   tasks[task](args);
 };

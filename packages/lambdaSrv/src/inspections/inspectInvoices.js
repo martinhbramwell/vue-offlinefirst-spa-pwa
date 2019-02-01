@@ -62,28 +62,34 @@ export default async (req, res) => {
 <html>
 <head>
 <style>
-#customers {
+#facturas {
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
 }
 
-#customers td, #customers th {
+#facturas td, #facturas th {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-#customers tr:nth-child(even){background-color: #336600;}
+#facturas tr:nth-child(even){background-color: #336600;}
 
-#customers tr:hover {background-color: #ddd;}
+#facturas tr:hover {background-color: #ddd;}
 
-#customers th {
+#facturas th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
   background-color: #4CAF50;
   color: white;
 }
+
+td.fecha {
+    width: 1%;
+    white-space: nowrap;
+}
+
 </style>
 </head>
   `);
@@ -150,7 +156,7 @@ export default async (req, res) => {
 
     out.write(`<tr>
       <td>${d.sequential}</td>
-      <td>${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td>
+      <td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td>
       <td>${d.nombreCliente}</td>
       <td><ul><li>${d.legalId}</li></ul></td>
       <td><ul><li>${d.email}</li></ul></td>
@@ -240,7 +246,7 @@ export default async (req, res) => {
   try {
     res.write('<br /><hr /><br />');
 
-    res.write(`<table id="customers"><tr>
+    res.write(`<table id="facturas"><tr>
       <th>Secuencial</th>
       <th>&nbsp; &nbsp; Fecha &nbsp; &nbsp;</th>
       <th>Nombre</th>

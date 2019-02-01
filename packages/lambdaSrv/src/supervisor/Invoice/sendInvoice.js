@@ -27,13 +27,15 @@ const send = async (args) => {
 
     const bundle = `${soapUploadStart}${invB64}${soapUploadEnd}`;
 
-    CLG(bundle);
+    // CLG(bundle);
 
     const sriResponse = await axios.post(urlUpload, bundle, headers);
     CLG(sriResponse.data);
 
 
-    inv.accepted = sriResponse.data.includes(soapUploadReceived); // eslint-disable-line no-param-reassign, max-len
+    const success = sriResponse.data.includes(soapUploadReceived) ? 'accepted' : 'rejected';
+    inv[success] = true; // eslint-disable-line no-param-reassign, max-len
+
     const pt = await db.put(inv);
     LG.info(`Put acceptance result : ${JSON.stringify(pt, null, 2)}`);
 

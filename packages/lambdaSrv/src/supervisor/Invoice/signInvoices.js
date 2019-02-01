@@ -12,6 +12,8 @@ const signing = async (args) => {
     const result = await db.find({
       selector: {
         type: 'invoice',
+        void: false,
+        hold: false,
         accepted: { $exists: false },
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: true },
@@ -28,7 +30,15 @@ const signing = async (args) => {
     const cert = fs.readFileSync(process.env.CERT, { flag: 'r' });
     const pwd = process.env.CERTPWD;
 
-    result.docs.forEach(inv => signInvoice({ inv, db, cert, pwd })); // eslint-disable-line object-curly-newline, max-len
+    /* eslint-disable no-restricted-syntax */
+    // await result.docs.forEach(doc => signInvoice({ doc, db, cert, pwd }));
+    const proms = [];
+    for (const doc of result.docs) {
+      proms.push(signInvoice({ doc, db, cert, pwd })); // eslint-disable-line object-curly-newline
+    }
+    /* eslint-enable no-restricted-syntax */
+
+    await Promise.all(proms);
   } catch (err) {
     LG.error(`Error signing invoices: ${JSON.stringify(err, null, 3)}`);
   }

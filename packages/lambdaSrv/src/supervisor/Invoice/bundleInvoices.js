@@ -10,6 +10,8 @@ const bundle = async (args) => {
     const result = await db.find({
       selector: {
         type: 'invoice',
+        void: false,
+        hold: false,
         accepted: { $exists: false },
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: false },
@@ -21,7 +23,16 @@ const bundle = async (args) => {
     });
     LG.info(`\n
       Unbundled invoices :: ${JSON.stringify(result.docs.length, null, 3)}\n`);
-    result.docs.forEach(inv => bundleInvoice({ inv, db }));
+
+    /* eslint-disable no-restricted-syntax */
+    // await result.docs.forEach(doc => bundleInvoice({ doc, db }));
+    const proms = [];
+    for (const doc of result.docs) {
+      proms.push(bundleInvoice({ doc, db }));
+    }
+    /* eslint-enable no-restricted-syntax */
+
+    await Promise.all(proms);
   } catch (err) {
     LG.error(`Error bundling invoices: ${JSON.stringify(err, null, 3)}`);
   }

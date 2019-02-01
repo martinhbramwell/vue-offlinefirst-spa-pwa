@@ -107,9 +107,14 @@ export default class {
         newRecord.data.email = lclPerson.docs[0].data.email || 'nulo';
         LG.info(`Person : ${lclPerson.docs[0].data.nombre} has email  ${newRecord.data.email}`);
 
+        // const randy = 0;
+        const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
+        newRecord.data.sequential += randy;
 
         newRecord.data.codigo = `001-002-${newRecord.data.sequential.toString().padStart(9, '0')}`;
         newRecord.data.pdv = 2;
+
+        newRecord.hold = true;
       } else {
         LG.warn(`\n\nAssuming we are loading a VueSPPWA invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
         const maxRow = (await findMaxRow(this.lclDB, serialIndex));
@@ -126,13 +131,18 @@ export default class {
         newRecord.data.pdv = pdv;
         newRecord.data.idib = idib;
         newRecord.data.sucursal = sucursal;
-        newRecord.data.sequential = sequential;
+        const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
+        // const randy = 0;
+        newRecord.data.sequential = sequential + randy;
         newRecord.data.codigo = `${sucursal.toString().padStart(3, '0')}`;
         newRecord.data.codigo += `-${pdv.toString().padStart(3, '0')}`;
-        newRecord.data.codigo += `-${sequential.toString().padStart(9, '0')}`;
+        newRecord.data.codigo += `-${(sequential).toString().padStart(9, '0')}`;
 
         newRecord._id = `Invoice_1_${idib.toString().padStart(16, '0')}`;
       }
+
+      newRecord.data.direccion = newRecord.data.direccion.length > 0 ? newRecord.data.direccion : 'no provisto';
+
       // CLG(newRecord.data.idib);
       newRecord.type = 'invoice';
       LG.debug(`\nBuilt newRecord:\n${JSON.stringify(newRecord.data.codigo, null, 2)}\n`);
