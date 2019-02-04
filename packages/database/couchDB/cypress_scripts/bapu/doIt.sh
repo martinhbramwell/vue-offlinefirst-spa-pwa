@@ -18,6 +18,6 @@ source ${HOME}/.ssh/secrets/local.config;
 # source ${HOME}/.ssh/secrets/offsppwa-vue.config;
 
 
-# ./node_modules/.bin/cypress open;
+./node_modules/.bin/cypress open;
 # ./node_modules/.bin/cypress run --spec cypress/integration/GetPersons.js;
-./node_modules/.bin/cypress run --spec cypress/integration/GetInvoices.js;
+# ./node_modules/.bin/cypress run --spec cypress/integration/GetInvoices.js;

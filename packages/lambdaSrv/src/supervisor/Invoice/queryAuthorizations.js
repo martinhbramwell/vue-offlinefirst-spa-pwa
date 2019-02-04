@@ -3,7 +3,6 @@ import queryAuthorization from './queryAuthorization';
 import { logger as LG } from '../../utils';
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
-CLG(process.env.CERT);
 
 const processing = async (args) => {
   const { db } = args;
@@ -11,6 +10,8 @@ const processing = async (args) => {
     const result = await db.find({
       selector: {
         type: 'invoice',
+        void: false,
+        hold: false,
         accepted: { $exists: true },
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: true },

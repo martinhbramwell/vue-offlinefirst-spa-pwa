@@ -4,6 +4,7 @@ import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
 
 import manageInvoices from './admin/manageInvoices';
+import scrapeInv from './admin/cypress/scrapeInv';
 
 import inspectInvoices from './inspections/inspectInvoices';
 import inspectPersons from './inspections/inspectPersons';
@@ -81,6 +82,10 @@ routes.get('/gestionDeFacturas', (req, res, next) => {
 
 routes.post('/gestionDeFacturas', (req, res, next) => {
   manageInvoices(req, res, next);
+});
+
+routes.get('/scrapeInv', (req, res, next) => {
+  scrapeInv(req, res, next);
 });
 
 export default routes;

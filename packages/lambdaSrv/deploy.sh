@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-
+echo -e "This does not work.  Haven't figured out why.";
+exit;
+echo -e "Wants to be run from parent directory of 'lambdaSrv'";
 source ${HOME}/.ssh/secrets/offsppwa-vue.config;
 
 export OLD_IFS=${IFS};
@@ -11,9 +13,12 @@ export IFS=$OLD_IFS;
 export THE_PROJECT=${PROJ_BUILD_PATH[0]}/${PROJ_BUILD_PATH[1]};
 
 echo "      THE_PROJECT = ${THE_PROJECT}";
-echo "       THE_TARGET = ${THE_TARGET}";
+echo "      COUCH_ADM = ${COUCH_ADM}";
+echo "      COUCH_HOST = ${COUCH_HOST}";
+
 
 # -----------------
+
 cat << EOF > ${THE_PROJECT}/../unpackLambdaSrv.sh
 #!/usr/bin/env bash
 #
@@ -25,7 +30,7 @@ cd \${HOME}
 rm -f ./unpackLambdaSrv.sh;
 EOF
 # -----------------
-
+exit;
 pushd ${THE_PROJECT}/..
   # pwd;
   # ls -la;

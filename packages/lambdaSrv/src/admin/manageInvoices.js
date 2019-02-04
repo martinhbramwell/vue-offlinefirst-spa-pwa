@@ -12,6 +12,7 @@ import queryAuthorizations from '../supervisor/Invoice/queryAuthorizations';
 import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
+const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 /* eslint-disable no-unused-vars */
@@ -61,6 +62,45 @@ const toXML = (inv, lvl = 1, inAry = false) => {
 };
 
 /* eslint-disable no-var, vars-on-top */
+
+
+async function cypressInvoices() {
+  try {
+    const host = window.location.origin;
+    const response = await fetch(`${host}/scrapeInv`);
+    const myJson = await response.json(); // extract JSON from the http response
+    CLG(myJson);
+  } catch (err) {
+    CLG(`Cypress error ${err}`);
+  }
+}
+
+function refresh() {
+  window.location.reload(true);
+}
+
+function changeVisibility() {
+  var all = document.getElementsByTagName('tr');
+  for (let ix = 1; ix < all.length; ix += 1) {
+    document.getElementById(all[ix].id).classList.remove('showMe');
+    document.getElementById(all[ix].id).classList.add('hideMe');
+  }
+
+  let hider = 0;
+  hider |= document.getElementById("denegados").checked && 1;
+  hider |= document.getElementById("autorizados").checked && 2;
+  hider |= document.getElementById("rechazados").checked && 4;
+  hider |= document.getElementById("aceptados").checked && 8;
+  hider |= document.getElementById("firmados").checked && 16;
+  hider |= document.getElementById("anulados").checked && 32;
+
+  var shown = document.getElementsByName(hider);
+  for (let ix = 0; ix < shown.length; ix += 1) {
+    document.getElementById(shown[ix].id).classList.remove('hideMe');
+    document.getElementById(shown[ix].id).classList.add('showMe');
+  }
+}
+
 function submit() {
   var held = document.getElementsByName('Hold');
   var anulled = document.getElementsByName('Void');
@@ -194,14 +234,19 @@ export default async (req, res) => {
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="icon" type="image/png" href="../images/favicon.ico" />
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 <script>
   var CLG = console.log;
+  var CLE = console.err;
   var CDR = console.dir;
+  ${cypressInvoices.toString()}
+  ${refresh.toString()}
   ${submit.toString()}
   ${firmar.toString()}
   ${enviar.toString()}
   ${verificar.toString()}
+  ${changeVisibility.toString()}
 </script>
 <style>
 #facturas {
@@ -240,6 +285,20 @@ input[type="password"] {
   background-color : #4CAF50;
 }
 
+.fa-times-circle {
+  color: #ff0000;
+}
+
+.spanBox {
+  color: white;
+  padding: 10px;
+  border: 1px solid white;
+}
+
+p {
+  font-size: 16px;
+}
+
 .button {
   display: inline-block;
   padding: 5px 10px;
@@ -265,6 +324,27 @@ input[type="password"] {
   box-shadow: 0 5px #666;
   transform: translateY(4px);
 }
+
+.d-table {
+  display:table !important;
+}
+
+.d-table-cell {
+  display:table-cell !important;
+}
+
+.w-100 {
+  width: 100% !important;
+}
+
+.tar {
+  text-align: right !important;
+}
+
+.hideMe {
+  visibility: collapse;
+}
+
 </style>
 </head>
   `);
@@ -338,8 +418,17 @@ input[type="password"] {
     const fecha = new Date(d.fecha);
 
     const persons = await getPersonRecord(d.nombreCliente); // eslint-disable-line no-unused-vars
+    /* eslint-disable no-bitwise, no-underscore-dangle, max-len */
+    let hider = 0;
+    hider |= (doc.authorized === 'no timestamp') && 1;
+    hider |= doc.authorized && 2;
+    hider |= doc.rejected && 4;
+    hider |= doc.accepted && 8;
+    hider |= doc._attachments && doc._attachments.invoiceSigned && doc._attachments.invoiceXml && 16;
+    hider |= doc.void && 32;
+    /* eslint-enable no-bitwise, no-underscore-dangle, max-len */
 
-    out.write(`<tr>
+    out.write(`<tr id="${d.sequential}" name=${hider} class="showMe">
       <td>${d.sequential}</td>
       <td><input id="h${d.sequential}" type="checkbox" name="Hold" ${doc.hold ? 'checked' : ''}></td>
       <td><input id="v${d.sequential}" type="checkbox" name="Void" ${doc.void ? 'checked' : ''}></td>
@@ -347,7 +436,8 @@ input[type="password"] {
       <td><i class="fas fa-${frm ? 'check-circle' : 'circle'}" /></td>
       <td><i class="fas fa-${env}" /></td>
       <td><i class="fas fa-${aut}" /></td>
-      <td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td>
+      <td class="fecha">${hider}</td>
+      <!-- td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td -->
       <td>${d.nombreCliente}</td>
       <td>${d.legalId.replace('[', '').replace(']', '')}</td>
       <td>${d.email}</td>
@@ -439,7 +529,20 @@ input[type="password"] {
   }
 
   try {
-    res.write('<br /><hr /><br />');
+    res.write(`
+      <div class="border d-table w-100">
+        <p class="d-table-cell">
+          <button class="button" type="button" onclick="refresh()">Refrescar</button>
+        </p>
+        <div class="d-table-cell tar">
+          <p>
+            Raspado de datos de BAPU :: &nbsp;
+            <button class="button" type="button" onclick="cypressInvoices()">Iniciar</button>
+          </p>
+        </div>
+      </div>
+    `);
+    res.write('<hr /><br />');
     res.write('<form name="gestionDeFacturas" action="/gestionDeFacturas" method="post">');
     res.write('Usuario: <input type="text" name="uid" /> ');
     res.write('&nbsp;Clave: <input type="password" name="pwd" />');
@@ -447,7 +550,15 @@ input[type="password"] {
     res.write('<input type="hidden" name="data" /><br><br>');
     res.write('<button class="button" type="button" onclick="firmar()">Firmar Facturas</button>');
     res.write('<button class="button" type="button" onclick="enviar()">Enviar Facturas</button>');
-    res.write('<button class="button" type="button" onclick="verificar()">Verificar Facturas</button><br>');
+    res.write('<button class="button" type="button" onclick="verificar()">Verificar Facturas</button>');
+    res.write('&nbsp; &nbsp; <span class="spanBox">');
+    res.write(' Anulados: <input id="anulados" onChange="changeVisibility()" type="checkbox" name="Anu">');
+    res.write(' Firmados: <input id="firmados" onChange="changeVisibility()" type="checkbox" name="Frm">');
+    res.write(' Aceptados: <input id="aceptados" onChange="changeVisibility()" type="checkbox" name="Acp">');
+    res.write(' Rechazados: <input id="rechazados" onChange="changeVisibility()" type="checkbox" name="Rch">');
+    res.write(' Autorizados: <input id="autorizados" onChange="changeVisibility()" type="checkbox" name="Aut">');
+    res.write(' Denegados: <input id="denegados" onChange="changeVisibility()" type="checkbox" name="Aut">');
+    res.write('</span><br />');
 
     res.write(`<table id="facturas"><tr>
       <th>Secuencial</th>
@@ -484,8 +595,6 @@ input[type="password"] {
     res.write('</table>');
 
     res.write('</form>');
-    // LG.info(`Person :: ${JSON.stringify(person, null, 2)}`);
-    // LG.info(`Person: ${pdd.nombre} ==> Telef: ${pdd.telefono_1} ID: ${pdd.ruc_cedula} Email: ${pdd.email}`);
   } catch (err) {
     CLG(err);
   }
