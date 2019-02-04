@@ -12,8 +12,8 @@
   "scripts": {
     "prestart": "npm run -s build",
     "start": "node dist/index.js",
-    "dev": "nodemon            src/index.js --exec \"node -r dotenv/config -r babel-register\"",
-    "dbg": "esw src test && nodemon  --inspect src/index.js --exec \"node -r dotenv/config -r babel-register\"",
+    "dev": "                nodemon --ignore cypress/ --inspect src/index.js --exec \"node -r dotenv/config -r babel-register\"",
+    "dbg": "esw src test && nodemon --ignore cypress/ --inspect src/index.js --exec \"node -r dotenv/config -r babel-register\"",
     "clean": "rimraf dist",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
     "test": "jest --watch",
@@ -41,6 +41,7 @@
     "babel-preset-env": "^1.6.1",
     "body-parser": "^1.18.2",
     "chokidar": "^2.0.4",
+    "cypress": "^3.1.5",
     "express": "^4.16.2",
     "logform": "^1.10.0",
     "moment": "^2.23.0",
@@ -54,6 +55,7 @@
     "relational-pouch": "^3.1.0",
     "rimraf": "^2.6.2",
     "winston": "^3.1.0",
+    "xml2js": "^0.4.19",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
