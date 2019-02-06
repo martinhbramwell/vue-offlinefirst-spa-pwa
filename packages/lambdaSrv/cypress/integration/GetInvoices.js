@@ -23,7 +23,7 @@ describe('BAPU Scraper', function() {
                                             .replace(/ /, '|')
                                             .replace(/:/g, '|')
                                             .split('|');
-        return [2018, 12, 31, 0, 0, 0];
+        return [2019, 1, 31, 14, 6, 30];
       }).as('latestInvoice');
   });
 

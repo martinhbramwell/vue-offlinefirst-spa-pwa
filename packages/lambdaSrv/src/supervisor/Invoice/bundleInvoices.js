@@ -16,9 +16,11 @@ const bundle = async (args) => {
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: false },
         '_attachments.invoiceSigned': { $exists: false },
-        // '_attachments.invoiceAuthorized': { $exists: false },
-        // '_attachments.invoiceNotAuthorized': { $exists: false },
-        // '_attachments.invoiceRejected': { $exists: false },
+
+
+        // // '_attachments.invoiceAuthorized': { $exists: false },
+        // // '_attachments.invoiceNotAuthorized': { $exists: false },
+        // // '_attachments.invoiceRejected': { $exists: false },
       },
     });
     LG.info(`\n

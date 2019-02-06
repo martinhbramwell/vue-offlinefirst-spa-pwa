@@ -80,6 +80,11 @@ routes.get('/gestionDeFacturas', (req, res, next) => {
   manageInvoices(req, res, next);
 });
 
+routes.post('/gdf', (req, res, next) => {
+  req.method = 'GET';
+  manageInvoices(req, res, next);
+});
+
 routes.post('/gestionDeFacturas', (req, res, next) => {
   manageInvoices(req, res, next);
 });

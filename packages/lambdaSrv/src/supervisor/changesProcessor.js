@@ -1,5 +1,5 @@
 import invoices from './Invoice';
-import { emitters, Queue, logger as LG } from '../utils';
+import { emitters, Queue, logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
 const { queueEmitter } = emitters;
 
@@ -9,8 +9,8 @@ const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 const handlers = {
   invoice: (args) => {
-    const { doc } = args;
-    LG.verbose(`Invoice change handler ${doc.data.idib}`);
+    // const { doc } = args;
+    // LG.verbose(`Invoice change handler ${doc.data.idib}`);
     invoices(args);
   },
 };

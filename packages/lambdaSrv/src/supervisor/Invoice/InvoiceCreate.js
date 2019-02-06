@@ -107,14 +107,20 @@ export default class {
         newRecord.data.email = lclPerson.docs[0].data.email || 'nulo';
         LG.info(`Person : ${lclPerson.docs[0].data.nombre} has email  ${newRecord.data.email}`);
 
+        const previousPeriodEndSequenceNumber = 10595;
+
         // const randy = 0;
-        const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
-        newRecord.data.sequential += randy;
+        const randy = 100300000;
+        // const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
+        const seqib = newRecord.data.sequential + randy;
+        newRecord.data.seqib = seqib;
+        newRecord.data.sequential = seqib - previousPeriodEndSequenceNumber;
 
         newRecord.data.codigo = `001-002-${newRecord.data.sequential.toString().padStart(9, '0')}`;
         newRecord.data.pdv = 2;
 
         newRecord.hold = true;
+        newRecord.void = false;
       } else {
         LG.warn(`\n\nAssuming we are loading a VueSPPWA invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
         const maxRow = (await findMaxRow(this.lclDB, serialIndex));

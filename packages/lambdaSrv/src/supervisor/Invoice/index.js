@@ -4,7 +4,7 @@ import signInvoice from './signInvoice'; // eslint-disable-line no-unused-vars
 import sendInvoice from './sendInvoice'; // eslint-disable-line no-unused-vars
 import queryAuthorization from './queryAuthorization'; // eslint-disable-line no-unused-vars
 
-import { logger as LG } from '../../utils';
+import { logger as LG } from '../../utils'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
@@ -46,7 +46,7 @@ const invoices = (ctx) => {
   acc |= doc.hold && 128;
 
 
-  let msg = '';
+  let msg = ''; // eslint-disable-line no-unused-vars
   let task = '';
   switch (acc) {
     // case 0:
@@ -82,7 +82,7 @@ const invoices = (ctx) => {
       task = 'nothing';
       msg = (acc & 128) ? 'Can do nothing with' : 'Invoice on hold';
   }
-  LG.warn(`\n\n${msg} :: ${acc}\n\n`);
+  // LG.warn(`\n\n${msg} :: ${acc}\n\n`);
   /* eslint-enable no-bitwise, no-underscore-dangle */
 
 

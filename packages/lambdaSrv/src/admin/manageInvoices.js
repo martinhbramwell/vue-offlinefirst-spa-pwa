@@ -86,13 +86,15 @@ function changeVisibility() {
     document.getElementById(all[ix].id).classList.add('hideMe');
   }
 
+  /* eslint-disable no-bitwise */
   let hider = 0;
-  hider |= document.getElementById("denegados").checked && 1;
-  hider |= document.getElementById("autorizados").checked && 2;
-  hider |= document.getElementById("rechazados").checked && 4;
-  hider |= document.getElementById("aceptados").checked && 8;
-  hider |= document.getElementById("firmados").checked && 16;
-  hider |= document.getElementById("anulados").checked && 32;
+  hider |= document.getElementById('denegados').checked && 1;
+  hider |= document.getElementById('autorizados').checked && 2;
+  hider |= document.getElementById('rechazados').checked && 4;
+  hider |= document.getElementById('aceptados').checked && 8;
+  hider |= document.getElementById('firmados').checked && 16;
+  hider |= document.getElementById('anulados').checked && 32;
+  /* eslint-enable no-bitwise */
 
   var shown = document.getElementsByName(hider);
   for (let ix = 0; ix < shown.length; ix += 1) {
@@ -116,9 +118,90 @@ function submit() {
 }
 
 function firmar() {
-  var act = document.getElementsByName('action');
-  act[0].value = 'firmar';
-  submit();
+  /* eslint-disable no-undef */
+  alertify.defaults.glossary.title = 'Logichem';
+  alertify.defaults.notifier.closeButton = true;
+  /* eslint-enable no-undef */
+
+  document.getElementsByName('action')[0].value = 'firmar';
+
+  var rows = document.getElementsByTagName('tr');
+  var last = 0;
+  var fails = [];
+  var wins = [];
+  var voids = [];
+  for (var ix = rows.length - 1; ix > 0; ix -= 1) {
+    const { id } = rows[ix];
+    const prp = document.getElementById(`Prp_${rows[ix].id}`).attributes.name.value;
+    const anu = document.getElementById(`Anu_${rows[ix].id}`).attributes.name.value;
+    const hld = document.getElementById(`h${rows[ix].id}`).checked;
+    const elemVoid = document.getElementById(`v${rows[ix].id}`);
+    const voided = elemVoid && elemVoid.checked;
+    if (voided) voids.push(id);
+    CLG(`
+      Last: ${last}
+      Id: ${id}
+      Status: ${prp}
+      State: ${anu}
+      Held: ${hld}
+    `);
+    if (prp === 'processed') {
+      last = id;
+      continue; // eslint-disable-line no-continue
+    } else if (anu === 'void') {
+      continue; // eslint-disable-line no-continue
+    } else if (hld) {
+      fails.push(id);
+    } else {
+      wins.push(id);
+    }
+  }
+
+  CDR(fails);
+  CDR(wins);
+  if ((wins[0] > last + 1) && (fails[0] < wins[wins.length - 1])) {
+    /* eslint-disable no-undef */
+    alertify.defaults.glossary.ok = 'Entendido';
+    alertify.alert(`
+      <h4>Hay Que Procesar Las Facturas En Orden Numerico</h4>
+      <div>  Se ha saltado las facturas ::</div>
+      <div>${fails.filter(elem => elem < wins[wins.length - 1])}</div>
+    `);
+    return;
+    /* eslint-enable no-undef */
+  }
+
+  if (voids.length > 0) {
+  /* eslint-disable no-undef */
+    alertify.defaults.glossary.ok = 'Si. Es corecto. Adelante.';
+    alertify.defaults.glossary.cancel = 'No sigues. Me jalé!';
+    let msg = '';
+    if (voids.length > 1) {
+      msg = `
+        <h4>Se va a anular unas facturas de manera <i>irreversible</i>.</h4>
+        <div>  Realmente desea anular las facturas ::</div>
+        <div>${voids.toString()}</div>
+      `;
+    } else {
+      msg = `
+        <h4>Se va a anular una factura de manera <i>irreversible</i>.</h4>
+        <div>  Realmente desea anular la factura :: ${voids[0]}</div>
+      `;
+    }
+    alertify.confirm(
+      msg,
+      () => {
+        CLG('WILL DO');
+        submit();
+      },
+      () => {
+        CLG('WILL QUIT');
+      },
+    ).set('defaultFocus', 'cancel');
+    /* eslint-enable no-undef */
+  } else {
+    submit();
+  }
 }
 
 function enviar() {
@@ -132,47 +215,94 @@ function verificar() {
   act[0].value = 'verificar';
   submit();
 }
-/* eslint-enable no-var, vars-on-top */
 
+
+const processVoids = async (voidsToProcess) => {
+  CLG('Process voids');
+  const dbInvoices = await databaseLocal.allDocs({
+    include_docs: true,
+    attachments: true,
+    // startkey: 'Invoice_2',
+    // endkey: 'Invoice_1_0000000000000000',
+    // descending: true,
+
+    startkey: 'Invoice_1_0000000000000000',
+    endkey: 'Invoice_2',
+  });
+
+  const invoices = dbInvoices.rows;
+  const voidedIds = voidsToProcess.map(inv => inv[0].replace('h', ''));
+  const first = invoices[0].doc.data.sequential;
+  let subtractor = invoices[0].doc.data.seqib - first;
+
+  const writes = invoices.map((itm) => {
+    const inv = itm;
+    const seq = inv.doc.data.seqib;
+    if (voidedIds.includes(seq.toString())) {
+      inv.doc.void = true;
+      subtractor += 1;
+      inv.doc.data.sequential = 0;
+      inv.doc.data.codigo = '???-???-?????????';
+    } else {
+      inv.doc.void = inv.doc.void || false;
+      const sequential = seq - subtractor;
+      inv.doc.data.sequential = sequential;
+      inv.doc.data.codigo = `001-002-${sequential.toString().padStart('0', 9)}`;
+      // const annul = settings[`h${seq}`].V && !inv.doc._attachments;
+      // inv.doc.void = inv.doc.void || annul;
+
+      // if (inv.doc.void) {
+      // } else {
+      // }
+    }
+    return inv.doc;
+  });
+  /* eslint-enable no-param-reassign, no-underscore-dangle */
+
+  await databaseLocal.bulkDocs(writes);
+
+  CLG('Processed voids');
+};
+
+/* eslint-enable no-var, vars-on-top */
 const saveSettings = async (args) => { // eslint-disable-line no-unused-vars
   const settings = JSON.parse(args);
+  const voidsToProcess = Object.entries(settings)
+    .filter(pair => pair[1].V);
+    // .reduce((acc, val) => { return acc || val }, false);
+  if (voidsToProcess.length) {
+    processVoids(voidsToProcess);
+    return false;
+  }
+
   const invoices = await databaseLocal.allDocs({
     include_docs: true,
     attachments: true,
-    startkey: 'Invoice_2',
-    endkey: 'Invoice_1_0000000000000000',
-    // limit:  3,
-    descending: true,
+    // startkey: 'Invoice_2',
+    // endkey: 'Invoice_1_0000000000000000',
+    // descending: true,
+
+    startkey: 'Invoice_1_0000000000000000',
+    endkey: 'Invoice_2',
   });
 
-  CDR(settings);
-
-  const updates = invoices.rows.filter((inv) => { // eslint-disable-line no-unused-vars
-    if (inv && inv.doc && inv.doc.data) {
-      const seq = inv.doc.data.sequential;
-      const hld = inv.doc.hold || false;
-      const anu = inv.doc.void || false;
+  const writes = invoices.rows.filter((invoice) => { // eslint-disable-line no-unused-vars
+    const inv = invoice;
+    if (inv.doc && inv.doc.data) {
+      if (inv.doc.void) return false;
+      const seq = inv.doc.data.seqib;
       if (settings[`h${seq}`]) {
-        CLG(`${seq}  ${hld === settings[`h${seq}`].H} & ${anu === settings[`h${seq}`].V}`);
-        const diff = (hld === settings[`h${seq}`].H) && (anu === settings[`h${seq}`].V);
-        return !diff;
+        inv.doc.hold = settings[`h${seq}`].H;
+        return !inv.doc.hold;
       }
     }
     return false;
-  });
+  }).map(inv => inv.doc);
 
-  CLG(`updates :: ${updates.length}`);
 
-  /* eslint-disable no-param-reassign */
-  const writes = updates.map((inv) => {
-    const seq = inv.doc.data.sequential;
-    inv.doc.hold = settings[`h${seq}`].H;
-    inv.doc.void = settings[`h${seq}`].V;
-    return inv.doc;
-  });
-  /* eslint-enable no-param-reassign */
-
-  await databaseLocal.bulkDocs(writes);
+  const bulkResults = await databaseLocal.bulkDocs(writes);
+  CDR(bulkResults);
+  return true;
 };
 
 const reHold = async () => { // eslint-disable-line no-unused-vars
@@ -197,24 +327,27 @@ const reHold = async () => { // eslint-disable-line no-unused-vars
 
 const clientActions = {
   firmar: async (args) => {
-    await saveSettings(args);
-    await bundleInvoices({ db: databaseLocal });
-    await signInvoices({ db: databaseLocal });
-    await reHold();
+    if (await saveSettings(args)) {
+      await bundleInvoices({ db: databaseLocal });
+      await signInvoices({ db: databaseLocal });
+      await reHold();
+    }
   },
 
   enviar: async (args) => {
-    await saveSettings(args);
-    await sendInvoices({ db: databaseLocal });
-    await reHold();
+    if (await saveSettings(args)) {
+      await sendInvoices({ db: databaseLocal });
+      await reHold();
+    }
   },
 
   verificar: async (args) => {
     CLG('verificar');
     CDR(args);
-    await saveSettings(args);
-    await queryAuthorizations({ db: databaseLocal });
-    await reHold();
+    if (await saveSettings(args)) {
+      await queryAuthorizations({ db: databaseLocal });
+      await reHold();
+    }
   },
 
   NUTHIN: () => {
@@ -229,123 +362,130 @@ export default async (req, res) => {
   CDR(req.body);
   clientActions[req.body.action || 'NUTHIN'](req.body.data);
 
+  if (req.method === 'POST') {
+    res.redirect(307, '/gdf');
+    return;
+  }
+
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.write(`
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="icon" type="image/png" href="../images/favicon.ico" />
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
-<script>
-  var CLG = console.log;
-  var CLE = console.err;
-  var CDR = console.dir;
-  ${cypressInvoices.toString()}
-  ${refresh.toString()}
-  ${submit.toString()}
-  ${firmar.toString()}
-  ${enviar.toString()}
-  ${verificar.toString()}
-  ${changeVisibility.toString()}
-</script>
-<style>
-#facturas {
-  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
+  <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/alertify.min.js"></script>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css"/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css"/>
+  <link rel="icon" type="image/png" href="../images/favicon.ico" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+  <script>
+    var CLG = console.log;
+    var CLE = console.err;
+    var CDR = console.dir;
+    ${cypressInvoices.toString()}
+    ${refresh.toString()}
+    ${submit.toString()}
+    ${firmar.toString()}
+    ${enviar.toString()}
+    ${verificar.toString()}
+    ${changeVisibility.toString()}
+  </script>
+  <style>
+    #facturas {
+      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
 
-#facturas td, #facturas th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
+    #facturas td, #facturas th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
 
-#facturas tr:nth-child(even){background-color: #336600;}
+    #facturas tr:nth-child(even){background-color: #336600;}
 
-#facturas tr:hover {background-color: #ddd;}
+    #facturas tr:hover {background-color: #ddd;}
 
-#facturas th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #4CAF50;
-  color: white;
-}
+    #facturas th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #4CAF50;
+      color: white;
+    }
 
-td.fecha {
-    width: 1%;
-    white-space: nowrap;
-}
+    td.fecha {
+        width: 1%;
+        white-space: nowrap;
+    }
 
-input[type="text"] {
-  background-color : #4CAF50;
-}
+    input[type="text"] {
+      background-color : #4CAF50;
+    }
 
-input[type="password"] {
-  background-color : #4CAF50;
-}
+    input[type="password"] {
+      background-color : #4CAF50;
+    }
 
-.fa-times-circle {
-  color: #ff0000;
-}
+    .fa-times-circle {
+      color: #ff0000;
+    }
 
-.spanBox {
-  color: white;
-  padding: 10px;
-  border: 1px solid white;
-}
+    .spanBox {
+      color: white;
+      padding: 10px;
+      border: 1px solid white;
+    }
 
-p {
-  font-size: 16px;
-}
+    p {
+      font-size: 16px;
+    }
 
-.button {
-  display: inline-block;
-  padding: 5px 10px;
-  font-size: 16px;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  outline: none;
-  color: #fff;
-  background-color: #4CAF50;
-  border: none;
-  border-radius: 5px;
-  box-shadow: 0 4px #999;
+    .button {
+      display: inline-block;
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      outline: none;
+      color: #fff;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 4px #999;
 
-  margin: 8px 4px;
-  margin-bottom: 25px;
-}
+      margin: 8px 4px;
+      margin-bottom: 25px;
+    }
 
-.button:hover {background-color: #3e8e41}
+    .button:hover {background-color: #3e8e41}
 
-.button:active {
-  background-color: #3e8e41;
-  box-shadow: 0 5px #666;
-  transform: translateY(4px);
-}
+    .button:active {
+      background-color: #3e8e41;
+      box-shadow: 0 5px #666;
+      transform: translateY(4px);
+    }
 
-.d-table {
-  display:table !important;
-}
+    .d-table {
+      display:table !important;
+    }
 
-.d-table-cell {
-  display:table-cell !important;
-}
+    .d-table-cell {
+      display:table-cell !important;
+    }
 
-.w-100 {
-  width: 100% !important;
-}
+    .w-100 {
+      width: 100% !important;
+    }
 
-.tar {
-  text-align: right !important;
-}
+    .tar {
+      text-align: right !important;
+    }
 
-.hideMe {
-  visibility: collapse;
-}
-
-</style>
+    .hideMe {
+      visibility: collapse;
+    }
+  </style>
 </head>
   `);
 
@@ -403,12 +543,17 @@ p {
   };
 
   // CAN'T USE ARROW FUNCTION IN THIS CASE
-  const writePersons = async function (inv, out) { // eslint-disable-line func-names
+  const writeInvoice = async function (inv, out) { // eslint-disable-line func-names
     const { doc } = inv;
     const { data: d } = doc;
 
     const prp = doc._attachments && doc._attachments.invoiceXml; // eslint-disable-line no-underscore-dangle
     const frm = doc._attachments && doc._attachments.invoiceSigned; // eslint-disable-line no-underscore-dangle
+
+    const voided = doc.void
+      ? '<i class="fas fa-times-circle"  name="Void"/>'
+      : `<input id="v${d.seqib}" type="checkbox" name="Void"}>`;
+
     let env = 'circle';
     env = doc.accepted ? 'check-circle' : env;
     env = doc.rejected ? 'times-circle' : env;
@@ -418,6 +563,7 @@ p {
     const fecha = new Date(d.fecha);
 
     const persons = await getPersonRecord(d.nombreCliente); // eslint-disable-line no-unused-vars
+
     /* eslint-disable no-bitwise, no-underscore-dangle, max-len */
     let hider = 0;
     hider |= (doc.authorized === 'no timestamp') && 1;
@@ -428,16 +574,21 @@ p {
     hider |= doc.void && 32;
     /* eslint-enable no-bitwise, no-underscore-dangle, max-len */
 
-    out.write(`<tr id="${d.sequential}" name=${hider} class="showMe">
+    d.sequential = d.sequential > 0
+      ? d.sequential.toString().padStart(9, '0')
+      : '~~~~~~~~~';
+    /* eslint-disable no-mixed-operators */
+    out.write(`<tr id="${d.seqib}" name=${hider} class="showMe">
       <td>${d.sequential}</td>
-      <td><input id="h${d.sequential}" type="checkbox" name="Hold" ${doc.hold ? 'checked' : ''}></td>
-      <td><input id="v${d.sequential}" type="checkbox" name="Void" ${doc.void ? 'checked' : ''}></td>
-      <td><i class="fas fa-${prp ? 'check-circle' : 'circle'}" /></td>
+      <td>${d.seqib && d.seqib.toString().padStart(9, '0') || '?????????'}</td>
+      <td><input id="h${d.seqib}" type="checkbox" name="Hold" ${doc.hold ? 'checked' : ''}></td>
+      <td id="Anu_${d.seqib}" name="${doc.void ? 'void' : 'valid'}">${voided}</td>
+      <td id="Prp_${d.seqib}" name="${prp ? 'processed' : 'new'}"><i class="fas fa-${prp ? 'check-circle' : 'circle'}" /></td>
       <td><i class="fas fa-${frm ? 'check-circle' : 'circle'}" /></td>
       <td><i class="fas fa-${env}" /></td>
       <td><i class="fas fa-${aut}" /></td>
-      <td class="fecha">${hider}</td>
-      <!-- td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td -->
+      <!-- td class="fecha">${hider}</td -->
+      <td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td>
       <td>${d.nombreCliente}</td>
       <td>${d.legalId.replace('[', '').replace(']', '')}</td>
       <td>${d.email}</td>
@@ -445,6 +596,7 @@ p {
       <td>${d.direccion}</td>
       </tr>
     `);
+    /* eslint-enable no-mixed-operators */
 
     // let ids = '';
     // let emails = '';
@@ -562,6 +714,7 @@ p {
 
     res.write(`<table id="facturas"><tr>
       <th>Secuencial</th>
+      <th>Sec BAPU</th>
       <th><i class="fas fa-hand-paper"/></th>
       <th><i class="fas fa-ban"/></th>
       <th>Prp</th>
@@ -585,10 +738,41 @@ p {
       descending: true,
     });
 
+    const rev = invoices.rows;
+
+    /* eslint-disable no-bitwise, no-underscore-dangle, prefer-destructuring, max-len */
+    // let sequential = 0;
+    // let seqib = 999999999;
+    // rev.sort((m, n) => m.doc.data.seqib - n.doc.data.seqib);
+    // for (let ix = 0; ix < rev.length; ix += 1) {
+    //   const { doc } = rev[ix];
+    //   const { data: itm } = doc;
+    //   if (doc._attachments && itm.seqib < seqib) seqib = itm.seqib;
+    //   if (doc._attachments && itm.sequential > sequential) sequential = itm.sequential;
+    //   // const wasGenerated =
+    //   // CLG(`${ix} | S: ${itm.sequential} I: ${itm.seqib} [${!!doc._attachments}] ${seqib} ${sequential}`);
+    // }
+
+    // let subtractor = seqib - sequential;
+    // CLG(`${seqib} - ${sequential} = ${subtractor}`);
+
+    // for (let ix = 0; ix < rev.length; ix += 1) {
+    //   if (rev[ix].doc.void) {
+    //     rev[ix].doc.data.sequential = 0;
+    //     subtractor += 1;
+    //   } else {
+    //     rev[ix].doc.data.sequential = rev[ix].doc.data.seqib - subtractor;
+    //   }
+    // }
+
+    // rev.sort((n, m) => m.doc.data.seqib - n.doc.data.seqib);
+    /* eslint-enable no-bitwise, no-underscore-dangle, prefer-destructuring, max-len */
+
     const proms = [];
-    for (let ix = 0; ix < invoices.rows.length; ix += 1) {
-      proms.push(writePersons(invoices.rows[ix], res));
+    for (let ix = 0; ix < rev.length; ix += 1) {
+      proms.push(writeInvoice(rev[ix], res));
     }
+    /* eslint-disable no-bitwise, no-underscore-dangle, prefer-destructuring, max-len */
 
     await Promise.all(proms);
 

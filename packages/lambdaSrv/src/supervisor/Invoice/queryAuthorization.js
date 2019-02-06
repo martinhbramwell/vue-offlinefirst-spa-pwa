@@ -61,7 +61,8 @@ const query = async (args) => { // eslint-disable-line no-unused-vars
 
     const sriResponse = await axios.post(urlQuery, bundle, headers);
     if (sriResponse.data.includes(soapQueryAuthorized)) {
-      inv.authorized = extractTimestamp(sriResponse); // eslint-disable-line no-param-reassign
+      const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+      fresh.authorized = extractTimestamp(sriResponse); // eslint-disable-line no-param-reassign
       // CLG(`|${sriResponse.data}|`);
 
       /* eslint-disable max-len */
@@ -75,12 +76,12 @@ const query = async (args) => { // eslint-disable-line no-unused-vars
       //   `);
       // });
 
-      const pt = await db.put(inv);
+      const pt = await db.put(fresh);
 
       LG.info(`Timestamp Put response :: ${JSON.stringify(pt, null, 2)}`);
     }
   } catch (err) {
-    LG.error(`Error while request authorization status report ${err}`);
+    LG.error(`Error while requesting authorization status report ${err}`);
   }
 };
 

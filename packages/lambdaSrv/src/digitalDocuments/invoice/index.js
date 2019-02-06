@@ -19,8 +19,8 @@ export default async (db, startkey) => {
     LG.error(`AllDocs failed to retrieve invoices from ${startkey}: <${err}>`);
   }
 
-  LG.verbose(`\n\nInvoice to process:: ${JSON.stringify(inv, null, 2)}  `);
-  LG.verbose(`\n\nTemplate to use :: ${JSON.stringify(template, null, 2)}  `);
+  // LG.verbose(`\n\nInvoice to process:: ${JSON.stringify(inv, null, 2)}  `);
+  // LG.verbose(`\n\nTemplate to use :: ${JSON.stringify(template, null, 2)}  `);
 
   // const jsonInvoice = recursivePopulate(inv, JSON.parse(JSON.stringify(template)));
   const jsonInvoice = recursivePopulate({
@@ -28,7 +28,7 @@ export default async (db, startkey) => {
     _tmplt: JSON.parse(JSON.stringify(template)),
   });
 
-  LG.debug(`\nDone :: ${JSON.stringify(jsonInvoice, null, 2)}`);
+  // LG.debug(`\nDone :: ${JSON.stringify(jsonInvoice, null, 2)}`);
 
   // const infoFactura = `${HEAD}${toXML(test)}${FOOT}`;
   // return infoFactura;
