@@ -117,13 +117,11 @@ function submit() {
   CLG('Sent');
 }
 
-function firmar() {
+function validateThenSubmit() {
   /* eslint-disable no-undef */
   alertify.defaults.glossary.title = 'Logichem';
   alertify.defaults.notifier.closeButton = true;
   /* eslint-enable no-undef */
-
-  document.getElementsByName('action')[0].value = 'firmar';
 
   var rows = document.getElementsByTagName('tr');
   var last = 0;
@@ -204,16 +202,19 @@ function firmar() {
   }
 }
 
+function firmar() {
+  document.getElementsByName('action')[0].value = 'firmar';
+  validateThenSubmit();
+}
+
 function enviar() {
-  var act = document.getElementsByName('action');
-  act[0].value = 'enviar';
-  submit();
+  document.getElementsByName('action')[0].value = 'enviar';
+  validateThenSubmit();
 }
 
 function verificar() {
-  var act = document.getElementsByName('action');
-  act[0].value = 'verificar';
-  submit();
+  document.getElementsByName('action')[0].value = 'verificar';
+  validateThenSubmit();
 }
 
 
@@ -384,6 +385,7 @@ export default async (req, res) => {
     ${cypressInvoices.toString()}
     ${refresh.toString()}
     ${submit.toString()}
+    ${validateThenSubmit.toString()}
     ${firmar.toString()}
     ${enviar.toString()}
     ${verificar.toString()}

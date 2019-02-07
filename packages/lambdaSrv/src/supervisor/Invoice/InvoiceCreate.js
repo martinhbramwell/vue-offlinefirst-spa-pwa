@@ -120,7 +120,7 @@ export default class {
         newRecord.data.pdv = 2;
 
         newRecord.hold = true;
-        newRecord.void = false;
+        newRecord.void = newRecord.data.sequential === randy;
       } else {
         LG.warn(`\n\nAssuming we are loading a VueSPPWA invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
         const maxRow = (await findMaxRow(this.lclDB, serialIndex));
