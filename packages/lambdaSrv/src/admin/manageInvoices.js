@@ -535,17 +535,17 @@ export default async (req, res) => {
     },
   ];
 
-  const getPersonRecord = async (name) => { // eslint-disable-line arrow-body-style
-    return databaseLocal.find({
-      selector: {
-        'data.type': 'person',
-        'data.nombre': name,
-      },
-    });
-  };
+  // const getPersonRecord = async (name) => { // eslint-disable-line arrow-body-style
+  //   return databaseLocal.find({
+  //     selector: {
+  //       'data.type': 'person',
+  //       'data.nombre': name,
+  //     },
+  //   });
+  // };
 
   // CAN'T USE ARROW FUNCTION IN THIS CASE
-  const writeInvoice = async function (inv, out) { // eslint-disable-line func-names
+  const writeInvoice = function (inv, out) { // eslint-disable-line func-names
     const { doc } = inv;
     const { data: d } = doc;
 
@@ -564,7 +564,7 @@ export default async (req, res) => {
     aut = (doc.authorized === 'no timestamp') ? 'times-circle' : aut;
     const fecha = new Date(d.fecha);
 
-    const persons = await getPersonRecord(d.nombreCliente); // eslint-disable-line no-unused-vars
+    // const persons = await getPersonRecord(d.nombreCliente); // eslint-disable-line no-unused-vars
 
     /* eslint-disable no-bitwise, no-underscore-dangle, max-len */
     let hider = 0;
@@ -599,27 +599,6 @@ export default async (req, res) => {
       </tr>
     `);
     /* eslint-enable no-mixed-operators */
-
-    // let ids = '';
-    // let emails = '';
-    // let phones = '';
-
-    // persons.docs.forEach((person) => {
-    //   const pdd = person.data;
-    //   ids += `<li>${pdd.ruc_cedula}</li>`;
-    //   emails += `<li>${pdd.email}</li>`;
-    //   phones += `<li>${pdd.telefono_1.replace(/\D/g, '')}</li>`;
-    // });
-
-    // out.write(`<tr>
-    //   <td></td>
-    //   <td></td>
-    //   <td></td>
-    //   <td><ul>${ids}</ul></td>
-    //   <td><ul>${emails}</ul></td>
-    //   <td><ul>${phones}</ul></td>
-    //   <td></td>
-    //   </tr>`);
   };
 
   const serialIndexName = 'invoice_serial';
@@ -641,7 +620,6 @@ export default async (req, res) => {
     LG.info(`
       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     const invoice = `Invoice_1_${code.idib.toString().padStart(16, '0')}`;
-    // res.write(`<br /></div>Couch _id key :: ${JSON.stringify(invoice, null, 2)}</div>`);
 
     const jsonInvoice = (await getInvoice(databaseLocal, invoice));
     if (!jsonInvoice) throw new Error(`Unable to get invoice ${invoice}!`);
@@ -652,22 +630,6 @@ export default async (req, res) => {
     res.write(`</div>Numero serial :: ${T.estab}-${T.ptoEmi}-${T.secuencial}</div>`);
     res.write(`<br /></div>Cliente :: ${jsonInvoice.infoFactura.razonSocialComprador}</div>`);
     res.write(`<br /></div>Codigo interno :: ${serial.idib}</div>`);
-
-    /* ***************************************************************************
-       ***************************************************************************
-    const digitalInvoice = `${HEAD}${toXML(jsonInvoice)}${FOOT}`;
-
-    // LG.info(digitalInvoice);
-
-    fs.writeFile(`/tmp/${uniqueId}.iri.raw.xml`, digitalInvoice, (err) => {
-      // throws an error, you could also catch it here
-      if (err) throw err;
-
-      // success case, the file was saved
-      LG.info('Invoice saved!');
-    });
-       ***************************************************************************
-       *************************************************************************** */
   } catch (err) {
     res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
   }
@@ -740,43 +702,7 @@ export default async (req, res) => {
       descending: true,
     });
 
-    const rev = invoices.rows;
-
-    /* eslint-disable no-bitwise, no-underscore-dangle, prefer-destructuring, max-len */
-    // let sequential = 0;
-    // let seqib = 999999999;
-    // rev.sort((m, n) => m.doc.data.seqib - n.doc.data.seqib);
-    // for (let ix = 0; ix < rev.length; ix += 1) {
-    //   const { doc } = rev[ix];
-    //   const { data: itm } = doc;
-    //   if (doc._attachments && itm.seqib < seqib) seqib = itm.seqib;
-    //   if (doc._attachments && itm.sequential > sequential) sequential = itm.sequential;
-    //   // const wasGenerated =
-    //   // CLG(`${ix} | S: ${itm.sequential} I: ${itm.seqib} [${!!doc._attachments}] ${seqib} ${sequential}`);
-    // }
-
-    // let subtractor = seqib - sequential;
-    // CLG(`${seqib} - ${sequential} = ${subtractor}`);
-
-    // for (let ix = 0; ix < rev.length; ix += 1) {
-    //   if (rev[ix].doc.void) {
-    //     rev[ix].doc.data.sequential = 0;
-    //     subtractor += 1;
-    //   } else {
-    //     rev[ix].doc.data.sequential = rev[ix].doc.data.seqib - subtractor;
-    //   }
-    // }
-
-    // rev.sort((n, m) => m.doc.data.seqib - n.doc.data.seqib);
-    /* eslint-enable no-bitwise, no-underscore-dangle, prefer-destructuring, max-len */
-
-    const proms = [];
-    for (let ix = 0; ix < rev.length; ix += 1) {
-      proms.push(writeInvoice(rev[ix], res));
-    }
-    /* eslint-disable no-bitwise, no-underscore-dangle, prefer-destructuring, max-len */
-
-    await Promise.all(proms);
+    invoices.rows.forEach(rev => writeInvoice(rev, res));
 
     res.write('</table>');
 

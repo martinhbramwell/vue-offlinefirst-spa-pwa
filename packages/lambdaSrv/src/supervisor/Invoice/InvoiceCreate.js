@@ -110,8 +110,13 @@ export default class {
         const previousPeriodEndSequenceNumber = 10595;
 
         // const randy = 0;
-        const randy = 100300000;
+        // const randy = 100300000;
         // const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
+        const idem = new Date();
+        const dy = idem.getDate().toString().padStart(2, '4');
+        const hr = idem.getHours().toString().padStart(2, '3');
+        const randy = parseInt(`${dy}${hr}00000`, 10);
+
         const seqib = newRecord.data.sequential + randy;
         newRecord.data.seqib = seqib;
         newRecord.data.sequential = seqib - previousPeriodEndSequenceNumber;
