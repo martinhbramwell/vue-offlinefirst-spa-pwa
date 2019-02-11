@@ -6,20 +6,19 @@ const sanityCheck = 'cypress/integration/SanityCheck.js';
 const scrapePersons = 'cypress/integration/GetPersons.js'; // eslint-disable-line no-unused-vars
 const scrapeInvoices = 'cypress/integration/GetInvoices.js'; // eslint-disable-line no-unused-vars
 
-const jsonStart = '{ "starts": "OK"';
-const jsonArrayStart = '"ping": [';
-const jsonArrayEnd = ']';
-const jsonEnd = '}';
+// const jsonStart = '{ "starts": "OK"';
+// const jsonArrayStart = '"ping": [';
+// const jsonArrayEnd = ']';
+// const jsonEnd = '}';
 
 export default async (req, res) => {
   const path = process.cwd();
   res.setHeader('Content-Type', 'application/json');
-  res.write(jsonStart);
+  // res.write(jsonStart);
 
-  let timer = null;
   try {
     /* eslint-disable max-len */
-    res.write(`, ${jsonArrayStart} "${(new Date()).toLocaleTimeString()}"`);
+    // res.write(`, ${jsonArrayStart} "${(new Date()).toLocaleTimeString()}"`);
     const resultSanityCheck = await cypress.run({ spec: `${path}/${sanityCheck}` });
     LG.info(`Sanity Check results :\n${JSON.stringify(resultSanityCheck.config.env, null, 3)}`);
     res.write(', "Sanity"');
@@ -37,8 +36,7 @@ export default async (req, res) => {
     res.write(`, "Async functional test failed ${err}.`);
   }
 
-  clearInterval(timer);
-  res.write(`${jsonArrayEnd}${jsonEnd}`);
+  // res.write(`${jsonArrayEnd}${jsonEnd}`);
   res.end();
   LG.info(`Awaiting ended on path ${path}`);
 };

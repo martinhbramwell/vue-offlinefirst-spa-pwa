@@ -12,6 +12,7 @@ const frags = {
   <script src="../scripts/firmar.js"></script>
   <script src="../scripts/enviar.js"></script>
   <script src="../scripts/verificar.js"></script>
+  <script src="../scripts/parms.js"></script>
 
 
   <link rel="stylesheet" href="../styles/style.css"/>
@@ -22,9 +23,9 @@ const frags = {
   <link rel="icon" type="image/png" href="../images/favicon.ico" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
   <script>
-    var CLG = console.log;
-    var CLE = console.err;
-    var CDR = console.dir;
+    const CLG = console.log;
+    const CLE = console.err;
+    const CDR = console.dir;
   </script>
 </head>
  `,
@@ -63,8 +64,8 @@ const frags = {
 `,
 
   authentication: `
-  Usuario: <input type="text" name="uid" />&nbsp;
-  Clave: <input type="password" name="pwd" />
+  Usuario: <input id="couchUid" type="text" name="uid" />&nbsp;
+  Clave: <input id="couchPwd" type="password" name="pwd" />
 `,
 
   hiddenFields: `
@@ -90,6 +91,14 @@ const frags = {
 `,
 
   modalBapuScraper: `
+  <script>
+    let elemCouchUid = document.getElementById("couchUid");
+    elemCouchUid.value = getCookie('uid');
+
+    let elemCouchPwd = document.getElementById("couchPwd");
+    elemCouchPwd.value = getCookie('pwd');
+  </script>
+
   <script src="../scripts/progress.js"></script>
   <div id="bapuModal" class="modal">
     <div class="modal-content">
