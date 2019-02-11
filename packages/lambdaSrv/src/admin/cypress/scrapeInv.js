@@ -24,10 +24,6 @@ export default async (req, res) => {
     LG.info(`Sanity Check results :\n${JSON.stringify(resultSanityCheck.config.env, null, 3)}`);
     res.write(', "Sanity"');
 
-    timer = setInterval(() => {
-      res.write(`, "${(new Date()).toLocaleTimeString()}"`);
-    }, 5000);
-
     const resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` });
     LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
     res.write(', "Persons"');

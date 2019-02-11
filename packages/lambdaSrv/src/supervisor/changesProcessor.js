@@ -13,6 +13,11 @@ const handlers = {
     // LG.verbose(`Invoice change handler ${doc.data.idib}`);
     invoices(args);
   },
+  person: (args) => {
+    const { doc } = args;
+    LG.verbose(`No change handler for type 'person'. ${doc.data.idib}`);
+    // invoices(args);
+  },
 };
 
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));

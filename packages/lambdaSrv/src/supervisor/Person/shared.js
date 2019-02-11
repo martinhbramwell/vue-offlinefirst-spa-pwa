@@ -19,6 +19,10 @@ export const update = (args, db, jobStack) => {
     // LG.debug(`Person ${field} :: ${alteredPerson.data[field]} vs ${updPerson.data[field]}`);
     updPerson.data[field] = alteredPerson.data[field];
   });
+
+  updPerson.updated = alteredPerson.data.updated;
+  updPerson.type = alteredPerson.data.type;
+
   LG.debug(`\n\n UPDATING Person ${updPerson._id} ::\n${JSON.stringify(updPerson, null, 2)}`);
   db.put(updPerson)
     .then((updpers) => {
@@ -100,34 +104,38 @@ export const create = async (args, db, jobStack) => {
     newPerson.data.retencion = 'FIXME';
     newPerson.data.role = 'Cliente';
 
+    newPerson.type = newPerson.data.type;
+    newPerson.updated = newPerson.data.updated;
+
+
     newRecord = newPerson;
 
-    const tmp = {
-      data: {
-        nombre: 'Carmen Miranda',
-        telefono_1: '02-222-2222',
-        telefono_2: '03-333-3333',
-        mobile: '654654654654',
-        tipo_de_documento: '_07',
-        ruc_cedula: '1711711717',
-        direccion: '     DUMMY NEW RECORD   ',
-        distribuidor: 'FIXME',
-        email: 'a@b.cd',
-        role: 'FIXME',
-        type: 'person',
-        codigo: 688,
-        idib: 688,
-        address_details: 688,
-        bottle_movements: 688,
-        admin_details: 688,
-        bottles: [],
-        es_empresa: 'FIXME',
-        es_client: 'FIXME',
-        es_proveedor: 'FIXME',
-        retencion: 'FIXME',
-      },
-      _id: 'aPerson_1_0000000000000688',
-    };
+    // const tmp = {
+    //   data: {
+    //     nombre: 'Carmen Miranda',
+    //     telefono_1: '02-222-2222',
+    //     telefono_2: '03-333-3333',
+    //     mobile: '654654654654',
+    //     tipo_de_documento: '_07',
+    //     ruc_cedula: '1711711717',
+    //     direccion: '     DUMMY NEW RECORD   ',
+    //     distribuidor: 'FIXME',
+    //     email: 'a@b.cd',
+    //     role: 'FIXME',
+    //     type: 'person',
+    //     codigo: 688,
+    //     idib: 688,
+    //     address_details: 688,
+    //     bottle_movements: 688,
+    //     admin_details: 688,
+    //     bottles: [],
+    //     es_empresa: 'FIXME',
+    //     es_client: 'FIXME',
+    //     es_proveedor: 'FIXME',
+    //     retencion: 'FIXME',
+    //   },
+    //   _id: 'aPerson_1_0000000000000688',
+    // };
 
     // newRecord = tmp;
 

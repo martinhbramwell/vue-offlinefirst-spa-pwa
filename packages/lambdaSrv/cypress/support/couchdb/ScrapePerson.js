@@ -21,6 +21,13 @@ const template = {
   }
 }
 
+const tStamp = D => ''.concat(
+  D.getFullYear().toString(),
+  (D.getMonth() + 1).toString().padStart(2, '0'),
+  D.getDate().toString().padStart(2, '0'),
+  D.getHours().toString().padStart(2, '0'),
+  D.getMinutes().toString().padStart(2, '0')
+);
 
 const processPerson = (elem, pyld) => {
   const { acc, page, codigo } = pyld;
@@ -63,6 +70,8 @@ const processPerson = (elem, pyld) => {
       req.data.telefono_1 = cols[4].innerText;
       req.data.tipo_de_documento = tipo_de_documento;
       req.data.email = cols[3].innerText;
+
+      req.data.updated = tStamp(new Date());
 
       let opts = Object.assign(couchPutOpts(id), { body: req });
 

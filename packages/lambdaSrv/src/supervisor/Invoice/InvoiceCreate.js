@@ -105,7 +105,7 @@ export default class {
         newRecord._id = `Invoice_1_${newRecord.data.idib.toString().padStart(16, '0')}`;
 
         newRecord.data.email = lclPerson.docs[0].data.email || 'nulo';
-        LG.info(`Person : ${lclPerson.docs[0].data.nombre} has email  ${newRecord.data.email}`);
+        LG.info(`(Invoice ${newRecord.data.sequential} create) Person : ${lclPerson.docs[0].data.nombre} has email  ${newRecord.data.email}`);
 
         const previousPeriodEndSequenceNumber = 10595;
 

@@ -6,3 +6,110 @@ body {
 a {
   color: #00B7FF;
 }
+
+#facturas {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#facturas td, #facturas th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#facturas tr:nth-child(even){background-color: #336600;}
+
+#facturas tr:hover {background-color: #ddd;}
+
+#facturas th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+td.fecha {
+    width: 1%;
+    white-space: nowrap;
+}
+
+input[type="text"] {
+  background-color : #4CAF50;
+}
+
+input[type="password"] {
+  background-color : #4CAF50;
+}
+
+.fa-times-circle {
+  color: #ff0000;
+}
+
+.fa-check-circle {
+  color: #39dbd0;
+}
+
+.spanBox {
+  color: white;
+  padding: 10px;
+  border: 1px solid white;
+}
+
+p {
+  font-size: 16px;
+}
+
+.button {
+  display: inline-block;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #4CAF50;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px #999;
+
+  margin: 8px 4px;
+  margin-bottom: 25px;
+}
+
+.button:hover {background-color: #3e8e41}
+
+.button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+.d-table {
+  display:table !important;
+}
+
+.d-table-cell {
+  display:table-cell !important;
+}
+
+.w-100 {
+  width: 100% !important;
+}
+
+.tar {
+  text-align: right !important;
+}
+
+.hideMe {
+  visibility: collapse;
+}
+
+#progress {
+  margin: 20px;
+  width: 400px;
+  height: 8px;
+  position: relative;
+}

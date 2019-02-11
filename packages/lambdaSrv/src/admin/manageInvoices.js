@@ -9,6 +9,8 @@ import signInvoices from '../supervisor/Invoice/signInvoices';
 import sendInvoices from '../supervisor/Invoice/sendInvoices';
 import queryAuthorizations from '../supervisor/Invoice/queryAuthorizations';
 
+import frags from './htmlFragments';
+
 import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
@@ -62,161 +64,6 @@ const toXML = (inv, lvl = 1, inAry = false) => {
 };
 
 /* eslint-disable no-var, vars-on-top */
-
-
-async function cypressInvoices() {
-  try {
-    const host = window.location.origin;
-    const response = await fetch(`${host}/scrapeInv`);
-    const myJson = await response.json(); // extract JSON from the http response
-    CLG(myJson);
-  } catch (err) {
-    CLG(`Cypress error ${err}`);
-  }
-}
-
-function refresh() {
-  window.location.reload(true);
-}
-
-function changeVisibility() {
-  var all = document.getElementsByTagName('tr');
-  for (let ix = 1; ix < all.length; ix += 1) {
-    document.getElementById(all[ix].id).classList.remove('showMe');
-    document.getElementById(all[ix].id).classList.add('hideMe');
-  }
-
-  /* eslint-disable no-bitwise */
-  let hider = 0;
-  hider |= document.getElementById('denegados').checked && 1;
-  hider |= document.getElementById('autorizados').checked && 2;
-  hider |= document.getElementById('rechazados').checked && 4;
-  hider |= document.getElementById('aceptados').checked && 8;
-  hider |= document.getElementById('firmados').checked && 16;
-  hider |= document.getElementById('anulados').checked && 32;
-  /* eslint-enable no-bitwise */
-
-  var shown = document.getElementsByName(hider);
-  for (let ix = 0; ix < shown.length; ix += 1) {
-    document.getElementById(shown[ix].id).classList.remove('hideMe');
-    document.getElementById(shown[ix].id).classList.add('showMe');
-  }
-}
-
-function submit() {
-  var held = document.getElementsByName('Hold');
-  var anulled = document.getElementsByName('Void');
-  var acc = {};
-  for (var ix = 0; ix < held.length; ix += 1) {
-    acc[held[ix].id] = { H: held[ix].checked, V: anulled[ix].checked };
-  }
-  var data = document.getElementsByName('data');
-  data[0].value = JSON.stringify(acc);
-
-  document.gestionDeFacturas.submit();
-  CLG('Sent');
-}
-
-function validateThenSubmit() {
-  /* eslint-disable no-undef */
-  alertify.defaults.glossary.title = 'Logichem';
-  alertify.defaults.notifier.closeButton = true;
-  /* eslint-enable no-undef */
-
-  var rows = document.getElementsByTagName('tr');
-  var last = 0;
-  var fails = [];
-  var wins = [];
-  var voids = [];
-  for (var ix = rows.length - 1; ix > 0; ix -= 1) {
-    const { id } = rows[ix];
-    const prp = document.getElementById(`Prp_${rows[ix].id}`).attributes.name.value;
-    const anu = document.getElementById(`Anu_${rows[ix].id}`).attributes.name.value;
-    const hld = document.getElementById(`h${rows[ix].id}`).checked;
-    const elemVoid = document.getElementById(`v${rows[ix].id}`);
-    const voided = elemVoid && elemVoid.checked;
-    if (voided) voids.push(id);
-    CLG(`
-      Last: ${last}
-      Id: ${id}
-      Status: ${prp}
-      State: ${anu}
-      Held: ${hld}
-    `);
-    if (prp === 'processed') {
-      last = id;
-      continue; // eslint-disable-line no-continue
-    } else if (anu === 'void') {
-      continue; // eslint-disable-line no-continue
-    } else if (hld) {
-      fails.push(id);
-    } else {
-      wins.push(id);
-    }
-  }
-
-  CDR(fails);
-  CDR(wins);
-  if ((wins[0] > last + 1) && (fails[0] < wins[wins.length - 1])) {
-    /* eslint-disable no-undef */
-    alertify.defaults.glossary.ok = 'Entendido';
-    alertify.alert(`
-      <h4>Hay Que Procesar Las Facturas En Orden Numerico</h4>
-      <div>  Se ha saltado las facturas ::</div>
-      <div>${fails.filter(elem => elem < wins[wins.length - 1])}</div>
-    `);
-    return;
-    /* eslint-enable no-undef */
-  }
-
-  if (voids.length > 0) {
-  /* eslint-disable no-undef */
-    alertify.defaults.glossary.ok = 'Si. Es corecto. Adelante.';
-    alertify.defaults.glossary.cancel = 'No sigues. Me jalé!';
-    let msg = '';
-    if (voids.length > 1) {
-      msg = `
-        <h4>Se va a anular unas facturas de manera <i>irreversible</i>.</h4>
-        <div>  Realmente desea anular las facturas ::</div>
-        <div>${voids.toString()}</div>
-      `;
-    } else {
-      msg = `
-        <h4>Se va a anular una factura de manera <i>irreversible</i>.</h4>
-        <div>  Realmente desea anular la factura :: ${voids[0]}</div>
-      `;
-    }
-    alertify.confirm(
-      msg,
-      () => {
-        CLG('WILL DO');
-        submit();
-      },
-      () => {
-        CLG('WILL QUIT');
-      },
-    ).set('defaultFocus', 'cancel');
-    /* eslint-enable no-undef */
-  } else {
-    submit();
-  }
-}
-
-function firmar() {
-  document.getElementsByName('action')[0].value = 'firmar';
-  validateThenSubmit();
-}
-
-function enviar() {
-  document.getElementsByName('action')[0].value = 'enviar';
-  validateThenSubmit();
-}
-
-function verificar() {
-  document.getElementsByName('action')[0].value = 'verificar';
-  validateThenSubmit();
-}
-
 
 const processVoids = async (voidsToProcess) => {
   CLG('Process voids');
@@ -368,131 +215,6 @@ export default async (req, res) => {
     return;
   }
 
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-  res.write(`
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/alertify.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css"/>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css"/>
-  <link rel="icon" type="image/png" href="../images/favicon.ico" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
-  <script>
-    var CLG = console.log;
-    var CLE = console.err;
-    var CDR = console.dir;
-    ${cypressInvoices.toString()}
-    ${refresh.toString()}
-    ${submit.toString()}
-    ${validateThenSubmit.toString()}
-    ${firmar.toString()}
-    ${enviar.toString()}
-    ${verificar.toString()}
-    ${changeVisibility.toString()}
-  </script>
-  <style>
-    #facturas {
-      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    #facturas td, #facturas th {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-
-    #facturas tr:nth-child(even){background-color: #336600;}
-
-    #facturas tr:hover {background-color: #ddd;}
-
-    #facturas th {
-      padding-top: 12px;
-      padding-bottom: 12px;
-      text-align: left;
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    td.fecha {
-        width: 1%;
-        white-space: nowrap;
-    }
-
-    input[type="text"] {
-      background-color : #4CAF50;
-    }
-
-    input[type="password"] {
-      background-color : #4CAF50;
-    }
-
-    .fa-times-circle {
-      color: #ff0000;
-    }
-
-    .spanBox {
-      color: white;
-      padding: 10px;
-      border: 1px solid white;
-    }
-
-    p {
-      font-size: 16px;
-    }
-
-    .button {
-      display: inline-block;
-      padding: 5px 10px;
-      font-size: 16px;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      outline: none;
-      color: #fff;
-      background-color: #4CAF50;
-      border: none;
-      border-radius: 5px;
-      box-shadow: 0 4px #999;
-
-      margin: 8px 4px;
-      margin-bottom: 25px;
-    }
-
-    .button:hover {background-color: #3e8e41}
-
-    .button:active {
-      background-color: #3e8e41;
-      box-shadow: 0 5px #666;
-      transform: translateY(4px);
-    }
-
-    .d-table {
-      display:table !important;
-    }
-
-    .d-table-cell {
-      display:table-cell !important;
-    }
-
-    .w-100 {
-      width: 100% !important;
-    }
-
-    .tar {
-      text-align: right !important;
-    }
-
-    .hideMe {
-      visibility: collapse;
-    }
-  </style>
-</head>
-  `);
-
-  res.write('<body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
-
   const CATEGORY_FIELD = {
     fieldName: 'data.type',
     sortOrder: 'desc',
@@ -607,6 +329,11 @@ export default async (req, res) => {
   const codeIndex = { name: codeIndexName, category: CATEGORY_FIELD, indexer: CODE_INDEX };
 
   try {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.write('<!DOCTYPE html><html>');
+    res.write(frags.documentHead);
+    res.write('<body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
+
     res.write('Ultima factura extraida ... <br /><br />');
 
     const maxSerial = (await findMaxRow(databaseLocal, serialIndex));
@@ -645,53 +372,19 @@ export default async (req, res) => {
   }
 
   try {
-    res.write(`
-      <div class="border d-table w-100">
-        <p class="d-table-cell">
-          <button class="button" type="button" onclick="refresh()">Refrescar</button>
-        </p>
-        <div class="d-table-cell tar">
-          <p>
-            Raspado de datos de BAPU :: &nbsp;
-            <button class="button" type="button" onclick="cypressInvoices()">Iniciar</button>
-          </p>
-        </div>
-      </div>
-    `);
-    res.write('<hr /><br />');
+    res.write(frags.topSection);
+    res.write('<hr />');
     res.write('<form name="gestionDeFacturas" action="/gestionDeFacturas" method="post">');
-    res.write('Usuario: <input type="text" name="uid" /> ');
-    res.write('&nbsp;Clave: <input type="password" name="pwd" />');
-    res.write('<input type="hidden" name="action" />');
-    res.write('<input type="hidden" name="data" /><br><br>');
-    res.write('<button class="button" type="button" onclick="firmar()">Firmar Facturas</button>');
-    res.write('<button class="button" type="button" onclick="enviar()">Enviar Facturas</button>');
-    res.write('<button class="button" type="button" onclick="verificar()">Verificar Facturas</button>');
-    res.write('&nbsp; &nbsp; <span class="spanBox">');
-    res.write(' Anulados: <input id="anulados" onChange="changeVisibility()" type="checkbox" name="Anu">');
-    res.write(' Firmados: <input id="firmados" onChange="changeVisibility()" type="checkbox" name="Frm">');
-    res.write(' Aceptados: <input id="aceptados" onChange="changeVisibility()" type="checkbox" name="Acp">');
-    res.write(' Rechazados: <input id="rechazados" onChange="changeVisibility()" type="checkbox" name="Rch">');
-    res.write(' Autorizados: <input id="autorizados" onChange="changeVisibility()" type="checkbox" name="Aut">');
-    res.write(' Denegados: <input id="denegados" onChange="changeVisibility()" type="checkbox" name="Aut">');
-    res.write('</span><br />');
+    res.write(frags.hiddenFields);
+    res.write(frags.authentication);
+    res.write('<br />');
+    res.write(frags.taskButtons);
+    res.write('<br />');
+    res.write(frags.filterFields);
+    res.write('<br />');
 
-    res.write(`<table id="facturas"><tr>
-      <th>Secuencial</th>
-      <th>Sec BAPU</th>
-      <th><i class="fas fa-hand-paper"/></th>
-      <th><i class="fas fa-ban"/></th>
-      <th>Prp</th>
-      <th>Frm</th>
-      <th>Env</th>
-      <th>Aut</th>
-      <th>Fecha</th>
-      <th>Nombre</th>
-      <th>Documento</th>
-      <th>Email</th>
-      <th>Telef #1</th>
-      <th>Direccion</th>
-      </tr>`);
+    res.write('<table id="facturas">');
+    res.write(frags.tableColumnHeader);
 
     const invoices = await databaseLocal.allDocs({
       include_docs: true,
@@ -711,6 +404,8 @@ export default async (req, res) => {
     CLG(err);
   }
 
+
+  res.write(frags.modalBapuScraper);
 
   res.write('</body></html>');
   res.end();
