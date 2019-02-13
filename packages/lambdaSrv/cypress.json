@@ -4,5 +4,6 @@
   "viewportWidth": 1366,
   "numTestsKeptInMemory": 5,
   "video": false,
+  "watchForFileChanges": false,
   "videoUploadOnPasses": false
 }

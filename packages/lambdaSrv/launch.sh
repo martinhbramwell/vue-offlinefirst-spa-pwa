@@ -7,7 +7,6 @@ export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )";
 pushd ${DIR};
 
 pushd './public/scripts/';
-ls -la;
 
 cat << EOF > parms.js
 const envServerURL = '${COUCH_PROTOCOL}://${COUCH_HOST}';

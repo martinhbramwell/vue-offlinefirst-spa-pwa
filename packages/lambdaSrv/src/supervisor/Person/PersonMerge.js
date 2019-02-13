@@ -36,7 +36,7 @@ export default class {
 
       // LG.info(`Found ${JSON.stringify(result, null, 2)}`);
       if (result.rows.length > 0) {
-        LG.info(`Ready to update ${upsertPerson.data.nombre}`);
+        LG.info(`Ready to update ${upsertPerson.data.idib} ${upsertPerson.data.nombre}`);
         upsertPerson._id = upsertRequest.data.codigo;
         update({
           request: upsertRequest,

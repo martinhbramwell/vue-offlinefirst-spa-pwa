@@ -1,4 +1,3 @@
-# source ${HOME}/.ssh/secrets/offsppwa-vue.config;
 source ${HOME}/.ssh/secrets/local.config;
 
 ###
