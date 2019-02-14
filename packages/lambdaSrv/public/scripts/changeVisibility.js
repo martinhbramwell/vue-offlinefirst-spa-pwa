@@ -20,7 +20,12 @@ function changeVisibility() {
 
   var invoices = document.getElementsByClassName('invoiceRow');
   for (let ix = 0; ix < invoices.length; ix += 1) {
-    if (hider ===0 || hider & invoices[ix].attributes.name.value) {
+    // if (hider ===0 || hider & invoices[ix].attributes.name.value) {
+    if (hider & invoices[ix].attributes.name.value) {
+      invoices[ix].classList.remove('hideMe');
+      invoices[ix].classList.add('showMe');
+    }
+    if (hider === 0 && invoices[ix].attributes.name.value === "0") {
       invoices[ix].classList.remove('hideMe');
       invoices[ix].classList.add('showMe');
     }
