@@ -1,8 +1,11 @@
 function changeVisibility() {
   var all = document.getElementsByTagName('tr');
   for (let ix = 1; ix < all.length; ix += 1) {
-    document.getElementById(all[ix].id).classList.remove('showMe');
-    document.getElementById(all[ix].id).classList.add('hideMe');
+    const { id } = all[ix];
+    if (id) {
+      document.getElementById(id).classList.remove('showMe');
+      document.getElementById(id).classList.add('hideMe');
+    }
   }
 
   /* eslint-disable no-bitwise */
@@ -15,9 +18,11 @@ function changeVisibility() {
   hider |= document.getElementById('anulados').checked && 32;
   /* eslint-enable no-bitwise */
 
-  var shown = document.getElementsByName(hider);
-  for (let ix = 0; ix < shown.length; ix += 1) {
-    document.getElementById(shown[ix].id).classList.remove('hideMe');
-    document.getElementById(shown[ix].id).classList.add('showMe');
+  var invoices = document.getElementsByClassName('invoiceRow');
+  for (let ix = 0; ix < invoices.length; ix += 1) {
+    if (hider ===0 || hider & invoices[ix].attributes.name.value) {
+      invoices[ix].classList.remove('hideMe');
+      invoices[ix].classList.add('showMe');
+    }
   }
 }

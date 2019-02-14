@@ -11,28 +11,30 @@ function validateThenSubmit() {
   var voids = [];
   for (var ix = rows.length - 1; ix > 0; ix -= 1) {
     const { id } = rows[ix];
-    const prp = document.getElementById(`Prp_${rows[ix].id}`).attributes.name.value;
-    const anu = document.getElementById(`Anu_${rows[ix].id}`).attributes.name.value;
-    const hld = document.getElementById(`h${rows[ix].id}`).checked;
-    const elemVoid = document.getElementById(`v${rows[ix].id}`);
-    const voided = elemVoid && elemVoid.checked;
-    if (voided) voids.push(id);
-    CLG(`
-      Last: ${last}
-      Id: ${id}
-      Status: ${prp}
-      State: ${anu}
-      Held: ${hld}
-    `);
-    if (prp === 'processed') {
-      last = id;
-      continue; // eslint-disable-line no-continue
-    } else if (anu === 'void') {
-      continue; // eslint-disable-line no-continue
-    } else if (hld) {
-      fails.push(id);
-    } else {
-      wins.push(id);
+    if (id) {
+      const prp = document.getElementById(`Prp_${id}`).attributes.name.value;
+      const anu = document.getElementById(`Anu_${id}`).attributes.name.value;
+      const hld = document.getElementById(`h${id}`).checked;
+      const elemVoid = document.getElementById(`v${id}`);
+      const voided = elemVoid && elemVoid.checked;
+      if (voided) voids.push(id);
+      CLG(`
+        Last: ${last}
+        Id: ${id}
+        Status: ${prp}
+        State: ${anu}
+        Held: ${hld}
+      `);
+      if (prp === 'processed') {
+        last = id;
+        continue; // eslint-disable-line no-continue
+      } else if (anu === 'void') {
+        continue; // eslint-disable-line no-continue
+      } else if (hld) {
+        fails.push(id);
+      } else {
+        wins.push(id);
+      }
     }
   }
 

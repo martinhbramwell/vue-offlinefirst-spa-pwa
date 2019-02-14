@@ -23,7 +23,7 @@ export const update = (args, db, jobStack) => {
   updPerson.updated = alteredPerson.data.updated;
   updPerson.type = alteredPerson.data.type;
 
-  LG.debug(`\n\n UPDATING Person ${updPerson._id} ::\n${JSON.stringify(updPerson, null, 2)}`);
+  // LG.debug(`\n\n UPDATING Person ${updPerson._id} ::\n${JSON.stringify(updPerson, null, 2)}`);
   db.put(updPerson)
     .then((updpers) => {
       LG.verbose('Person Updated');
@@ -33,7 +33,7 @@ export const update = (args, db, jobStack) => {
       db.put(updateRequest)
         .then((updrq) => {
           LG.verbose('Marked PersonUpdate Request Deleted');
-          LG.debug(`Deletion :: ${JSON.stringify(updrq, null, 2)}`);
+          // LG.debug(`Deletion :: ${JSON.stringify(updrq, null, 2)}`);
 
           const job = jobStack.pop();
           if (job) job.process();

@@ -302,7 +302,7 @@ export default async (req, res) => {
       ? d.sequential.toString().padStart(9, '0')
       : '~~~~~~~~~';
     /* eslint-disable no-mixed-operators */
-    out.write(`<tr id="${d.seqib}" name=${hider} class="showMe">
+    out.write(`<tr id="${d.seqib}" name=${hider} class="invoiceRow showMe">
       <td>${d.sequential}</td>
       <td>${d.seqib && d.seqib.toString().padStart(9, '0') || '?????????'}</td>
       <td><input id="h${d.seqib}" type="checkbox" name="Hold" ${doc.hold ? 'checked' : ''}></td>

@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import { logger as LG } from '../../utils'; // eslint-disable-line no-unused-vars
 
-const sanityCheck = 'cypress/integration/SanityCheck.js';
+const sanityCheck = 'cypress/integration/SanityCheck.js'; // eslint-disable-line no-unused-vars
 const scrapePersons = 'cypress/integration/GetPersons.js';
 const scrapeInvoices = 'cypress/integration/GetInvoices.js';
 
@@ -13,7 +13,7 @@ const jsonEnd = '}';
 const pages = { thisPage: 0 };
 const path = process.cwd();
 const controlFile = `${path}/cypress/nextPage.json`;
-let resultSanityCheck = null;
+let resultSanityCheck = null; // eslint-disable-line no-unused-vars, prefer-const
 let resultPersons = null;
 export default async (req, res) => {
   LG.info('Start screen scrapers');
@@ -37,7 +37,7 @@ export default async (req, res) => {
     for (let pg = 8; pg > 0; pg -= 1) {
       pages.thisPage = pg;
       fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
-      resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` });
+      resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
       LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
       res.write(', "Persons"');
     }
