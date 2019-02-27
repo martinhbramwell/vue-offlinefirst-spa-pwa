@@ -9,6 +9,7 @@ export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 export DIR_FILES_FOR_UPLOAD="serverSideFiles";
 export DIR_SETUP_FILES="setupScripts";
 
+export GET_ASK_PASS_FUNC="source .bash_login;";
 export APT_UPDATE_FILE="aptFix.sh";
 
 ########  Function definitions
@@ -157,7 +158,7 @@ uploadServerSideFiles () {
 ########
 prepareAPT () {
   echo -e "Refresh APT"
-  declare APTCMD="source .bash_login;";
+  declare APTCMD="${GET_ASK_PASS_FUNC}";
   APTCMD="${APTCMD} source \${HOME}/${DIR_SETUP_FILES}/${APT_UPDATE_FILE};";
   # APTCMD="${APTCMD} pushd ${DIR_SETUP_FILES};";
   APTCMD="${APTCMD} lazyUpdate;";
@@ -173,7 +174,7 @@ prepareUFW () {
   declare UFW_SETUP_FILE="SetUpUFW.sh";
 
   echo -e "Set up UFW"
-  UFWCMD="source .bash_login; source \${HOME}/${DIR_SETUP_FILES}/${UFW_SETUP_FILE}; prepareUFW;";
+  UFWCMD="${GET_ASK_PASS_FUNC} source \${HOME}/${DIR_SETUP_FILES}/${UFW_SETUP_FILE}; prepareUFW;";
   ssh -t ${NEW_HOST_NAME} ${UFWCMD};
 };
 
@@ -182,12 +183,30 @@ prepareUFW () {
 ########
 prepareNodeJS () {
   declare NODEJS_SETUP_FILE="InstallNodeJS.sh";
-  echo -e "Upload NodeJS set up script '${NODEJS_SETUP_FILE}'.";
-  scp ${SCRIPT_DIR}/${NODEJS_SETUP_FILE} ${NEW_HOST_NAME}:~;
 
   echo -e "Set up NodeJS"
-  NJSCMD="source .bash_login; source ${NODEJS_SETUP_FILE}; prepareUFW;";
+  NJSCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${NODEJS_SETUP_FILE};";
   ssh -t ${NEW_HOST_NAME} ${NJSCMD};
+};
+
+
+
+########
+prepareCouchDB () {
+  declare COUCHDB_SETUP_FILE="InstallCouchDB.sh";
+  declare SECRETS_PATH="\${HOME}/.ssh/secrets";
+  declare SECS="${SECRETS_PATH}/CouchDB";
+  echo -e "Set up CouchDB";
+  source ${HOME}/.ssh/secrets/offsppwa-vue.config;
+
+  declare USR="export COUCH_USR=\"'${COUCH_USR}'\"";
+  declare PWD="export COUCH_PWD=\"'${COUCH_PWD}'\"";
+
+  SECCMD="mkdir -p ${SECRETS_PATH}; echo '${USR}' > ${SECS}; echo '${PWD}' >> ${SECS};";
+  ssh -t ${NEW_HOST_NAME} ${SECCMD};
+
+  CDBCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${COUCHDB_SETUP_FILE};";
+  ssh -t ${NEW_HOST_NAME} ${CDBCMD};
 };
 
 
@@ -208,7 +227,8 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
     ****************************************
 ";
 
-# pushAndRunAskPassServiceMaker;
+# prepareCouchDB;
+# # pushAndRunAskPassServiceMaker;
 # echo -e "
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;
@@ -221,7 +241,8 @@ if ssh -oBatchMode=yes -tl ${NEW_HOST_ADMIN} ${NEW_HOST} "pwd" &> /dev/null; the
   uploadServerSideFiles;
   prepareAPT;
   prepareUFW;
-  # prepareNodeJS;
+  prepareNodeJS;
+  prepareCouchDB;
 else
   prepareHostForKeyBasedLogins;
 fi;

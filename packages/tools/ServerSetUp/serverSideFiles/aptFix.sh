@@ -9,7 +9,7 @@ source ${SCRIPT_DIR}/setupScripts/utils.sh;
 
 ########
 say () {
-  echo "${1}${MSG}";
+  echo "'${1}'${MSG}";
 }
 
 
@@ -19,6 +19,9 @@ aptInstallIfNotInstalled() {
   declare MSG=" is already installed";
   X="git"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="jq"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="curl"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="gnupg2"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+
 }
 
 
