@@ -120,6 +120,13 @@ pushAndRunAskPassServiceMaker() {
 
 
 ########
+patchGrubConfigFile () {
+  echo "Patching GRUB configuration of '${NEW_HOST}'.";
+  ssh -T ${NEW_HOST_NAME} "bash -s" -- < ${SCRIPT_DIR}/PatchGrubConfigFile.sh;
+};
+
+
+########
 patchSSHServerConfigFile () {
   echo "Patching SSH server configuration of '${NEW_HOST}'.";
   ssh -T ${NEW_HOST_NAME} "bash -s" -- < ${SCRIPT_DIR}/PatchSSHServerConfigFile.sh;
@@ -135,6 +142,7 @@ prepareHostForKeyBasedLogins () {
     createNewUser;
     pushNewUserPublicKey;
     pushAndRunAskPassServiceMaker;
+    patchGrubConfigFile;
     patchSSHServerConfigFile;
   else
     echo "Failed to login as root user on '${NEW_HOST}'";
@@ -148,8 +156,11 @@ prepareHostForKeyBasedLogins () {
 uploadServerSideFiles () {
   echo -e "Create server side script files home '${HOME}/${DIR_SETUP_FILES}'";
   ssh -t ${NEW_HOST_NAME} "mkdir -p \${HOME}/${DIR_SETUP_FILES}";
-  echo -e "Upload server side files from '${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}'";
-  scp -r ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*.* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
+  echo -e "Upload server side files ...
+  from : '${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*'
+  to   : '~/${DIR_SETUP_FILES}'";
+  rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* meta:~/${DIR_SETUP_FILES};
+  # scp -r ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*.* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
 
 };
 
@@ -195,18 +206,56 @@ prepareNodeJS () {
 prepareCouchDB () {
   declare COUCHDB_SETUP_FILE="InstallCouchDB.sh";
   declare SECRETS_PATH="\${HOME}/.ssh/secrets";
-  declare SECS="${SECRETS_PATH}/CouchDB";
+  declare SECRETS_FILENAME="CouchDB";
+  declare SECRETS_FILE="${SECRETS_PATH}/${SECRETS_FILENAME}";
+  declare SECRETS_FILE_WRITER_NAME="writeSecret.sh";
+
   echo -e "Set up CouchDB";
   source ${HOME}/.ssh/secrets/offsppwa-vue.config;
 
-  declare USR="export COUCH_USR=\"'${COUCH_USR}'\"";
-  declare PWD="export COUCH_PWD=\"'${COUCH_PWD}'\"";
+  cat << EOF > ${XDG_RUNTIME_DIR}/${SECRETS_FILENAME}
+#!/usr/bin/env bash
+#
+mkdir -p ${SECRETS_PATH};
+cat << 'END_OF_FILE' > ${SECRETS_FILE}
+export COUCH_USR="${COUCH_USR}";
+export COUCH_PWD="${COUCH_PWD}";
+export COUCH_ROOT_PWD="${COUCH_ROOT_PWD}";
+END_OF_FILE
+chmod go-rwx ${SECRETS_FILE};
+rm -f ${SECRETS_FILE_WRITER_NAME};
+EOF
 
-  SECCMD="mkdir -p ${SECRETS_PATH}; echo '${USR}' > ${SECS}; echo '${PWD}' >> ${SECS};";
+  scp ${XDG_RUNTIME_DIR}/${SECRETS_FILENAME} ${NEW_HOST_NAME}:~/${SECRETS_FILE_WRITER_NAME};
+
+  SECCMD="chmod +x ${SECRETS_FILE_WRITER_NAME}; ./${SECRETS_FILE_WRITER_NAME};";
   ssh -t ${NEW_HOST_NAME} ${SECCMD};
 
   CDBCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${COUCHDB_SETUP_FILE};";
   ssh -t ${NEW_HOST_NAME} ${CDBCMD};
+};
+
+
+
+########
+prepareNginx () {
+  declare NGINX_SETUP_FILE="InstallNginx.sh";
+
+  echo -e "Set up Nginx";
+  NGXCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${NGINX_SETUP_FILE};";
+  ssh -t ${NEW_HOST_NAME} ${NGXCMD};
+};
+
+
+
+
+########
+prepareLetsEncrypt () {
+  declare CERTS_SETUP_FILE="InstallCertificates.sh";
+
+  echo -e "Set up LetsEncypt";
+  CRTCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${CERTS_SETUP_FILE};";
+  ssh -t ${NEW_HOST_NAME} ${CRTCMD};
 };
 
 
@@ -227,7 +276,9 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
     ****************************************
 ";
 
-# prepareCouchDB;
+# # qTst;
+# prepareNginx;
+# # prepareCouchDB;
 # # pushAndRunAskPassServiceMaker;
 # echo -e "
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
@@ -243,13 +294,14 @@ if ssh -oBatchMode=yes -tl ${NEW_HOST_ADMIN} ${NEW_HOST} "pwd" &> /dev/null; the
   prepareUFW;
   prepareNodeJS;
   prepareCouchDB;
+  prepareLetsEncrypt;
+  prepareNginx;
 else
   prepareHostForKeyBasedLogins;
 fi;
 
 
-echo -e "";
-echo -e "";
+echo -e " ";
 echo -e "
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo -e "";

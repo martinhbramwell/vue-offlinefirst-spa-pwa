@@ -17,11 +17,21 @@ say () {
 ########
 aptInstallIfNotInstalled() {
   declare MSG=" is already installed";
+
+  X="software-properties-common"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+
+  sudo -A add-apt-repository -y universe;
+  sudo -A add-apt-repository -y ppa:certbot/certbot;
+  sudo -A apt-get -y update;
+
   X="git"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="jq"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="curl"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="gnupg2"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-
+  X="debconf-utils"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="nginx"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="certbot"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="python-certbot-nginx"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
 }
 
 
@@ -35,10 +45,18 @@ get_date() {
 
 ########
 forceUpdate() {
+
+  export DEBIAN_FRONTEND=noninteractive;
+
+  echo -e "\n    ********* Updating ********* \n\n";
   sudo -A apt -y update;
-  sudo -A apt -y upgrade;
+  echo -e "\n    ********* Upgrading ********* \n\n";
+  sudo -A DEBIAN_FRONTEND=noninteractive apt -y upgrade;
+  echo -e "\n ********* Dist Upgrading ********* \n\n";
   sudo -A apt -y dist-upgrade;
+  echo -e "\n    ********* Cleaning ********* \n\n";
   sudo -A apt -y clean;
+  echo -e "\n    ********* Removing ********* \n\n";
   sudo -A apt -y autoremove;
   date -d "$(date) 4 hours" > ~/.last_apt_update;
 }
