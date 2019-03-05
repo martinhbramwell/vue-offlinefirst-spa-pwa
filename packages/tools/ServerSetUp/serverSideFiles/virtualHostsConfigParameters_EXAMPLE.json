@@ -1,0 +1,18 @@
+{
+  "SSL_PARMS": {
+    "CERTIFICATE_OWNER_EMAIL": "yourself.yourorg@gmail.com",
+    "SSL_DFH_ID": "1gT4cOCZzNUJEuriUkzQqR3cceHu7PcH-"
+  },
+  "VHOSTS": [
+    {
+      "SYMLINK_NAME": "CouchDB",
+      "GDRIVE_FILE_ID": "1FJ6Az9n68IByS9F5LXR9d0qrZSC3Lnmm",
+      "VHOST_NAME": "chdb.yourpublic.work"
+    },
+    {
+      "SYMLINK_NAME": "NodeJS",
+      "GDRIVE_FILE_ID": "1KvedJxa2XHtKdbmoEyCDzyq1Attmmdpe",
+      "VHOST_NAME": "gdf.yourpublic.work"
+    }
+  ]
+}

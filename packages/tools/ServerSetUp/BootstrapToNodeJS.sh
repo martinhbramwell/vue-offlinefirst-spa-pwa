@@ -248,7 +248,6 @@ prepareNginx () {
 
 
 
-
 ########
 prepareLetsEncrypt () {
   declare CERTS_SETUP_FILE="InstallCertificates.sh";
@@ -256,6 +255,27 @@ prepareLetsEncrypt () {
   echo -e "Set up LetsEncypt";
   CRTCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${CERTS_SETUP_FILE};";
   ssh -t ${NEW_HOST_NAME} ${CRTCMD};
+};
+
+
+
+########
+qTst () {
+  echo -e "Quick test...";
+
+  declare VHOSTS=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .VHOSTS);
+  # declare CERTIFICATE_OWNER_EMAIL=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .SSL_PARMS.CERTIFICATE_OWNER_EMAIL);
+  # declare SSL_DFH_ID=$(jq -r .SSL_DFH_ID <<< ${PARMS});
+  declare LEN=$(echo ${VHOSTS} | jq '. | length');
+  # for IX (( IX=0; IX<$LEN; IX++ ))
+  for (( IX=0; IX<$(echo ${VHOSTS} | jq '. | length'); IX++ ))
+  do
+    echo ${VHOSTS} | jq -r .[$IX].SYMLINK_NAME;
+  done
+  # for VHOST in $(echo ${VHOSTS} | jq '.'); do
+  #   echo "Got ${VHOST}";
+  # done;
+  echo -e "Done quick test.";
 };
 
 
@@ -277,9 +297,11 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 ";
 
 # # qTst;
-# prepareNginx;
-# # prepareCouchDB;
-# # pushAndRunAskPassServiceMaker;
+# uploadServerSideFiles;
+# # prepareNginx;
+# prepareLetsEncrypt;
+# # # prepareCouchDB;
+# # # pushAndRunAskPassServiceMaker;
 # echo -e "
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;

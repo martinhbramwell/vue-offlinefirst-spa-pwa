@@ -3,6 +3,62 @@
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
 
+
+configureSSL()
+{
+  declare SSL_DFH_ID=$(cat ${PARMS} | jq -r .SSL_PARMS.SSL_DFH_ID);
+
+  declare SSL_DFH_FILE_NAME="";
+  pushd SecretsCollector >/dev/null;
+    [ -e ./node_modules/axios/lib/axios.js ] || npm install;
+    SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID});
+  popd >/dev/null;
+
+  echo -e "SSL_DFH_FILE_NAME = ${SSL_DFH_FILE_NAME}";
+  export SSLD_SERVER="/etc/ssl/private/";
+  sudo -A cp ${XDG_RUNTIME_DIR}/${SSL_DFH_FILE_NAME} ${SSLD_SERVER};
+
+}
+
+defineVirtualHost ()
+{
+  echo "++++++++++++++  VHOST  +++++++++++++++";
+
+  declare GDRIVE_FILE_ID=$(echo ${VHOSTS} | jq -r .[$1].GDRIVE_FILE_ID);
+  declare SITES_ENABLED_SYMLINK_NAME=$(echo ${VHOSTS} | jq -r .[$1].SYMLINK_NAME);
+  echo -e "Processing VHost : '${SITES_ENABLED_SYMLINK_NAME}' from GSuite file : '${GDRIVE_FILE_ID}'";
+
+  declare SITES_AVAILABLE_FILE_NAME="";
+  pushd SecretsCollector >/dev/null;
+    SITES_AVAILABLE_FILE_NAME=$(node collectSecret.js ${GDRIVE_FILE_ID});
+    # SITES_AVAILABLE_FILE_NAME="CouchDB_ReverseProxy_WITHCERT.sh"
+  popd >/dev/null;
+
+  export SITES_AVAILABLE_FILE=${HTTPD_SERVER}/${SITES_AVAILABLE_DIR}/${SITES_AVAILABLE_FILE_NAME%.sh};
+  #   *** SITES_AVAILABLE_FILE is required in template ***
+  export VHOST_NAME=$(echo ${VHOSTS} | jq -r .[$1].VHOST_NAME);
+  #   *** VHOST_NAME is required in template ***
+
+  # echo -e "export XDG_RUNTIME_DIR=\"${XDG_RUNTIME_DIR}\"";
+  # echo -e "export SITES_AVAILABLE_FILE_NAME=\"${SITES_AVAILABLE_FILE_NAME}\"";
+  # echo -e "export SITES_AVAILABLE_FILE=\"${SITES_AVAILABLE_FILE}\"";
+  echo -e "External URL : \"${VHOST_NAME}\"";
+
+  chmod +x ${XDG_RUNTIME_DIR}/${SITES_AVAILABLE_FILE_NAME};
+  ${XDG_RUNTIME_DIR}/${SITES_AVAILABLE_FILE_NAME};
+
+  pushd ${HTTPD_SERVER}/${SITES_ENABLED_DIR} >/dev/null;
+    sudo -A rm -f ${SITES_ENABLED_SYMLINK_NAME}
+    sudo -A ln -s ../${SITES_AVAILABLE_DIR}/${SITES_AVAILABLE_FILE_NAME%.sh} ${SITES_ENABLED_SYMLINK_NAME%.sh};
+  popd >/dev/null;
+
+  sudo -A mkdir -p "/var/log/nginx/${VHOST_NAME}";
+  sudo -A touch "/var/log/nginx/${VHOST_NAME}/access.log";
+  sudo -A touch "/var/log/nginx/${VHOST_NAME}/error.log";
+  sudo -A chown nobody:root /var/log/nginx/${VHOST_NAME}/*.log;
+
+}
+
 installNginx()
 {
 
@@ -15,51 +71,23 @@ installNginx()
 
 
   pushd ${SCRIPT_DIR} >/dev/null;
-    source virtualHostsConfigParameters.sh;
-    pushd SecretsCollector >/dev/null;
-      [ -e ./node_modules/axios/lib/axios.js ] || npm install;
-      # echo -e "SSL_DFH_ID = ${SSL_DFH_ID}";
-      declare SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID});
-
-      declare COUCHDB_RP_NGINX_VP_FILE_NAME=$(node collectSecret.js ${COUCHDB_RP_GDRIVE_FILE_ID});
-      declare NODEJS_RP_NGINX_VP_FILE_NAME=$(node collectSecret.js ${NODEJS_RP_GDRIVE_FILE_ID});
-
-      # export COUCHDB_RP_NGINX_VP_FILE_NAME="CouchDB_ReverseProxy_WITHCERT";
-      # export NODEJS_RP_NGINX_VP_FILE_NAME="NodeJS_ReverseProxy_WITHCERT";
-    popd >/dev/null;
-
-    echo -e "SSL_DFH_FILE_NAME = ${SSL_DFH_FILE_NAME}";
-    export SSLD_SERVER="/etc/ssl/private/";
-    sudo -A cp ${XDG_RUNTIME_DIR}/${SSL_DFH_FILE_NAME} ${SSLD_SERVER};
-
-
-    echo -e "COUCHDB_RP_NGINX_VP_FILE_NAME = ${COUCHDB_RP_NGINX_VP_FILE_NAME}";
-    echo -e "NODEJS_RP_NGINX_VP_FILE_NAME = ${NODEJS_RP_NGINX_VP_FILE_NAME}";
-
-    # cat ${XDG_RUNTIME_DIR}/${NODEJS_RP_NGINX_VP_FILE_NAME};
+    declare PARMS="virtualHostsConfigParameters.json";
 
     export HTTPD_SERVER="/etc/nginx";
 
     export SITES_AVAILABLE_DIR="sites-available";
     export SITES_ENABLED_DIR="sites-enabled";
 
-    export SITES_AVAILABLE_FILE_NAME=${COUCHDB_RP_NGINX_VP_FILE_NAME};
-    export SITES_AVAILABLE_FILE=${HTTPD_SERVER}/${SITES_AVAILABLE_DIR}/${SITES_AVAILABLE_FILE_NAME};
+    # Configure SSL
+    configureSSL;
 
-    export SITES_ENABLED_SYMLINK_NAME=${COUCHDB_SYMLINK_NAME};
-
-    chmod +x ${XDG_RUNTIME_DIR}/${SITES_AVAILABLE_FILE_NAME};
-    ${XDG_RUNTIME_DIR}/${SITES_AVAILABLE_FILE_NAME};
-
-    pushd ${HTTPD_SERVER}/${SITES_ENABLED_DIR} >/dev/null;
-      sudo -A rm -f ${SITES_ENABLED_SYMLINK_NAME}
-      sudo -A ln -s ../${SITES_AVAILABLE_DIR}/${SITES_AVAILABLE_FILE_NAME} ${SITES_ENABLED_SYMLINK_NAME};
-    popd >/dev/null;
-
-    sudo -A mkdir -p "/var/log/nginx/${COUCHDB_RP_VHOST_NAME}";
-    sudo -A touch "/var/log/nginx/${COUCHDB_RP_VHOST_NAME}/access.log";
-    sudo -A touch "/var/log/nginx/${COUCHDB_RP_VHOST_NAME}/error.log";
-    sudo -A chown nobody:root /var/log/nginx/${COUCHDB_RP_VHOST_NAME}/*.log;
+    # Configure Virtual Hosts
+    declare VHOSTS=$(cat ${PARMS} | jq -r .VHOSTS);
+    for (( IX=0; IX<$(echo ${VHOSTS} | jq '. | length'); IX++ ))
+    # for (( IX=0; IX<2; IX++ ))
+    do
+      defineVirtualHost $IX;
+    done
 
   popd >/dev/null;
 
