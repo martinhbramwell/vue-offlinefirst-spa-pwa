@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 
-# export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
-export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+# export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
 source ${CONFIG_FILE};
 
 export DOWNLOADS_DIR="${HOME}/Downloads";
