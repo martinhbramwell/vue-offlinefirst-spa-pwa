@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-export LAUNCH_DIR="${HOME}/vue-offlinefirst-spa-pwa/packages/lambdaSrv";
+export LAUNCH_DIR="${HOME}/services/vue-offlinefirst-spa-pwa/packages/lambdaSrv";
 
 DO_PID=$(ps faux | grep -v grep | grep -v "sh -c" | grep "node dist/index.js"  | awk '{ print $2 }');
 echo -e "$(date) | Supervisor '${DO_PID}' is alive." | tee -a /tmp/pouchLog;

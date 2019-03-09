@@ -159,9 +159,7 @@ uploadServerSideFiles () {
   echo -e "Upload server side files ...
   from : '${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*'
   to   : '~/${DIR_SETUP_FILES}'";
-  rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* meta:~/${DIR_SETUP_FILES};
-  # scp -r ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*.* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
-
+  rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
 };
 
 
@@ -260,21 +258,47 @@ prepareLetsEncrypt () {
 
 
 ########
+prepareNodeApp () {
+  declare NODE_APP_SETUP_FILE="InstallNodeApplication.sh";
+  declare PARMS=./serverSideFiles/virtualHostsConfigParameters.json;
+
+  declare SECRETS_FILE_PATH=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_PATH);
+  declare SECRETS_FILE_NAME=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_NAME);
+  declare SECRETS_FILE="${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME}";
+
+  declare MATCH="SIGNING_CERTIFICATE";
+  declare TMP=$(cat ${SECRETS_FILE} | grep -m 1 ${MATCH} | cut -d'"' -f 2);
+  declare SIGNING_CERTIFICATE_FILE=$(eval "echo ${TMP}");
+  # eval "echo ${TMP}";
+
+  echo -e "Signing certificate file : ${SIGNING_CERTIFICATE_FILE}";
+  echo -e "Push secrets file '${SECRETS_FILE_NAME}' to target '${NEW_HOST_NAME}:${SECRETS_FILE_PATH}'";
+  ssh -t ${NEW_HOST_NAME} "mkdir -p ${SECRETS_FILE_PATH}";
+  scp ${SECRETS_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+  scp ${HOME}/${SECRETS_FILE_PATH}/local.config ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+  scp ${SIGNING_CERTIFICATE_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+
+  echo -e "Set up Node Application";
+  APPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${NODE_APP_SETUP_FILE};";
+  ssh -t ${NEW_HOST_NAME} ${APPCMD};
+
+};
+
+
+
+########
 qTst () {
   echo -e "Quick test...";
+  pushd serverSideFiles/SecretsCollector >/dev/null;
+    [ -e ./node_modules/axios/lib/axios.js ] || npm install;
+    # export VUESPPWAKEY=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey");
+    # echo "export VUESPPWAKEY=\"${VUESPPWAKEY}\"";
+    # export VUESPPWAKEY_PUB=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey.pub");
+    # echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
+    export VUESPPWAKEY_PUB=$(node collectSecret.js "1m_6vKD1kaiFU1NhX1oNlnJ2GPjuq7ire" "vuesppwaKey.pub");
+    echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
+  popd >/dev/null;
 
-  declare VHOSTS=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .VHOSTS);
-  # declare CERTIFICATE_OWNER_EMAIL=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .SSL_PARMS.CERTIFICATE_OWNER_EMAIL);
-  # declare SSL_DFH_ID=$(jq -r .SSL_DFH_ID <<< ${PARMS});
-  declare LEN=$(echo ${VHOSTS} | jq '. | length');
-  # for IX (( IX=0; IX<$LEN; IX++ ))
-  for (( IX=0; IX<$(echo ${VHOSTS} | jq '. | length'); IX++ ))
-  do
-    echo ${VHOSTS} | jq -r .[$IX].SYMLINK_NAME;
-  done
-  # for VHOST in $(echo ${VHOSTS} | jq '.'); do
-  #   echo "Got ${VHOST}";
-  # done;
   echo -e "Done quick test.";
 };
 
@@ -296,10 +320,11 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
     ****************************************
 ";
 
-# # qTst;
+# #qTst;
 # uploadServerSideFiles;
 # # prepareNginx;
-# prepareLetsEncrypt;
+# # prepareLetsEncrypt;
+# prepareNodeApp;
 # # # prepareCouchDB;
 # # # pushAndRunAskPassServiceMaker;
 # echo -e "
@@ -318,12 +343,13 @@ if ssh -oBatchMode=yes -tl ${NEW_HOST_ADMIN} ${NEW_HOST} "pwd" &> /dev/null; the
   prepareCouchDB;
   prepareLetsEncrypt;
   prepareNginx;
+  prepareNodeApp;
 else
   prepareHostForKeyBasedLogins;
 fi;
 
 
-echo -e " ";
+echo -e "      ";
 echo -e "
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo -e "";

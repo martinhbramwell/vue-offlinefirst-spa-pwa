@@ -12,7 +12,14 @@
     {
       "SYMLINK_NAME": "NodeJS",
       "GDRIVE_FILE_ID": "1KvedJxa2XHtKdbmoEyCDzyq1Attmmdpe",
-      "VHOST_NAME": "gdf.yourpublic.work"
+      "VHOST_NAME": "app.yourpublic.work"
     }
-  ]
+  ],
+  "NODEJS_APP": {
+    "SSH_KEY": "1lcbxfkFJNiVetFAKELOsQnieNYVOVYKy",
+    "SSH_KEY_PUB": "1bn9Wlf2Z7FAKEOFFX_wHBiBBcFkJK78q",
+    "CLONING_URL": "git@github.com:yourorg/yourproject.git",
+    "FOLDER_NAME": "yourproject",
+    "PRODUCTION_BRANCH": "production"
+  }
 }

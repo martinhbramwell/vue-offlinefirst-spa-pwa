@@ -14,7 +14,7 @@ installCouchDB()
   if ! systemctl is-active --quiet couchdb; then
     declare ERROR=$(sudo -A service couchdb start 2>&1 >/dev/null);
     if [[ ${ERROR} == *"couchdb.service not found"* ]]; then
-      echo "Nos such service. Have to install."
+      echo "No such service. Have to install."
     fi;
 
     export HAVE_SET_APT_SOURCE=$(cat /etc/apt/sources.list | grep "couchdb-deb ${DISTRO} main");

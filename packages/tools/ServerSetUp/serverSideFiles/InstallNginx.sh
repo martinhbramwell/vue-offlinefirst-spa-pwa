@@ -11,7 +11,7 @@ configureSSL()
   declare SSL_DFH_FILE_NAME="";
   pushd SecretsCollector >/dev/null;
     [ -e ./node_modules/axios/lib/axios.js ] || npm install;
-    SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID});
+    SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID} "dhparams_4096.pem");
   popd >/dev/null;
 
   echo -e "SSL_DFH_FILE_NAME = ${SSL_DFH_FILE_NAME}";
@@ -26,11 +26,13 @@ defineVirtualHost ()
 
   declare GDRIVE_FILE_ID=$(echo ${VHOSTS} | jq -r .[$1].GDRIVE_FILE_ID);
   declare SITES_ENABLED_SYMLINK_NAME=$(echo ${VHOSTS} | jq -r .[$1].SYMLINK_NAME);
+  declare GDRIVE_FILE_NAME=$(echo ${VHOSTS} | jq -r .[$1].GDRIVE_FILE_NAME);
+
   echo -e "Processing VHost : '${SITES_ENABLED_SYMLINK_NAME}' from GSuite file : '${GDRIVE_FILE_ID}'";
 
   declare SITES_AVAILABLE_FILE_NAME="";
   pushd SecretsCollector >/dev/null;
-    SITES_AVAILABLE_FILE_NAME=$(node collectSecret.js ${GDRIVE_FILE_ID});
+    SITES_AVAILABLE_FILE_NAME=$(node collectSecret.js ${GDRIVE_FILE_ID} ${GDRIVE_FILE_NAME});
     # SITES_AVAILABLE_FILE_NAME="CouchDB_ReverseProxy_WITHCERT.sh"
   popd >/dev/null;
 
