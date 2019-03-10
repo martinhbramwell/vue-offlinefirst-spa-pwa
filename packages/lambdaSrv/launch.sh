@@ -44,6 +44,6 @@ EOF
   npm install;
   npm run prestart;
 
-  node dist/index.js &;
+  node dist/index.js &
 
 popd >/dev/null;
