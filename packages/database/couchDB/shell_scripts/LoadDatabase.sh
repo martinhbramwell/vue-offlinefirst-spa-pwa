@@ -17,16 +17,16 @@ echo -e "
 Ready to recreate CouchDb main database '${COUCH}'!!
 -----------------------------------------$(head -c ${#COUCH} < /dev/zero | tr '\0' '-')---
 ";
-read -p "Type 'y' to confirm? " -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-  echo -e "Quitting..."
-  exit 0;
-fi
 
-if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
-  usage;
+if [[ -z $1 ]]
+then
+  read -p "Type 'y' to confirm? " -n 1 -r
+  echo    # (optional) move to a new line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]
+  then
+    echo -e "Quitting..."
+    exit 0;
+  fi
 fi;
 
 echo -e "MariaDB export files : ${DATAFILES_TEMP_DIR}";
