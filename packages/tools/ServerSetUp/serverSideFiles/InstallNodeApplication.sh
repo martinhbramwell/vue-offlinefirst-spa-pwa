@@ -65,8 +65,36 @@ ${END_ALIAS}
 
 configureCronJob ()
 {
-  echo -e "*/5 * * * * /home/meta/vue-offlinefirst-spa-pwa/packages/lambdaSrv/watchdog.sh > /dev/null";
+  export MSG="Application Watch Dog ${FOLDER_NAME}";
+  export START_ALIAS="# ^^^^ ${MSG} ^^^^";
+  export END_ALIAS="# vvvv ${MSG} vvvv";
+  export PATCH="
+${START_ALIAS}
+*/5 * * * * ${NODEJS_APP_WATCHDOG} > /dev/null
+${END_ALIAS}
+";
+
+  export TEMP_FILE="${XDG_RUNTIME_DIR}/crontab.txt";
+  crontab -l >${TEMP_FILE} 2>/dev/null;
+  export EXISTS=$(echo "$?");
+  if [[ "${EXISTS}" = "0" ]]
+  then
+    crontab -r;
+    sed -i "/${START_ALIAS}/,/${END_ALIAS}/d" ${TEMP_FILE};
+    sed -i '/^$/d' ${TEMP_FILE};
+  else
+    touch ${TEMP_FILE};
+  fi;
+  echo -e "${PATCH}" >> ${TEMP_FILE}
+  crontab ${TEMP_FILE}
+
 }
+
+# export FOLDER_NAME="vue-offlinefirst-spa-pwa";
+# export PROJECT_CONTAINER_DIR="${HOME}/services";
+# export NODEJS_APP_WATCHDOG="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/lambdaSrv/watchdog.sh";
+# configureCronJob;
+
 
 
 installNodeApplication ()
@@ -89,6 +117,10 @@ installNodeApplication ()
     declare PARMS="virtualHostsConfigParameters.json";
     export NODEJS_APP=$(cat ${PARMS} | jq -r .NODEJS_APP);
     echo "export NODEJS_APP=\"${NODEJS_APP}\"";
+    declare SECRETS_FILE_PATH=$(echo ${NODEJS_APP} | jq -r .SECRETS_FILE_PATH);
+    declare SECRETS_FILE_NAME=$(echo ${NODEJS_APP} | jq -r .SECRETS_FILE_NAME);
+    echo -e "Loading secrets from '${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME}'";
+    source ${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME};
 
     configureGit;
 
@@ -96,8 +128,9 @@ installNodeApplication ()
     declare FOLDER_NAME=$(echo ${NODEJS_APP} | jq -r .FOLDER_NAME);
     declare PRODUCTION_BRANCH=$(echo ${NODEJS_APP} | jq -r .PRODUCTION_BRANCH);
 
-    mkdir -p ${HOME}/services;
-    pushd ${HOME}/services >/dev/null;
+    echo -e "Creating project container directory '${PROJECT_CONTAINER_DIR}'";
+    mkdir -p ${PROJECT_CONTAINER_DIR};
+    pushd ${PROJECT_CONTAINER_DIR} >/dev/null;
       if [ ! -d "${FOLDER_NAME}" ] ; then
         echo -e "Cloning project...";
         git clone ${CLONING_URL} ${FOLDER_NAME};
@@ -127,9 +160,20 @@ installNodeApplication ()
 
   pushd ${TEMP_DIR} >/dev/null;
     mv ${XDG_RUNTIME_DIR}/${INITIAL_DATABASE_ZIP_FILE_NAME} .;
+    echo -e "Placing database initializations files at '${TEMP_DIR}'.";
     base64 -d ${INITIAL_DATABASE_ZIP_FILE_NAME} | tar -zxv;
   popd >/dev/null;
 
+  export DATABASE_INIT_SCRIPTS_DIR="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/database/couchDB/shell_scripts";
+  pushd ${DATABASE_INIT_SCRIPTS_DIR} >/dev/null;
+    echo -e "Initializing database at '${DATABASE_INIT_SCRIPTS_DIR}'.";
+    ./LoadDatabase.sh yes;
+  popd >/dev/null;
+
+  export NODEJS_APP_SERVER="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/lambdaSrv";
+  export NODEJS_APP_WATCHDOG="${NODEJS_APP_SERVER}/watchdog.sh";
+  ${NODEJS_APP_WATCHDOG};
+  configureCronJob;
 
   echo -e "Installed Node app.";
 }

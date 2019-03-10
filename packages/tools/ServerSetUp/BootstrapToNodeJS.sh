@@ -209,7 +209,7 @@ prepareCouchDB () {
   declare SECRETS_FILE_WRITER_NAME="writeSecret.sh";
 
   echo -e "Set up CouchDB";
-  source ${HOME}/.ssh/secrets/offsppwa-vue.config;
+  source ${CONFIG_FILE};
 
   cat << EOF > ${XDG_RUNTIME_DIR}/${SECRETS_FILENAME}
 #!/usr/bin/env bash
@@ -349,7 +349,7 @@ else
 fi;
 
 
-echo -e "      ";
+echo -e "       ";
 echo -e "
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo -e "";

@@ -2,8 +2,9 @@
 #
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
-export COUCH_DATABASE=${1:-$COUCH_DATABASE};
-export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+# export COUCH_DATABASE=${1:-$COUCH_DATABASE};
+# export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+# export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
 
 function usage() {
   echo "Usage: ./PutUsers.sh \$COUCH_DATABASE";
@@ -16,16 +17,17 @@ if [[ ! -f ${CONFIG_FILE} ]]; then
   usage;
 fi;
 
-# source ${CONFIG_FILE};
+source ${CONFIG_FILE};
 
 if [[ -z "$COUCH_URL" ||  -z "$COUCH_DATABASE" ]]; then
   usage;
 fi;
 
-#####
-echo -e "
-Setting database users for :: ${COUCH_DATABASE}";
+######
 
+echo -e "
+Setting database users for :: ${COUCH_DATABASE}
+${COUCH_USERS[@]}";
 
 ## now loop through the above array
 for COUCH_USER in "${COUCH_USERS[@]}"
