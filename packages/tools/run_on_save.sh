@@ -27,6 +27,7 @@ function doIt() {
 
 # listVariables;
 
+doIt;
 while true #run indefinitely
 do
   inotifywait -qqr -e close_write,move,create,delete ${IGNORE_PATHS} ${WATCH_DIRECTORY} && doIt;

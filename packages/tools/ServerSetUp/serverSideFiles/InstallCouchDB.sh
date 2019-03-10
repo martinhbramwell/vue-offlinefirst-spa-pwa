@@ -7,6 +7,40 @@ export COMMENT="## CouchDB";
 export SOURCE_SPEC="deb https://apache.bintray.com/couchdb-deb ${DISTRO} main";
 export APT_SOURCES="/etc/apt/sources.list";
 
+
+patchCouchConfig()
+{
+  export MSG="CORS configuration";
+  export START_ALIAS="# ^^^^ ${MSG} ^^^^";
+  export END_ALIAS="# vvvv ${MSG} vvvv";
+  export PATCH="
+${START_ALIAS}
+[cors]
+headers = accept, authorization, content-type, origin, referer
+origins = *
+credentials = true
+methods = GET, PUT, POST, HEAD, DELETE
+
+[httpd]
+enable_cors = true
+${END_ALIAS}
+";
+
+  export COUCH_LOCAL="/opt/couchdb/etc/local.d";
+  export COUCH_INI="10-admins.ini";
+  export COUCH_CFG="${COUCH_LOCAL}/${COUCH_INI}";
+  if [ ! -e ${COUCH_CFG} ]
+  then
+    sudo -A mkdir -p ${COUCH_LOCAL};
+    echo "# " | sudo -A tee ${COUCH_CFG};
+  fi
+  sudo -A sed -i "/${START_ALIAS}/,/${END_ALIAS}/d" ${COUCH_CFG};
+  echo -e "${PATCH}" | sudo -A tee --append ${COUCH_CFG};
+
+#  sudo -A cat ${COUCH_CFG};
+
+}
+
 installCouchDB()
 {
 
@@ -44,6 +78,10 @@ installCouchDB()
     # declare COUCHDB_VERSION="2.3.0";
     echo -e "CouchDB '${COUCHDB_VERSION}' is up and running;";
   fi;
+
+  patchCouchConfig;
+  sudo -A service couchdb stop;
+  sudo -A service couchdb start;
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
