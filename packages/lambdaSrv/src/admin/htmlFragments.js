@@ -4,6 +4,8 @@ const frags = {
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/alertify.min.js"></script>
   <script src="../scripts/progressbar.min.js"></script>
+  <script src="../scripts/cookies.js"></script>
+  <script src="../scripts/authenticate.js"></script>
   <script src="../scripts/refresh.js"></script>
   <script src="../scripts/changeVisibility.js"></script>
   <script src="../scripts/cypressInvoices.js"></script>
@@ -57,15 +59,15 @@ const frags = {
   <div class="d-table-cell tar">
     <p>
       Raspado de datos de BAPU :: &nbsp;
-      <button id="btnOpenBapuModal" class="button" type="button" onclick="cypressInvoices()">Iniciar</button>
+      <button id="btnOpenBapuModal" class="button" type="button">Iniciar</button>
     </p>
   </div>
 </div>
 `,
 
   authentication: `
-  Usuario: <input id="couchUid" type="text" name="uid" />&nbsp;
-  Clave: <input id="couchPwd" type="password" name="pwd" />
+  Usuario: <input id="couchUid" type="text" name="uid" value=""/>&nbsp;
+  Clave: <input id="couchPwd" type="password" name="pwd" value="" />
 `,
 
   hiddenFields: `
@@ -91,13 +93,13 @@ const frags = {
 `,
 
   modalBapuScraper: `
-  <script>
+  <!-- script>
     let elemCouchUid = document.getElementById("couchUid");
     elemCouchUid.value = getCookie('uid');
 
     let elemCouchPwd = document.getElementById("couchPwd");
     elemCouchPwd.value = getCookie('pwd');
-  </script>
+  </script -->
 
   <script src="../scripts/progress.js"></script>
   <div id="bapuModal" class="modal">

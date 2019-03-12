@@ -51,33 +51,39 @@ btnOpenBapuModal.onclick = async (event) => {
   let currentInvoice = 'esperando inicio';
   let pct = 0;
   let rsltAll = null;
-  if (elemCouchUid.value.length < 1 || elemCouchPwd.value.length < 1) {
-    alertify.alert(`
-      <h4>Hay que ingresar nombre de usuario y clave</h4>
-    `);
-    return;
-  } else {
+
+  const creds = await authenticate();
+  // CLG(`Creds are ${creds}`);
+  // CDR(creds);
+  if (creds == null) return;
+
+  // if (elemCouchUid.value.length < 1 || elemCouchPwd.value.length < 1) {
+  //   alertify.alert(`
+  //     <h4>Hay que ingresar nombre de usuario y clave</h4>
+  //   `);
+  //   return;
+  // } else {
     try {
-      config.auth.username = elemCouchUid.value;
-      config.auth.password = elemCouchPwd.value;
+      // config.auth.username = elemCouchUid.value;
+      // config.auth.password = elemCouchPwd.value;
+      config.auth = creds;
       rsltAll = await axios.get(`${uriAll}`, config);
-      CDR(rsltAll);
-      setCookie('uid', elemCouchUid.value, 30);
-      setCookie('pwd', elemCouchPwd.value, 30);
+//       CDR(rsltAll);
     } catch (err) {
       CDR(err);
-      const msg = err.response.status === 401 ? 'Usuario o contraseña inválida.' : err;
-      alertify.alert(`
-        <h3>El intento de conexión a la base de datos falló.</h3>
-        <p>${msg}</p>
-      `);
+      // const msg = err.response.status === 401 ? 'Usuario o contraseña inválida.' : err;
+      // alertify.alert(`
+      //   <h3>El intento de conexión a la base de datos falló.</h3>
+      //   <p>${msg}</p>
+      // `);
       return;
     }
-  }
+  // }
 
   try {
 
-    allPersonsCount = rsltAll.data.rows[0].value - 5;
+    allPersonsCount = 1000;
+    // allPersonsCount = rsltAll.data.rows[0].value - 5;
 
     const rsltIniInv = await axios.get(`${uriLastInv}`, config);
     CDR(rsltIniInv);

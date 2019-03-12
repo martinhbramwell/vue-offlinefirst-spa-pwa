@@ -138,7 +138,7 @@ patchSSHServerConfigFile () {
 prepareHostForKeyBasedLogins () {
   echo -e "\nApparently user '${NEW_HOST_ADMIN}' does not yet exist. Creating...";
   [[ -z "${ROOT_PASSWORD}" ]] && usage;
-  if sshpass -p ${ROOT_PASSWORD} ssh -t root@${NEW_HOST} "pwd" &> /dev/null; then
+  if sshpass -p ${ROOT_PASSWORD} ssh -t ${NEW_HOST_ROOT}@${NEW_HOST} "pwd" &> /dev/null; then
     createNewUser;
     pushNewUserPublicKey;
     pushAndRunAskPassServiceMaker;

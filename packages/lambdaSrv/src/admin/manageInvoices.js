@@ -207,13 +207,25 @@ const clientActions = {
 export default async (req, res) => {
   /* Get last invoice serial number  */
 
-  CDR(req.body);
+  // CLG(`manageInvoices.js {req.body}`);
+  // CDR(req.body);
   clientActions[req.body.action || 'NUTHIN'](req.body.data);
 
   if (req.method === 'POST') {
     res.redirect(307, '/gdf');
     return;
   }
+
+  let creds = null;
+  let allowed = false;
+  // CDR(req.headers.cookie);
+  if (req.headers.cookie) {
+    creds = {};
+    eval(req.headers.cookie); // eslint-disable-line no-eval
+    // CDR(creds);
+    if (creds.password) allowed = true;
+  }
+
 
   const CATEGORY_FIELD = {
     fieldName: 'data.type',
@@ -267,7 +279,7 @@ export default async (req, res) => {
   // };
 
   // CAN'T USE ARROW FUNCTION IN THIS CASE
-  const writeInvoice = function (inv, out) { // eslint-disable-line func-names
+  const writeInvoice = function (inv, out) { // eslint-disable-line no-unused-vars, func-names
     const { doc } = inv;
     const { data: d } = doc;
 
@@ -307,10 +319,10 @@ export default async (req, res) => {
       <td>${d.seqib && d.seqib.toString().padStart(9, '0') || '?????????'}</td>
       <td><input id="h${d.seqib}" type="checkbox" name="Hold" ${doc.hold ? 'checked' : ''}></td>
       <td id="Anu_${d.seqib}" name="${doc.void ? 'void' : 'valid'}">${voided}</td>
-      <td id="Prp_${d.seqib}" name="${prp ? 'processed' : 'new'}"><i class="fas fa-${prp ? 'check-circle' : 'circle'}" /></td>
-      <td><i class="fas fa-${frm ? 'check-circle' : 'circle'}" /></td>
-      <td><i class="fas fa-${env}" /></td>
-      <td><i class="fas fa-${aut}" /></td>
+      <td style="text-align: center;" id="Prp_${d.seqib}" name="${prp ? 'processed' : 'new'}"><i class="fas fa-${prp ? 'check-circle' : 'circle'}" /></td>
+      <td style="text-align: center;"><i class="fas fa-${frm ? 'check-circle' : 'circle'}" /></td>
+      <td style="text-align: center;"><i class="fas fa-${env}" /></td>
+      <td style="text-align: center;"><i class="fas fa-${aut}" /></td>
       <!-- td class="fecha">${hider}</td -->
       <td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td>
       <td>${d.nombreCliente}</td>
@@ -334,7 +346,7 @@ export default async (req, res) => {
     res.write(frags.documentHead);
     res.write('<body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
 
-    res.write('Ultima factura extraida ... <br /><br />');
+    res.write('<i>Última factura extraida ... </i><br /><br />');
 
     const maxSerial = (await findMaxRow(databaseLocal, serialIndex));
     if (!maxSerial.data) throw new Error(`Unable to get results using index ${serialIndexName}!`);
@@ -372,32 +384,35 @@ export default async (req, res) => {
   }
 
   try {
-    res.write(frags.topSection);
     res.write('<hr />');
     res.write('<form name="gestionDeFacturas" action="/gestionDeFacturas" method="post">');
     res.write(frags.hiddenFields);
     res.write(frags.authentication);
-    res.write('<br />');
+    res.write(frags.topSection);
     res.write(frags.taskButtons);
     res.write('<br />');
     res.write(frags.filterFields);
     res.write('<br />');
 
-    res.write('<table id="facturas">');
-    res.write(frags.tableColumnHeader);
+    if (allowed) {
+      res.write('<table id="facturas">');
+      res.write(frags.tableColumnHeader);
 
-    const invoices = await databaseLocal.allDocs({
-      include_docs: true,
-      attachments: true,
-      startkey: 'Invoice_2',
-      endkey: 'Invoice_1_0000000000000000',
-      // limit: 3,
-      descending: true,
-    });
+      const invoices = await databaseLocal.allDocs({
+        include_docs: true,
+        attachments: true,
+        startkey: 'Invoice_2',
+        endkey: 'Invoice_1_0000000000000000',
+        // limit: 3,
+        descending: true,
+      });
 
-    invoices.rows.forEach(rev => writeInvoice(rev, res));
+      invoices.rows.forEach(rev => writeInvoice(rev, res));
 
-    res.write('</table>');
+      res.write('</table>');
+    } else {
+      res.write('Esperando usuario autorizado');
+    }
 
     res.write('</form>');
   } catch (err) {

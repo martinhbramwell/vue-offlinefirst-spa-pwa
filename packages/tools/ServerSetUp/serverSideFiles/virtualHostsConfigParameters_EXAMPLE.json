@@ -7,19 +7,31 @@
     {
       "SYMLINK_NAME": "CouchDB",
       "GDRIVE_FILE_ID": "1FJ6Az9n68IByS9F5LXR9d0qrZSC3Lnmm",
+      "GDRIVE_FILE_NAME": "CouchDB_ReverseProxy_WITHCERT.sh",
       "VHOST_NAME": "chdb.yourpublic.work"
+
+
     },
     {
       "SYMLINK_NAME": "NodeJS",
       "GDRIVE_FILE_ID": "1KvedJxa2XHtKdbmoEyCDzyq1Attmmdpe",
+      "GDRIVE_FILE_NAME": "NodeJS_ReverseProxy_WITHCERT.sh",
       "VHOST_NAME": "app.yourpublic.work"
+
+
     }
   ],
   "NODEJS_APP": {
     "SSH_KEY": "1lcbxfkFJNiVetFAKELOsQnieNYVOVYKy",
     "SSH_KEY_PUB": "1bn9Wlf2Z7FAKEOFFX_wHBiBBcFkJK78q",
+    "SSH_ALIAS": "yourproject",
     "CLONING_URL": "git@github.com:yourorg/yourproject.git",
     "FOLDER_NAME": "yourproject",
-    "PRODUCTION_BRANCH": "production"
+    "PRODUCTION_BRANCH": "production",
+    "SECRETS_FILE_PATH": ".ssh/secrets",
+    "SECRETS_FILE_NAME": "example.config",
+    "INITIAL_DATABASE_ZIP": "1HJ9SMMg1WLT4a2127EebEkL25YRER2ky",
+    "INITIAL_DATABASE_ZIP_FILE_NAME": "CouchInitialization_.tar.gz.b64",
+    "GIT_USER_NAME": "yourself.yourorg"
   }
 }

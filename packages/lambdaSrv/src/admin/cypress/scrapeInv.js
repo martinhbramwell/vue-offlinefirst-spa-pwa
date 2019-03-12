@@ -1,4 +1,4 @@
-import cypress from 'cypress'; // eslint-disable-line no-unused-vars
+import cypress from 'cypress';
 import fs from 'fs';
 
 import { logger as LG } from '../../utils'; // eslint-disable-line no-unused-vars
@@ -23,17 +23,6 @@ export default async (req, res) => {
   try {
     /* eslint-disable max-len */
 
-    // pages.thisPage = 1;
-    // fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
-    // resultSanityCheck = await cypress.run({ spec: `${path}/${sanityCheck}` });
-    // LG.info(`Sanity Check #1 results :\n${JSON.stringify(resultSanityCheck.config.env, null, 3)}`);
-    // res.write(', "thisPage": "Sanity 1"');
-
-    // pages.thisPage = 2;
-    // fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
-    // resultSanityCheck = await cypress.run({ spec: `${path}/${sanityCheck}` });
-    // LG.info(`Sanity Check #2 results :\n${JSON.stringify(resultSanityCheck.config.env, null, 3)}`);
-    // res.write(', "thisPage": "Sanity 2"');
     for (let pg = 8; pg > 0; pg -= 1) {
       pages.thisPage = pg;
       fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));

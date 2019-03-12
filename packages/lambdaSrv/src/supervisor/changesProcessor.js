@@ -25,7 +25,7 @@ const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, millise
 
 const processItem = async (item) => {
   const { doc } = item;
-  CLG(`Ready to process queue item '${doc.type}'.`);
+  // CLG(`Ready to process queue item '${doc.type}'.`);
   await sleep(1500); // eslint-disable-line no-await-in-loop
   handlers[doc.type](item);
 };

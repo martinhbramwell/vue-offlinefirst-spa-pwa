@@ -11,6 +11,9 @@ describe('BAPU Scraper', function() {
 
     const opts = couchGetOpts(Cypress.env('CH_LATESTINVOICE'));
 
+    const startDateStr = Cypress.env('CH_FIRSTINVOICE');
+    const startDate = startDateStr.split(' ').map(x=>+x);
+
     cy.log('-------------------');
     cy.log(JSON.stringify(opts, null, 2));
     cy.log('-------------------');
@@ -23,7 +26,8 @@ describe('BAPU Scraper', function() {
                                             .replace(/ /, '|')
                                             .replace(/:/g, '|')
                                             .split('|');
-        return [2019, 1, 31, 14, 6, 30];
+        // return [2019, 1, 31, 14, 6, 30];
+        return startDate;
       }).as('latestInvoice');
   });
 
