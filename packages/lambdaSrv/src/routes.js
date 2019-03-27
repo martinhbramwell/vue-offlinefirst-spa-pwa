@@ -3,6 +3,7 @@ import { Router } from 'express';
 import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
 
+import deleteRange from './admin/deleteRange';
 import manageInvoices from './admin/manageInvoices';
 import scrapeInv from './admin/cypress/scrapeInv';
 
@@ -90,6 +91,10 @@ routes.post('/gestionDeFacturas', (req, res, next) => {
 
 routes.get('/scrapeInv', (req, res, next) => {
   scrapeInv(req, res, next);
+});
+
+routes.get('/deleteRange', (req, res, next) => {
+  deleteRange(req, res, next);
 });
 
 export default routes;

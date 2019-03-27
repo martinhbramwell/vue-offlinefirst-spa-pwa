@@ -1,6 +1,7 @@
 async function authenticate() {
   // CLG('  ***  DISABLED  ***');
   // let ret = '';
+  const cookieTime = 60;
   let creds = null;
   try {
     var cookie = getCookie('creds');
@@ -23,7 +24,7 @@ async function authenticate() {
         CLG(`URL: '${uriAll}' '${JSON.stringify(config)}'`);
         rsltAll = await axios.get(`${uriAll}`, config);
         CDR(rsltAll);
-        setCookie('creds', JSON.stringify(creds), 60)
+        setCookie('creds', JSON.stringify(creds), cookieTime)
       } catch (err) {
         // CDR(err);
         const msg = err.response.status === 401 ? 'Usuario o contraseña inválida.' : err;
@@ -35,7 +36,7 @@ async function authenticate() {
       }
 
     } else {
-      setCookie('creds', cookie, 0.1)
+      setCookie('creds', cookie, cookieTime)
       creds = JSON.parse(cookie);
       CLG(`Got cookie: '${creds.username}: ${creds.password}'`);
     }
