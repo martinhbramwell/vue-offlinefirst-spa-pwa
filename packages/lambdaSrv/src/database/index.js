@@ -22,12 +22,13 @@ const rmtDbHost = process.env.COUCH_HOST;
 // LG.verbose(`UTILS : ${JSON.stringify(logger, null, 2)}`)
 LG.info(`Logs written to ${process.env.LOG_DIR}`);
 LG.info(`Local :: ${lclDb}`);
+LG.info(`Remote :: ${rmtDb}`);
 
 PouchDB.plugin(finder);
 PouchDB.plugin(relater);
 PouchDB.plugin(adptrMemory);
 
-const userId = process.env.COUCH_USR;
+const userId = process.env.COUCH_ADMIN;
 
 export const databaseRemote = new PouchDB(rmtDb);
 export const databaseLocal = new PouchDB(lclDb, { adapter });

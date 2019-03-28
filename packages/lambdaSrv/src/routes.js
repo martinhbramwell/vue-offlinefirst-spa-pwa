@@ -4,6 +4,7 @@ import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
 
 import deleteRange from './admin/deleteRange';
+import updateRange from './admin/updateRange';
 import manageInvoices from './admin/manageInvoices';
 import scrapeInv from './admin/cypress/scrapeInv';
 
@@ -95,6 +96,10 @@ routes.get('/scrapeInv', (req, res, next) => {
 
 routes.get('/deleteRange', (req, res, next) => {
   deleteRange(req, res, next);
+});
+
+routes.get('/updateRange', (req, res, next) => {
+  updateRange(req, res, next);
 });
 
 export default routes;

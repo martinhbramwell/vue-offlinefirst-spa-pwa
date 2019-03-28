@@ -7,22 +7,22 @@ const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 export default async (req, res) => {
-  CLG(`deleteRange.js ${req.body}`);
+  CLG(`updateRange.js ${req.body}`);
   CDR(req.body);
 
   res.write('<html><body>');
 
   const config = {
-    startkey: 'Request_2',
-    endkey: 'Request_3',
-    alteration: { _deleted: true },
+    startkey: 'qqqInvoice_1_0000000000004626',
+    endkey: 'qqqInvoice_2',
+    alteration: { fixed: Date.now() / 1000 | 0 },
   };
 
-  const deletions = await listRange(res, db, config);
-  CDR(deletions);
-  await db.bulkDocs(deletions);
+  const updates = await listRange(res, db, config);
+  CDR(updates);
+  await db.bulkDocs(updates);
 
-  res.write('</br></br>Deleted all "Request" records');
+  res.write('</br></br>Updated some "Invoice" records');
 
   res.write('</body></html>');
   res.end();
