@@ -27,7 +27,7 @@ const startProgress = (container) => {
     from: {color: '#FFEA82'},
     to: {color: '#ED6A5A'},
     step: (state, bar) => {
-      bar.setText(Math.round(bar.value() * 100) + ' Porcentaje de 1000 clientes');
+      bar.setText(Math.round(bar.value() * 100) + ' porciento de 1000 clientes');
     }
   });
 }

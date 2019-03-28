@@ -19,7 +19,7 @@ const listRange = async (res, db, config) => { // eslint-disable-line no-unused-
     // CLG(`${rec.id} (${rec.value.rev})`);
     result.push(rec.doc);
     res.write('</br>');
-    res.write(`${rec.id} (${rec.value.rev})`);
+    res.write(`${rec.id} (${rec.value.rev}) ${JSON.stringify(alteration)}`);
   });
 
 

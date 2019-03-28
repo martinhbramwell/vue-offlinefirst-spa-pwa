@@ -178,7 +178,7 @@ export default () => {
         const dir = response.direction;
         const { docs } = response.change;
         LG.info(`${lclDb} ${name} *** ${label} ${dir} sync delta *** `);
-        LG.info(`Database replication from: ${docs.length} records.`);
+        LG.info(`Database replication : ${dir}ed ${docs.length} record${docs.length === 1 ? '' : 's'}.`);
         docs.forEach((doc) => {
           if (!replicatedEntityCounters[doc.data.type]) {
             replicatedEntityCounters[doc.data.type] = 0;

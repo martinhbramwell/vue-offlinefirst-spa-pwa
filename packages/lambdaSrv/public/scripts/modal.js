@@ -98,7 +98,7 @@ btnOpenBapuModal.onclick = async (event) => {
       const rsltRef = await axios.get(`${uriRefd}&${startkey}`, config);
       refreshedPersonsCount = rsltRef.data.rows.length > 0 ? rsltRef.data.rows[0].value : 0;
       pct = refreshedPersonsCount / allPersonsCount;
-      CLG(`Rows : ${rsltRef.data.rows.length}  Total : ${allPersonsCount}  Current ${refreshedPersonsCount}   Progress :: ${pct}`);
+      CLG(`URL : ${uriRefd}&${startkey} Rows : ${rsltRef.data.rows.length}  Total : ${allPersonsCount}  Current ${refreshedPersonsCount}   Progress :: ${pct}`);
       progressBar.animate(pct);
 
       const rsltCurrInv = await axios.get(`${uriLastInv}`, config);

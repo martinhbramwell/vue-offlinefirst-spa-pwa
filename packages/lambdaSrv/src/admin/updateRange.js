@@ -7,22 +7,32 @@ const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 export default async (req, res) => {
-  CLG(`updateRange.js ${req.body}`);
-  CDR(req.body);
+  CLG(`updateRange.js ${req.query}`);
+  CDR(req.query);
 
   res.write('<html><body>');
+  res.write(`</br>Start key : ${req.query.s}`);
+  res.write(`</br>End key : ${req.query.e}`);
+  const alteration = JSON.parse(req.query.alt);
+  CDR(alteration);
+  res.write(`</br>Alteration : ${req.query.alt}`);
+  res.write('</br>');
 
-  const config = {
-    startkey: 'qqqInvoice_1_0000000000004626',
-    endkey: 'qqqInvoice_2',
-    alteration: { fixed: Date.now() / 1000 | 0 },
-  };
+  if (req.query.e && req.query.s && req.query.alt) {
+    const config = {
+      startkey: req.query.s,
+      endkey: req.query.e,
+      alteration,
+    };
 
-  const updates = await listRange(res, db, config);
-  CDR(updates);
-  await db.bulkDocs(updates);
+    const updates = await listRange(res, db, config);
+    CDR(updates);
+    await db.bulkDocs(updates);
 
-  res.write('</br></br>Updated some "Invoice" records');
+    res.write('</br></br>Updated some "Invoice" records');
+  } else {
+    res.write('</br></br>No range specified.');
+  }
 
   res.write('</body></html>');
   res.end();

@@ -23,12 +23,18 @@ export default async (req, res) => {
   try {
     /* eslint-disable max-len */
 
-    for (let pg = 8; pg > 0; pg -= 1) {
-      pages.thisPage = pg;
-      fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
-      resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
-      LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
-      res.write(', "Persons"');
+    if (process.env.CYPRESS_SKIP_PERSONS && process.env.CYPRESS_SKIP_PERSONS === 'true') {
+      const message = 'Will not scrape persons data';
+      LG.info(message);
+      res.write(`, "${message}"`);
+    } else {
+      for (let pg = 8; pg > 0; pg -= 1) {
+        pages.thisPage = pg;
+        fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
+        resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
+        LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
+        res.write(', "Persons"');
+      }
     }
 
     const resultInvoices = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
@@ -38,7 +44,7 @@ export default async (req, res) => {
     /* eslint-enable max-len */
   } catch (err) {
     LG.error(err);
-    res.write(`, "Async functional test failed ${err}.`);
+    res.write(`, "Screen scraping failed ${err}.`);
   }
 
   res.write(`${jsonEnd}`);
