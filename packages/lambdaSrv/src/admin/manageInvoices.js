@@ -199,7 +199,7 @@ const clientActions = {
   },
 
   NUTHIN: () => {
-    CLG('NUTHIN');
+    CLG('Null client action');
   },
 };
 
@@ -216,16 +216,20 @@ export default async (req, res) => {
     return;
   }
 
+  const sCreds = 'creds';
+  const replace = `${sCreds}=\{.+\}`; // eslint-disable-line no-useless-escape
+  const re = new RegExp(replace, 'i');
+
   let creds = null;
   let allowed = false;
-  // CDR(req.headers.cookie);
-  if (req.headers.cookie) {
-    creds = {};
-    eval(req.headers.cookie); // eslint-disable-line no-eval
-    // CDR(creds);
+  CDR(req.headers.cookie);
+  try {
+    creds = JSON.parse(req.headers.cookie.match(re)[0].replace(`${sCreds}=`, ''));
+    // CLG(`User in cookie is ${creds.username}`);
     if (creds.password) allowed = true;
-  }
-
+  } catch (err) {
+    CLG(`Could not get user from cookie. Err : >${err}<`);
+  };
 
   const CATEGORY_FIELD = {
     fieldName: 'data.type',
