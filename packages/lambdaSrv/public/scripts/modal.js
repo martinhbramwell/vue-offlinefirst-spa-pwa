@@ -38,7 +38,7 @@ btnOpenBapuModal.onclick = async (event) => {
 
   const uriAll = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwAll}?${prms}`;
   const uriRefd = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwRefd}?${prms}`;
-  const startkey = `startkey="${tStamp(new Date())}"`;
+  const startkey = `startkey=%22${tStamp(new Date())}%22`;
   const config = { auth: envAuth };
 
   const vwLastInv = 'latestInvoice';
