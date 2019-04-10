@@ -7,16 +7,21 @@ export SCRIPT_NAME=$(basename "$0");
 configureSSL()
 {
   declare SSL_DFH_ID=$(cat ${PARMS} | jq -r .SSL_PARMS.SSL_DFH_ID);
+  declare DHPARMS_FILE="dhparams_4096.pem";
+  declare SSLD_SERVER="/etc/ssl/private/";
 
   declare SSL_DFH_FILE_NAME="";
   pushd SecretsCollector >/dev/null;
     [ -e ./node_modules/axios/lib/axios.js ] || npm install;
-    SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID} "dhparams_4096.pem");
+    SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID} "${DHPARMS_FILE}" ${XDG_RUNTIME_DIR});
   popd >/dev/null;
 
   echo -e "SSL_DFH_FILE_NAME = ${SSL_DFH_FILE_NAME}";
-  export SSLD_SERVER="/etc/ssl/private/";
+
+  $(echo ${SSL_DFH_FILE_NAME} | grep "Error" >/dev/null) && return 1;
+
   sudo -A cp ${XDG_RUNTIME_DIR}/${SSL_DFH_FILE_NAME} ${SSLD_SERVER};
+  # sudo -A ls -la ${SSLD_SERVER};
 
 }
 
@@ -32,7 +37,7 @@ defineVirtualHost ()
 
   declare SITES_AVAILABLE_FILE_NAME="";
   pushd SecretsCollector >/dev/null;
-    SITES_AVAILABLE_FILE_NAME=$(node collectSecret.js ${GDRIVE_FILE_ID} ${GDRIVE_FILE_NAME});
+    SITES_AVAILABLE_FILE_NAME=$(node collectSecret.js ${GDRIVE_FILE_ID} ${GDRIVE_FILE_NAME} ${XDG_RUNTIME_DIR});
     # SITES_AVAILABLE_FILE_NAME="CouchDB_ReverseProxy_WITHCERT.sh"
   popd >/dev/null;
 
@@ -81,7 +86,7 @@ installNginx()
     export SITES_ENABLED_DIR="sites-enabled";
 
     # Configure SSL
-    configureSSL;
+    configureSSL || return 1;
 
     # Configure Virtual Hosts
     declare VHOSTS=$(cat ${PARMS} | jq -r .VHOSTS);

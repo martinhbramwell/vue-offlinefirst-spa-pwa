@@ -17,7 +17,7 @@ installCert(){
 installSslCertificates()
 {
   declare PARMS="./setupScripts/virtualHostsConfigParameters.json";
-
+  # cat ${PARMS};
   declare CERTIFICATE_OWNER_EMAIL=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTIFICATE_OWNER_EMAIL);
   echo -e "CERTIFICATE_OWNER_EMAIL=\"${CERTIFICATE_OWNER_EMAIL}\"";
 

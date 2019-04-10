@@ -8,7 +8,7 @@ export DEST_FILE_NAME="splidge";
 export DEST_FILE=${DEST_DIR}/${DEST_FILE_NAME};
 
 pushd SecretsCollector >/dev/null;
-  node collectSecret.js 1zH7Kx74kesEgVh8AtXU7BOBdGGVHWzKh ${TMPLT_DIR};
+  node collectSecret.js 1zH7Kx74kesEgVh8AtXU7BOBdGGVHWzKh ${TMPLT_DIR}  ${XDG_RUNTIME_DIR};
 popd >/dev/null;
 
 # export RFRF="splut";

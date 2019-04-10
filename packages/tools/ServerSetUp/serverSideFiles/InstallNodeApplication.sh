@@ -15,9 +15,9 @@ configureGit ()
   pushd SecretsCollector >/dev/null;
     [ -e ./node_modules/axios/lib/axios.js ] || npm install;
     echo -e "Get private key.";
-    SSH_KEY_FILE_NAME=$(node collectSecret.js ${SSH_KEY} ${SSH_ALIAS});
+    SSH_KEY_FILE_NAME=$(node collectSecret.js ${SSH_KEY} ${SSH_ALIAS} ${XDG_RUNTIME_DIR});
     echo -e "Get public key.";
-    SSH_KEY_PUB_FILE_NAME=$(node collectSecret.js ${SSH_KEY_PUB} ${SSH_ALIAS}.pub);
+    SSH_KEY_PUB_FILE_NAME=$(node collectSecret.js ${SSH_KEY_PUB} ${SSH_ALIAS}.pub ${XDG_RUNTIME_DIR});
   popd >/dev/null;
 
   echo -e "SSH_KEY_FILE_NAME = ${SSH_KEY_FILE_NAME}";
@@ -152,7 +152,7 @@ installNodeApplication ()
   declare INITIAL_DATABASE_ZIP_FILE_NAME=$(echo ${NODEJS_APP} | jq -r .INITIAL_DATABASE_ZIP_FILE_NAME);
   pushd ${SCRIPT_DIR}/SecretsCollector >/dev/null;
     echo -e "Get database initializations files...";
-    INITIAL_DATABASE_ZIP_FILE_NAME=$(node collectSecret.js ${INITIAL_DATABASE_ZIP} "${INITIAL_DATABASE_ZIP_FILE_NAME}");
+    INITIAL_DATABASE_ZIP_FILE_NAME=$(node collectSecret.js ${INITIAL_DATABASE_ZIP} "${INITIAL_DATABASE_ZIP_FILE_NAME}" ${XDG_RUNTIME_DIR});
   popd >/dev/null;
 
   declare TEMP_DIR=${HOME}/temp;

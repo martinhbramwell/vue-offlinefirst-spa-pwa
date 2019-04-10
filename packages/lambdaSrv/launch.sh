@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 #
 source ${HOME}/.bash_login;
-# source ${HOME}/.ssh/secrets/offsppwa-vue.config;
-source ${HOME}/.ssh/secrets/local.config;
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )";
 pushd ${DIR} >/dev/null;

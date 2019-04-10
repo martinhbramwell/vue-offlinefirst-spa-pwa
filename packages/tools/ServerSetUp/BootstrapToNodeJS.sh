@@ -2,10 +2,10 @@
 #
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
-export ROOT_PASSWORD=${1};
 
 # export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
-export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+# export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
 export DIR_FILES_FOR_UPLOAD="serverSideFiles";
 export DIR_SETUP_FILES="setupScripts";
 
@@ -62,14 +62,6 @@ createNewUser () {
 
 
 
-########
-pushNewUserPublicKey () {
-  echo "Pushing public key for user : '${NEW_HOST_ADMIN}'.";
-  sshpass -p ${NEW_HOST_PWD} ssh -t ${NEW_HOST_ADMIN}@${NEW_HOST} "pwd";
-  patchSSHConfigFile;
-};
-
-
 
 ########
 patchSSHConfigFile () {
@@ -85,7 +77,7 @@ patchSSHConfigFile () {
   fi;
 
   echo "Patching SSH config file with alias for '${NEW_HOST_ADMIN}@${NEW_HOST}'";
-  export PTRN="# Alias configuration for '${NEW_HOST_ADMIN}@${NEW_HOST}'";
+  export PTRN="# Alias configuration: '${NEW_HOST_NAME}'";
   export PTRNB="${PTRN} «begins»";
   export PTRNE="${PTRN} «ends»";
 
@@ -94,6 +86,7 @@ patchSSHConfigFile () {
   sed -i "/${PTRNB}/,/${PTRNE}/d" ${SSHCFG_FILE};
 
   echo -e "${PTRNB}
+# Alias '${NEW_HOST_NAME}'' binds to remote user '${NEW_HOST_ADMIN}@${NEW_HOST}'.'
 Host ${NEW_HOST_NAME}
   User ${NEW_HOST_ADMIN}
   HostName ${NEW_HOST}
@@ -105,10 +98,19 @@ ${PTRNE}
   sed -i "/^$/N;/^\n$/D" ${SSHCFG_FILE}; # blank lines to 1 line
 
   echo "Pushing SSH public key to account '${NEW_HOST_ADMIN}@${NEW_HOST}'";
-  sshpass -p ${NEW_HOST_PWD} ssh-copy-id -i ${SSHPTH}/${KEY_NAME} ${NEW_HOST_NAME};
+  # echo "sshpass -p ${NEW_HOST_PWD} ssh-copy-id -f -i ${SSHPTH}/${KEY_NAME} ${NEW_HOST_ADMIN}@${NEW_HOST}";
+  sshpass -p ${NEW_HOST_PWD} ssh-copy-id -f -i ${SSHPTH}/${KEY_NAME} ${NEW_HOST_ADMIN}@${NEW_HOST};
 
 }
 
+
+########
+pushNewUserPublicKey () {
+  echo "Pushing public key for user : '${NEW_HOST_ADMIN}@${NEW_HOST}'.";
+  sshpass -p ${NEW_HOST_PWD} ssh -t ${NEW_HOST_ADMIN}@${NEW_HOST} "pwd";
+  echo "!";
+  patchSSHConfigFile;
+};
 
 
 ########
@@ -151,6 +153,17 @@ prepareHostForKeyBasedLogins () {
 };
 
 
+
+########
+importSecretFiles () {
+  declare TYPE="virtualHostsCfgPrms";
+  declare SECRET="${WEBTASK_SECRET}";
+  declare HDR="Content-Type: application/json";
+  pwd;
+  echo -e "Download secret files from secure cloud locations";
+  curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L http://bit.ly/vue-offlinefirst-spa-pwa > tmp.json;
+  mv tmp.json ./serverSideFiles/virtualHostsConfigParameters.json;
+};
 
 ########
 uploadServerSideFiles () {
@@ -295,7 +308,7 @@ qTst () {
     # echo "export VUESPPWAKEY=\"${VUESPPWAKEY}\"";
     # export VUESPPWAKEY_PUB=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey.pub");
     # echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
-    export VUESPPWAKEY_PUB=$(node collectSecret.js "1m_6vKD1kaiFU1NhX1oNlnJ2GPjuq7ire" "vuesppwaKey.pub");
+    export VUESPPWAKEY_PUB=$(node collectSecret.js "1m_6vKD1kaiFU1NhX1oNlnJ2GPjuq7ire" "vuesppwaKey.pub" ${XDG_RUNTIME_DIR});
     echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
   popd >/dev/null;
 
@@ -309,48 +322,56 @@ echo -e "Effecting unfulfilled APT requirement installations..."
 dpkg -s sshpass &> /dev/null || sudo apt install sshpass;
 
 
-source ${CONFIG_FILE};
+source ${CONFIG_FILE}  || exit;
+export ROOT_PASSWORD="${1:-${NEW_HOST_PWD}}";
 
 
 ################################################################################
+######
 ######  It all starts here ......
+######
+################################################################################
 
 export SERVER_IP=$(getent hosts ${NEW_HOST} | awk '{ print $1 }');
 echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
     ****************************************
 ";
 
-# #qTst;
-# uploadServerSideFiles;
+# # #qTst;
+# prepareHostForKeyBasedLogins;
+# # importSecretFiles;
+# # uploadServerSideFiles;
+# # prepareAPT;
+# # # prepareLetsEncrypt;
 # # prepareNginx;
-# # prepareLetsEncrypt;
-# prepareNodeApp;
-# # # prepareCouchDB;
-# # # pushAndRunAskPassServiceMaker;
+# # # # prepareCouchDB;
+# # # # pushAndRunAskPassServiceMaker;
+# # prepareNodeApp;
 # echo -e "
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;
 
 
-updateLocalKnownHostsFile;
-
 echo -e "Attempting to connect as admin user '${NEW_HOST_ADMIN}'.";
 if ssh -oBatchMode=yes -tl ${NEW_HOST_ADMIN} ${NEW_HOST} "pwd" &> /dev/null; then
-  uploadServerSideFiles;
-  prepareAPT;
-  prepareUFW;
-  prepareNodeJS;
-  prepareCouchDB;
-  prepareLetsEncrypt;
-  prepareNginx;
+  # importSecretFiles;
+  # uploadServerSideFiles;
+  # prepareAPT;
+  # prepareUFW;
+  # prepareNodeJS;
+  # prepareCouchDB;
+  # prepareLetsEncrypt;
+  # prepareNginx;
   prepareNodeApp;
 else
   prepareHostForKeyBasedLogins;
 fi;
 
 
-echo -e "       ";
+echo -e "";
+echo -e "   DONE    ";
 echo -e "
+                                    time zone  ????
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo -e "";
 echo -e "";

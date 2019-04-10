@@ -58,7 +58,7 @@ queueEmitter.on('itemAdded', queueAction);
 const changeHandler = (db, change) => { // eslint-disable-line no-unused-vars
   const { doc } = change;
   if (doc && doc.type) {
-    // LG.debug(`\n@@@@@@@@@@@@@\n${JSON.stringify(change, null, 2)}\n@@@@@@@@@@@@@`);
+    LG.debug(`\n@@@@@@@@@@@@@\n${JSON.stringify(change, null, 2)}\n@@@@@@@@@@@@@`);
     changesQueue.push({ db, doc });
   }
 };

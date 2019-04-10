@@ -5,7 +5,7 @@ const { authorize, loadToken } = require('./auth');
 
 const fileId = process.argv[2];
 const fileName = process.argv[3];
-const targetPath = process.env.XDG_RUNTIME_DIR;
+const targetPath = process.argv[4];
 
 
 /**
