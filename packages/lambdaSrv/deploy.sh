@@ -3,7 +3,7 @@
 echo -e "This does not work.  Haven't figured out why.";
 exit;
 echo -e "Wants to be run from parent directory of 'lambdaSrv'";
-source ${HOME}/.ssh/secrets/offsppwa-vue.config;
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 export OLD_IFS=${IFS};
 IFS='/';

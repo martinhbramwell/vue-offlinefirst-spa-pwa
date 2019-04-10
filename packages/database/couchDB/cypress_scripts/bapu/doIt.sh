@@ -2,7 +2,7 @@ command -v jq > /dev/null || sudo apt install jq;
 [ -d node_modules/cypress ] || npm install;
 
 
-# source ${HOME}/.ssh/secrets/offsppwa-vue.config
+# source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config
 # cat << EOF > .secrets.js;
 # NODE_ENV=development
 # VUE_APP_STATIC_MODE=STATIC_DEV
@@ -15,7 +15,7 @@ command -v jq > /dev/null || sudo apt install jq;
 # ./node_modules/.bin/cypress open
 
 source ${HOME}/.ssh/secrets/local.config;
-# source ${HOME}/.ssh/secrets/offsppwa-vue.config;
+# source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 
 ./node_modules/.bin/cypress open;

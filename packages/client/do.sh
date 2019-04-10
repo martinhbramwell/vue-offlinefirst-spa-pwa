@@ -1,6 +1,6 @@
 [ -d node_modules/abbrev ] || npm install;
 
-source ${HOME}/.ssh/secrets/offsppwa-vue.config
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config
 cat << EOF > .env.development
 NODE_ENV=development
 VUE_APP_STATIC_MODE=STATIC_DEV

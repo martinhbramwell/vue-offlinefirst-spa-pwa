@@ -4,7 +4,6 @@ export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
 
 # export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
-# export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
 export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
 export DIR_FILES_FOR_UPLOAD="serverSideFiles";
 export DIR_SETUP_FILES="setupScripts";

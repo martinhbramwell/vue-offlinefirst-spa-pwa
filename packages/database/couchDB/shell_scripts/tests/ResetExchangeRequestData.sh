@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
 function usage() {
   echo "Usage: 'COUCH_URL', 'COUCH_DATABASE_NAME' and 'VERSION' must be specified in ${CONFIG_FILE}";
   exit 1;

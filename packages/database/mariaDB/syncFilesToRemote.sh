@@ -1,4 +1,4 @@
-export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
 source ${CONFIG_FILE};
 
 export SYNC_DIR="mariaDB";

@@ -1,4 +1,4 @@
-source ${HOME}/.ssh/secrets/offsppwa-vue.config
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config
 
 export SRCE=${MARIA_USR}@${MARIA_HOST}:/home/${MARIA_USR}/${TEST_FILES_PATH}
 
