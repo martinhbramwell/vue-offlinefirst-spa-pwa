@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 
-export CONFIG_FILE="${HOME}/.ssh/secrets/offsppwa-vue.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa";
 # export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
 source ${CONFIG_FILE};
 

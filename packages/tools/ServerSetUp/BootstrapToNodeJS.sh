@@ -138,7 +138,16 @@ patchSSHServerConfigFile () {
 
 ########
 prepareHostForKeyBasedLogins () {
-  echo -e "\nApparently user '${NEW_HOST_ADMIN}' does not yet exist. Creating...";
+
+  ssh-keygen -R ${NEW_HOST};
+  export NEW_HOST_IP=$(ping -q -c 1 ${NEW_HOST} > tmp; cat tmp | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
+  ssh-keygen -R ${NEW_HOST_IP};
+
+  ssh-keyscan -H ${NEW_HOST} >> ~/.ssh/known_hosts
+  ssh-keyscan -H ${NEW_HOST_IP} >> ~/.ssh/known_hosts
+
+  echo -e "\nApparently user '${NEW_HOST_ADMIN}' does not yet exist. Creating...
+  ${NEW_HOST_ROOT}:${ROOT_PASSWORD}@${NEW_HOST}";
   [[ -z "${ROOT_PASSWORD}" ]] && usage;
   if sshpass -p ${ROOT_PASSWORD} ssh -t ${NEW_HOST_ROOT}@${NEW_HOST} "pwd" &> /dev/null; then
     createNewUser;
@@ -167,7 +176,7 @@ importSecretFiles () {
 
 ########
 uploadServerSideFiles () {
-  echo -e "Create server side script files home '${HOME}/${DIR_SETUP_FILES}'";
+  echo -e "Create server side script files home '${NEW_HOST_NAME}:${HOME}/${DIR_SETUP_FILES}'";
   ssh -t ${NEW_HOST_NAME} "mkdir -p \${HOME}/${DIR_SETUP_FILES}";
   echo -e "Upload server side files ...
   from : '${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*'
@@ -269,6 +278,30 @@ prepareLetsEncrypt () {
 };
 
 
+export SIG_FILE=sig.p12;
+export SIG_TARGZ="${SIG_FILE}.tar.gz";
+export SIG_B64="${SIG_TARGZ}.b64";
+unWrapSignature() {
+  sed -i 's/ /\n/g' ${SIG_B64};
+  cat ${SIG_B64} | base64 --decode > ${SIG_TARGZ};
+  tar zxvf ${SIG_TARGZ};
+};
+
+########
+downLoadSignature () {
+  export DLD_TYPE="signature";
+  export DLD_URL="http://bit.ly/vue-offlinefirst-spa-pwa";
+
+  pushd ${XDG_RUNTIME_DIR} > /dev/null;
+    curl -sH "Content-Type: application/json" -d '{"mode":"'"${MODE}"'","type":"'"${DLD_TYPE}"'","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${DLD_URL} > ${SIG_B64};
+    export isERROR=$(grep -c "Error" ${SIG_B64});
+    if [[ ${isERROR} -lt 1 ]]; then unWrapSignature; fi;
+    rm -f "${SIG_FILE}*";
+    ls -la
+  popd >/dev/null;
+};
+
+
 
 ########
 prepareNodeApp () {
@@ -279,17 +312,21 @@ prepareNodeApp () {
   declare SECRETS_FILE_NAME=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_NAME);
   declare SECRETS_FILE="${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME}";
 
-  declare MATCH="SIGNING_CERTIFICATE";
-  declare TMP=$(cat ${SECRETS_FILE} | grep -m 1 ${MATCH} | cut -d'"' -f 2);
-  declare SIGNING_CERTIFICATE_FILE=$(eval "echo ${TMP}");
-  # eval "echo ${TMP}";
 
   echo -e "Signing certificate file : ${SIGNING_CERTIFICATE_FILE}";
   echo -e "Push secrets file '${SECRETS_FILE_NAME}' to target '${NEW_HOST_NAME}:${SECRETS_FILE_PATH}'";
   ssh -t ${NEW_HOST_NAME} "mkdir -p ${SECRETS_FILE_PATH}";
   scp ${SECRETS_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
   scp ${HOME}/${SECRETS_FILE_PATH}/local.config ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
-  scp ${SIGNING_CERTIFICATE_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+
+  declare MATCH="SIGNING_CERTIFICATE";
+  declare TMP=$(cat ${SECRETS_FILE} | grep -m 1 ${MATCH} | cut -d'"' -f 2);
+  declare SIGNING_CERTIFICATE_FILE=$(eval "echo ${TMP}");
+  # eval "echo ${TMP}";
+
+  downLoadSignature;
+  ls -la ${XDG_RUNTIME_DIR}/${SIGNING_CERTIFICATE_FILE};
+  scp ${XDG_RUNTIME_DIR}/${SIGNING_CERTIFICATE_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
 
   echo -e "Set up Node Application";
   APPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${NODE_APP_SETUP_FILE};";
@@ -338,7 +375,7 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 ";
 
 # # #qTst;
-# prepareHostForKeyBasedLogins;
+# # prepareHostForKeyBasedLogins;
 # # importSecretFiles;
 # # uploadServerSideFiles;
 # # prepareAPT;
@@ -346,7 +383,7 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 # # prepareNginx;
 # # # # prepareCouchDB;
 # # # # pushAndRunAskPassServiceMaker;
-# # prepareNodeApp;
+# prepareNodeApp;
 # echo -e "
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;
@@ -354,14 +391,14 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 
 echo -e "Attempting to connect as admin user '${NEW_HOST_ADMIN}'.";
 if ssh -oBatchMode=yes -tl ${NEW_HOST_ADMIN} ${NEW_HOST} "pwd" &> /dev/null; then
-  # importSecretFiles;
-  # uploadServerSideFiles;
-  # prepareAPT;
-  # prepareUFW;
-  # prepareNodeJS;
-  # prepareCouchDB;
-  # prepareLetsEncrypt;
-  # prepareNginx;
+  importSecretFiles;
+  uploadServerSideFiles;
+  prepareAPT;
+  prepareUFW;
+  prepareNodeJS;
+  prepareCouchDB;
+  prepareLetsEncrypt;
+  prepareNginx;
   prepareNodeApp;
 else
   prepareHostForKeyBasedLogins;
