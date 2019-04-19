@@ -222,11 +222,25 @@ export default () => {
     action: nullAction,
   };
 
+  const personssReplicationFilter = {
+    name: 'post_processing/by_person',
+    label: 'PERSON',
+    action: nullAction,
+  };
+
+  const specialReplicationFilter = {
+    name: 'post_processing/special',
+    label: 'SPECIAL',
+    action: nullAction,
+  };
+
 
   const replicationFilters = [
     coreReplicationFilter,
     requestsReplicationFilter,
     invoicesReplicationFilter,
+    personssReplicationFilter,
+    specialReplicationFilter,
   ];
 
   let secondaryReplicationsWaiting = true;

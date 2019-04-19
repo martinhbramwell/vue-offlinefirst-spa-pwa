@@ -86,7 +86,7 @@ const processVoids = async (voidsToProcess) => {
   const writes = invoices.map((itm) => {
     const inv = itm;
     const seq = inv.doc.data.seqib;
-    if (voidedIds.includes(seq.toString())) {
+    if (inv.doc.void || voidedIds.includes(seq.toString())) {
       inv.doc.void = true;
       subtractor += 1;
       inv.doc.data.sequential = 0;
@@ -229,7 +229,7 @@ export default async (req, res) => {
     if (creds.password) allowed = true;
   } catch (err) {
     CLG(`Could not get user from cookie. Err : >${err}<`);
-  };
+  }
 
   const CATEGORY_FIELD = {
     fieldName: 'data.type',
@@ -377,15 +377,6 @@ export default async (req, res) => {
     res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
   }
 
-  try {
-    await databaseLocal.createIndex({
-      index: {
-        fields: ['data.type', 'data.nombre'],
-      },
-    });
-  } catch (err) {
-    res.write(`<br /></div>Index creation error ::  ${JSON.stringify(err, null, 2)}</div>`);
-  }
 
   try {
     res.write('<hr />');
@@ -399,6 +390,16 @@ export default async (req, res) => {
     res.write('<br />');
 
     if (allowed) {
+      try {
+        await databaseLocal.createIndex({
+          index: {
+            fields: ['data.type', 'data.nombre'],
+          },
+        });
+      } catch (err) {
+        res.write(`<br /></div>Index creation error ::  ${JSON.stringify(err, null, 2)}</div>`);
+      }
+
       res.write('<table id="facturas">');
       res.write(frags.tableColumnHeader);
 

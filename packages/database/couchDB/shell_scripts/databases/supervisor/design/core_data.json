@@ -1,6 +1,6 @@
 {
   "_id": "_design/core_data",
   "filters": {
-    "by_entities": "function(doc, req) { return doc._id === '_design/visible' || doc._id === '_design/core_data' || doc.data && doc.data.type && ['person', 'profile', 'address', 'bottle', 'movement', 'bottle_move', 'person_bottle_move'].indexOf(doc.data.type) > -1 }"
+    "by_entities": "function(doc, req) { return doc._id === '_design/visible' || doc._id === '_design/core_data' || !doc._deleted && doc.data && doc.data.type && ['person', 'profile', 'address', 'bottle', 'movement', 'bottle_move', 'person_bottle_move'].indexOf(doc.data.type) > -1 }"
   }
 }

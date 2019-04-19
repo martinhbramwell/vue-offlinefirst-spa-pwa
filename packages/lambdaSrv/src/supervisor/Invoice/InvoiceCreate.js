@@ -97,7 +97,7 @@ export default class {
         const lclPerson = await this.lclDB.find({ selector: slctr });
 
         if (lclPerson.docs.length < 1) {
-          LG.warn(`${moduleTitle}.${operationName} --> NO SUCH PERSON`);
+          LG.warn(`${moduleTitle}.${operationName} --> NO SUCH PERSON :: ${newRecord.data.nombreCliente}`);
           const tmp = this.jobStack.pop();
           if (tmp) tmp.process();
           return;
@@ -156,23 +156,31 @@ export default class {
 
       // CLG(newRecord.data.idib);
       newRecord.type = 'invoice';
-      LG.debug(`\nBuilt newRecord:\n${JSON.stringify(newRecord.data.codigo, null, 2)}\n`);
+      LG.info(`\nBuilt newRecord: ${JSON.stringify(newRecord.data.codigo, null, 2)}\n`);
 
-      this.lclDB.put(newRecord)
-        .then((newpers) => {
+      try {
+        // Safety: Look for existing record in case this ran before.
+        const doc = await this.lclDB.get(newRecord._id);
+        LG.info(`\nREFUSING TO OVERWRITE EXISTING RECORD: ${JSON.stringify(newRecord.data.codigo, null, 2)}\n`);
+      } catch (e) {
+        try {
+          const newpers = await this.lclDB.put(newRecord);
           LG.verbose(`Invoice Created :: ${JSON.stringify(newpers, null, 2)}`);
-          // LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
-          this.lclDB.put(disposableRequest)
-            .then((delrq) => {
-              LG.verbose(`Marked ${moduleTitle} Request Deleted`);
-              // LG.debug(`Deletion :: ${JSON.stringify(delrq, null, 2)}`);
+        } catch (err) {
+          LG.error(`UPDATE ERROR :: ${JSON.stringify(err, null, 2)}`);
+        }
+      }
 
-              const tmp = this.jobStack.pop();
-              if (tmp) tmp.process();
-            })
-            .catch(err => LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`));
-        })
-        .catch(err => LG.error(`UPDATE ERROR :: ${JSON.stringify(err, null, 2)}`));
+      try {
+        LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
+        const delrq = await this.lclDB.put(disposableRequest);
+        LG.verbose(`Marked ${moduleTitle} Request Deleted`);
+      } catch (err) {
+        LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
+      }
+
+      const tmp = this.jobStack.pop();
+      if (tmp) tmp.process();
     }
   }
 }

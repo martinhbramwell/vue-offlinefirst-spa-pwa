@@ -11,6 +11,9 @@
     "allPersons": {
       "map": "function (doc) {\n  if (doc.data.type && doc.data.type === 'person') { emit(doc.data.type, 1) };\n}",
       "reduce": "_count"
+    },
+    "specialFix": {
+      "map": "function (doc) {\n  if (doc._id === '00_SpecialFix') { emit(doc._id, doc) }\n}"
     }
   },
   "language": "javascript"

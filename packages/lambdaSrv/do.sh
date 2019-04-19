@@ -1,4 +1,4 @@
-source ${HOME}/.ssh/secrets/local.config;
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 ###
 # rm -fr /opt/pouchdb/iriblu_34; echo -e "Ready\n"> /tmp/pouchLog; ./do.sh

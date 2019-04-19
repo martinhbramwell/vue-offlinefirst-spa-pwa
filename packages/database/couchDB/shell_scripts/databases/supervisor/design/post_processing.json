@@ -1,7 +1,10 @@
 {
   "_id": "_design/post_processing",
   "filters": {
+    "special": "function(doc, req) { return doc._id == '00_SpecialFix' }",
+    "by_deletion": "function(doc, req) { return doc._deleted != true }",
     "by_request": "function(doc, req) { return doc._id === '_design/post_processing' || doc.meta && doc.meta.type && doc.meta.type == 'Request' }",
-    "by_invoice": "function(doc, req) { return doc._id === '_design/post_processing' || doc.data && doc.data.idib && doc.data.type && doc.data.type == 'invoice' && doc.data.codigo.length === 17 }"
+    "by_invoice": "function(doc, req) { return doc._id === '_design/post_processing' || doc.data && doc.data.idib && doc.data.type && doc.data.type == 'invoice' && doc.data.codigo.length === 17 }",
+    "by_person": "function(doc, req) { return doc._id === '_design/post_processing' || doc.data && doc.data.idib && doc.data.type && doc.data.type == 'person' }"
   }
 }

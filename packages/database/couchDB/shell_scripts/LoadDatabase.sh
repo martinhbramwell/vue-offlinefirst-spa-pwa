@@ -68,6 +68,11 @@ if [[ 1 == 1 ]]; then # Database data
   ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};
   ./UploadJsonFile.sh ./databases/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME}_metadata;
 
+fi;
+
+if [[ 1 == 0 ]]; then # New filters
+
+
   export COUCH_GROUP_NAME='persons';
   export COUCH_COLLECTION_NAME='person';
   # ./UploadJsonFile.sh ${DATAFILES_TEMP_DIR}/${COUCH_GROUP_NAME}/${COUCH_COLLECTION_NAME};

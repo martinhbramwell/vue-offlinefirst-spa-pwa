@@ -140,6 +140,8 @@ prepareHostForKeyBasedLogins () {
 
   ssh-keygen -R ${NEW_HOST};
   export NEW_HOST_IP=$(ping -q -c 1 ${NEW_HOST} > tmp; cat tmp | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
+  rm -f tmp;
+
   ssh-keygen -R ${NEW_HOST_IP};
 
   ssh-keyscan -H ${NEW_HOST} >> ~/.ssh/known_hosts

@@ -5,6 +5,8 @@ async function cypressInvoices() {
     const host = window.location.origin;
     CLG(`Fetching from ${host}/scrapeInv`);
     const response = await fetch(`${host}/scrapeInv`);
+    // const txt = await response.clone().text(); // extract TEXT from the http response
+    // CLG(txt);
     const jsonResponse = await response.json(); // extract JSON from the http response
     CLG(jsonResponse);
     ret = jsonResponse;
