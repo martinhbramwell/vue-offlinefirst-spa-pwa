@@ -298,7 +298,7 @@ downLoadSignature () {
     export isERROR=$(grep -c "Error" ${SIG_B64});
     if [[ ${isERROR} -lt 1 ]]; then unWrapSignature; fi;
     rm -f "${SIG_FILE}*";
-    ls -la
+    # ls -la;
   popd >/dev/null;
 };
 
@@ -313,12 +313,19 @@ prepareNodeApp () {
   declare SECRETS_FILE_NAME=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_NAME);
   declare SECRETS_FILE="${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME}";
 
+  declare HDR="Content-Type: application/json";
+  declare HOST="http://bit.ly/vue-offlinefirst-spa-pwa";
 
-  echo -e "Signing certificate file : ${SIGNING_CERTIFICATE_FILE}";
-  echo -e "Push secrets file '${SECRETS_FILE_NAME}' to target '${NEW_HOST_NAME}:${SECRETS_FILE_PATH}'";
-  ssh -t ${NEW_HOST_NAME} "mkdir -p ${SECRETS_FILE_PATH}";
-  scp ${SECRETS_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
-  scp ${HOME}/${SECRETS_FILE_PATH}/local.config ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+  pushd ${XDG_RUNTIME_DIR} >/dev/null;
+    pwd;
+    echo -e "Download secret files from secure cloud locations";
+    curl -sH "${HDR}" -d '{"mode":"PRD","type":"configuration","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${HOST} > ${SECRETS_FILE_NAME};
+
+    ssh -t ${NEW_HOST_NAME} "mkdir -p ${SECRETS_FILE_PATH}";
+    scp ${SECRETS_FILE_NAME} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+
+    rm -f ${SECRETS_FILE_NAME};
+  popd >/dev/null;
 
   declare MATCH="SIGNING_CERTIFICATE";
   declare TMP=$(cat ${SECRETS_FILE} | grep -m 1 ${MATCH} | cut -d'"' -f 2);

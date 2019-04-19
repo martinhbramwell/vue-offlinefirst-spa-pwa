@@ -2,7 +2,6 @@
 #
 
 export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
-# export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
 source ${CONFIG_FILE};
 
 export DOWNLOADS_DIR="${HOME}/Downloads";

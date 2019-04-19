@@ -14,8 +14,7 @@ command -v jq > /dev/null || sudo apt install jq;
 
 # ./node_modules/.bin/cypress open
 
-source ${HOME}/.ssh/secrets/local.config;
-# source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 
 ./node_modules/.bin/cypress open;

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 export SOURCE_DATABASE=${1:-$SOURCE_DATABASE};
-export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
+export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
 
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
