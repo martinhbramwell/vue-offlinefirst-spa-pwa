@@ -59,15 +59,14 @@ export default async (req, res) => {
       }
     }
 
-    const prod = true;
-    if (prod) {
+    if (process.env.CYPRESS_SKIP_INVOICES && process.env.CYPRESS_SKIP_INVOICES === 'true') {
+      const message = 'Will not scrape invoice data';
+      LG.info(message);
+      res.write(', "type": "message"');
+    } else {
       const resultInvoices = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
       LG.info(`Invoices page scraper results:\n${JSON.stringify(resultInvoices.config.env, null, 3)}`);
       res.write(', "type": "Invoices"');
-    } else {
-      const message = 'Will not scrape invoice data';
-      LG.info(message);
-      res.write(', "type": "Neither"');
     }
 
     /* eslint-enable max-len */
