@@ -26,8 +26,9 @@ const signing = async (args) => {
     LG.info(`\n
       Unsigned invoices :: ${JSON.stringify(result.docs.length, null, 3)}\n
     `);
+    LG.info(`Certificate :: ${JSON.stringify(process.env.SIGNING_CERTIFICATE_PATH, null, 3)}`);
 
-    const cert = fs.readFileSync(process.env.CERT, { flag: 'r' });
+    const cert = fs.readFileSync(process.env.SIGNING_CERTIFICATE_PATH, { flag: 'r' });
     const pwd = process.env.CERTPWD;
 
     /* eslint-disable no-restricted-syntax */
@@ -45,7 +46,6 @@ const signing = async (args) => {
 };
 
 export default signing;
-
 
 /*
 {

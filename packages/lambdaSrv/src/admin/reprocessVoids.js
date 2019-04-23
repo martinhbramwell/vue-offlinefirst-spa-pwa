@@ -1,5 +1,4 @@
 import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
-import listRange from '../utils/listRange';
 import { databaseLocal as db } from '../database';
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
@@ -56,14 +55,14 @@ export const processVoids = async (voidsToProcess) => {
 
 export default async (req, res) => {
   CLG(`updateRange.js ${req.query}`);
-  CLG(`full request URL ${req.protocol + '://' + req.get('host') + req.originalUrl}`);
+  CLG(`full request URL ${req.protocol}://${req.get('host')}${req.originalUrl}`);
   // CDR(req);
 
   processVoids([]);
 
   res.write('<html><body>');
   res.write('Voids reprocessing has been dispatched.');
-  res.write(`Wait 2 minutes the click on :: <a href=${req.protocol + '://' + req.get('host') + '/gestionDeFacturas'}>${req.protocol + '://' + req.get('host') + '/gestionDeFacturas'}</a>`);
+  res.write(`Wait 2 minutes the click on :: <a href=${req.protocol}://${req.get('host')}/gestionDeFacturas'}>${req.protocol}://${req.get('host')}/gestionDeFacturas'}</a>`);
   res.write('</body></html>');
   res.end();
 };
