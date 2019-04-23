@@ -1,6 +1,7 @@
 import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 import listRange from '../utils/listRange';
 import { databaseLocal as db } from '../database';
+import { processVoids } from './reprocessVoids';
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
@@ -28,6 +29,8 @@ export default async (req, res) => {
     const updates = await listRange(res, db, config);
     CDR(updates);
     await db.bulkDocs(updates);
+
+    processVoids([]);
 
     res.write('</br></br>Updated some "Invoice" records');
   } else {

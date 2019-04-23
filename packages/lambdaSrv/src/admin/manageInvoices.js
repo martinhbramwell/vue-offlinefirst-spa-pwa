@@ -86,7 +86,7 @@ const processVoids = async (voidsToProcess) => {
   const writes = invoices.map((itm) => {
     const inv = itm;
     const seq = inv.doc.data.seqib;
-    if (inv.doc.void || voidedIds.includes(seq.toString())) {
+    if ((inv.doc.void && inv.doc.void === true) || voidedIds.includes(seq.toString())) {
       inv.doc.void = true;
       subtractor += 1;
       inv.doc.data.sequential = 0;

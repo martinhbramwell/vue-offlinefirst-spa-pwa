@@ -3,6 +3,7 @@ import { Router } from 'express';
 import validations from './validations';
 import inspectDesignDocs from './inspections/inspectDesignDocs';
 
+import reprocessVoids from './admin/reprocessVoids';
 import updateRange from './admin/updateRange';
 import manageInvoices from './admin/manageInvoices';
 import scrapeInv from './admin/cypress/scrapeInv';
@@ -96,6 +97,10 @@ routes.get('/scrapeInv', (req, res, next) => {
 
 routes.get('/updateRange', (req, res, next) => {
   updateRange(req, res, next);
+});
+
+routes.get('/reprocessVoids', (req, res, next) => {
+  reprocessVoids(req, res, next);
 });
 
 export default routes;
