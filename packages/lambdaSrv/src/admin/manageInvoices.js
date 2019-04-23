@@ -290,7 +290,7 @@ export default async (req, res) => {
     const prp = doc._attachments && doc._attachments.invoiceXml; // eslint-disable-line no-underscore-dangle
     const frm = doc._attachments && doc._attachments.invoiceSigned; // eslint-disable-line no-underscore-dangle
 
-    const voided = doc.void
+    const voided = doc.void === true
       ? '<i class="fas fa-times-circle"  name="Void"/>'
       : `<input id="v${d.seqib}" type="checkbox" name="Void"}>`;
 

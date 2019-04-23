@@ -33,10 +33,9 @@ export default async (req, res) => {
   } else {
     res.write('</br></br>No range specified.');
     res.write('</br>Example usage:');
-    res.write('</br>&nbsp; &nbsp; &nbsp; https://spvr.iridium.blue/updateRange?s=Invoice_1_0000000000004685&e=Invoice_2&alt={%22_deleted%22:%22true%22}  }');
+    res.write('</br>&nbsp; &nbsp; &nbsp; https://spvr.iridium.blue/updateRange?s=Invoice_1_0000000000004685&e=Invoice_1_0000000000004685&alt={%22_deleted%22:%22true%22}  }');
   }
 
   res.write('</body></html>');
   res.end();
 };
-
