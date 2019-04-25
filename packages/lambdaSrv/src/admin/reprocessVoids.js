@@ -14,22 +14,26 @@ const getFirstSequential = (seqs) => {
     // console.log(`${idx} ${looking}`);
   } while (idx < seqs.length - 1 && looking);
 
-  console.log(looking);
-  let ret = { prefix: "0", strSerial: "0", intSerial: 0, sequential: "0" };
+  // CLG(looking);
+  const ret = {
+    prefix: '0',
+    strSerial: '0',
+    intSerial: 0,
+    sequential: '0',
+  };
   if (looking) {
-    console.log('random');
     ret.prefix = getRandomInt(9999).toString().padStart(4, '0');
     ret.intSerial = 1;
     ret.strSerial = ret.intSerial.toString().padStart(5, '0');
     ret.sequential = `${ret.prefix}${ret.strSerial}`;
   } else {
-    ret.sequential = seqs[idx];
-    ret.prefix = seqs[idx].slice(0, 4)
-    ret.strSerial = seqs[idx].slice(-5);
+    ret.sequential = seqs[idx].toString();
+    ret.prefix = ret.sequential.slice(0, 4);
+    ret.strSerial = ret.sequential.slice(-5);
     ret.intSerial = parseInt(ret.strSerial, 10);
   }
   return ret;
-}
+};
 
 
 export const processVoids = async (voidsToProcess) => {

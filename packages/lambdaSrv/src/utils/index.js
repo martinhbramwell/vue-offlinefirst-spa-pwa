@@ -88,9 +88,7 @@ export const booleanVal = (val) => {
   return false;
 };
 
-export const getRandomInt = (max) => {
-  return Math.floor(Math.random() * Math.floor(max));
-}
+export const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
 
 export class Queue {
   constructor(emitter, ...elements) {
