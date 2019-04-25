@@ -4,6 +4,8 @@ import fs from 'fs';
 import { logger as LG } from '../../utils'; // eslint-disable-line no-unused-vars
 import { databaseLocal } from '../../database';
 
+import { processVoids } from '../reprocessVoids';
+
 const sanityCheck = 'cypress/integration/SanityCheck.js'; // eslint-disable-line no-unused-vars
 const scrapePersons = 'cypress/integration/GetPersons.js';
 const scrapeInvoices = 'cypress/integration/GetInvoices.js';
@@ -130,4 +132,5 @@ export default async (req, res) => {
   res.write(`${jsonEnd}`);
   res.end();
   LG.info(`Awaiting ended on path ${path}`);
+  processVoids([]);
 };
