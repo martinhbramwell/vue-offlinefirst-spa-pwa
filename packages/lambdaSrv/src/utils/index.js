@@ -78,6 +78,20 @@ export const logger = createLogger({
   ],
 });
 
+export const booleanVal = (val) => {
+  if (val) {
+    if (typeof val === 'string') {
+      return (val.toLowerCase() === 'true');
+    }
+    return val;
+  }
+  return false;
+};
+
+export const getRandomInt = (max) => {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
 export class Queue {
   constructor(emitter, ...elements) {
     this.elements = [...elements];

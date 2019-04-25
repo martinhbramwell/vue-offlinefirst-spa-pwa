@@ -8,10 +8,12 @@ import bundleInvoices from '../supervisor/Invoice/bundleInvoices';
 import signInvoices from '../supervisor/Invoice/signInvoices';
 import sendInvoices from '../supervisor/Invoice/sendInvoices';
 import queryAuthorizations from '../supervisor/Invoice/queryAuthorizations';
+import { processVoids } from './reprocessVoids';
+
 
 import frags from './htmlFragments';
 
-import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
+import { booleanVal, logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
@@ -65,53 +67,6 @@ const toXML = (inv, lvl = 1, inAry = false) => {
 
 /* eslint-disable no-var, vars-on-top */
 
-const processVoids = async (voidsToProcess) => {
-  CLG('Process voids');
-  const dbInvoices = await databaseLocal.allDocs({
-    include_docs: true,
-    attachments: true,
-    // startkey: 'Invoice_2',
-    // endkey: 'Invoice_1_0000000000000000',
-    // descending: true,
-
-    startkey: 'Invoice_1_0000000000000000',
-    endkey: 'Invoice_2',
-  });
-
-  const invoices = dbInvoices.rows;
-  const voidedIds = voidsToProcess.map(inv => inv[0].replace('h', ''));
-  const first = invoices[0].doc.data.sequential;
-  let subtractor = invoices[0].doc.data.seqib - first;
-
-  const writes = invoices.map((itm) => {
-    const inv = itm;
-    const seq = inv.doc.data.seqib;
-    if ((inv.doc.void && inv.doc.void === true) || voidedIds.includes(seq.toString())) {
-      inv.doc.void = true;
-      subtractor += 1;
-      inv.doc.data.sequential = 0;
-      inv.doc.data.codigo = '???-???-?????????';
-    } else {
-      inv.doc.void = inv.doc.void || false;
-      const sequential = seq - subtractor;
-      inv.doc.data.sequential = sequential;
-      inv.doc.data.codigo = `001-002-${sequential.toString().padStart('0', 9)}`;
-      // const annul = settings[`h${seq}`].V && !inv.doc._attachments;
-      // inv.doc.void = inv.doc.void || annul;
-
-      // if (inv.doc.void) {
-      // } else {
-      // }
-    }
-    return inv.doc;
-  });
-  /* eslint-enable no-param-reassign, no-underscore-dangle */
-
-  await databaseLocal.bulkDocs(writes);
-
-  CLG('Processed voids');
-};
-
 /* eslint-enable no-var, vars-on-top */
 const saveSettings = async (args) => { // eslint-disable-line no-unused-vars
   const settings = JSON.parse(args);
@@ -137,7 +92,9 @@ const saveSettings = async (args) => { // eslint-disable-line no-unused-vars
   const writes = invoices.rows.filter((invoice) => { // eslint-disable-line no-unused-vars
     const inv = invoice;
     if (inv.doc && inv.doc.data) {
-      if (inv.doc.void) return false;
+      const isVoid = booleanVal(inv.doc.void);
+
+      if (isVoid) return false;
       const seq = inv.doc.data.seqib;
       if (settings[`h${seq}`]) {
         inv.doc.hold = settings[`h${seq}`].H;
@@ -290,7 +247,9 @@ export default async (req, res) => {
     const prp = doc._attachments && doc._attachments.invoiceXml; // eslint-disable-line no-underscore-dangle
     const frm = doc._attachments && doc._attachments.invoiceSigned; // eslint-disable-line no-underscore-dangle
 
-    const voided = doc.void === true
+    const isVoid = booleanVal(doc.void);
+
+    const voided = isVoid
       ? '<i class="fas fa-times-circle"  name="Void"/>'
       : `<input id="v${d.seqib}" type="checkbox" name="Void"}>`;
 
@@ -302,8 +261,6 @@ export default async (req, res) => {
     aut = (doc.authorized === 'no timestamp') ? 'times-circle' : aut;
     const fecha = new Date(d.fecha);
 
-    // const persons = await getPersonRecord(d.nombreCliente); // eslint-disable-line no-unused-vars
-
     /* eslint-disable no-bitwise, no-underscore-dangle, max-len */
     let hider = 0;
     hider |= (doc.authorized === 'no timestamp') && 1;
@@ -311,7 +268,7 @@ export default async (req, res) => {
     hider |= doc.rejected && 4;
     hider |= doc.accepted && 8;
     hider |= doc._attachments && doc._attachments.invoiceSigned && doc._attachments.invoiceXml && 16;
-    hider |= doc.void && 32;
+    hider |= isVoid && 32;
     /* eslint-enable no-bitwise, no-underscore-dangle, max-len */
 
     d.sequential = d.sequential > 0
@@ -322,7 +279,7 @@ export default async (req, res) => {
       <td>${d.sequential}</td>
       <td>${d.seqib && d.seqib.toString().padStart(9, '0') || '?????????'}</td>
       <td><input id="h${d.seqib}" type="checkbox" name="Hold" ${doc.hold ? 'checked' : ''}></td>
-      <td id="Anu_${d.seqib}" name="${doc.void ? 'void' : 'valid'}">${voided}</td>
+      <td id="Anu_${d.seqib}" name="${isVoid ? 'void' : 'valid'}">${voided}</td>
       <td style="text-align: center;" id="Prp_${d.seqib}" name="${prp ? 'processed' : 'new'}"><i class="fas fa-${prp ? 'check-circle' : 'circle'}" /></td>
       <td style="text-align: center;"><i class="fas fa-${frm ? 'check-circle' : 'circle'}" /></td>
       <td style="text-align: center;"><i class="fas fa-${env}" /></td>

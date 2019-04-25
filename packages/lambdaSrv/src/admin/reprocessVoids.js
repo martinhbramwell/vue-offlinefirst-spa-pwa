@@ -1,9 +1,36 @@
-import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
+import { booleanVal, getRandomInt, logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 import { databaseLocal as db } from '../database';
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
+
+const getFirstSequential = (seqs) => {
+  let idx = -1;
+  let looking = true;
+  do {
+    idx += 1;
+    looking = parseInt(seqs[idx], 10) < 1;
+    // console.log(`${idx} ${looking}`);
+  } while (idx < seqs.length - 1 && looking);
+
+  console.log(looking);
+  let ret = { prefix: "0", strSerial: "0", intSerial: 0, sequential: "0" };
+  if (looking) {
+    console.log('random');
+    ret.prefix = getRandomInt(9999).toString().padStart(4, '0');
+    ret.intSerial = 1;
+    ret.strSerial = ret.intSerial.toString().padStart(5, '0');
+    ret.sequential = `${ret.prefix}${ret.strSerial}`;
+  } else {
+    ret.sequential = seqs[idx];
+    ret.prefix = seqs[idx].slice(0, 4)
+    ret.strSerial = seqs[idx].slice(-5);
+    ret.intSerial = parseInt(ret.strSerial, 10);
+  }
+  return ret;
+}
+
 
 export const processVoids = async (voidsToProcess) => {
   CLG('Process voids');
@@ -20,32 +47,34 @@ export const processVoids = async (voidsToProcess) => {
 
   const invoices = dbInvoices.rows;
   const voidedIds = voidsToProcess.map(inv => inv[0].replace('h', ''));
-  const first = invoices[0].doc.data.sequential;
-  let subtractor = invoices[0].doc.data.seqib - first;
+
+  const seqs = invoices.map(seq => seq.doc.data.sequential);
+  const firstSequential = getFirstSequential(seqs);
+
+  const { prefix: seqPrefix } = firstSequential;
+  // const seqPrefix = getRandomInt(9999).toString().padStart(4, '0');
+  // const seqPrefix = invoices[0].doc.data.sequential.toString().slice(0, 4);
+
+  let subtractor = parseInt(invoices[0].doc.data.seqib.toString().slice(-5), 10) - 1;
 
   const writes = invoices.map((itm) => {
     const inv = itm;
-    const seq = inv.doc.data.seqib;
-    if ((inv.doc.void && inv.doc.void === true) || voidedIds.includes(seq.toString())) {
+    const seqBAPU = inv.doc.data.seqib.toString();
+    const isVoid = booleanVal(inv.doc.void);
+    if (isVoid || voidedIds.includes(seqBAPU)) {
       inv.doc.void = true;
       subtractor += 1;
       inv.doc.data.sequential = 0;
       inv.doc.data.codigo = '???-???-?????????';
     } else {
-      inv.doc.void = inv.doc.void || false;
-      const sequential = seq - subtractor;
-      inv.doc.data.sequential = sequential;
-      inv.doc.data.codigo = `001-002-${sequential.toString().padStart('0', 9)}`;
-      // const annul = settings[`h${seq}`].V && !inv.doc._attachments;
-      // inv.doc.void = inv.doc.void || annul;
-
-      // if (inv.doc.void) {
-      // } else {
-      // }
+      inv.doc.void = false;
+      const seq = parseInt(seqBAPU.slice(-5), 10);
+      const strSequential = `${seqPrefix}${(seq - subtractor).toString().padStart(5, '0')}`;
+      inv.doc.data.sequential = strSequential;
+      inv.doc.data.codigo = `001-002-${strSequential}`;
     }
     return inv.doc;
   });
-  /* eslint-enable no-param-reassign, no-underscore-dangle */
 
   await db.bulkDocs(writes);
 
@@ -62,7 +91,7 @@ export default async (req, res) => {
 
   res.write('<html><body>');
   res.write('Voids reprocessing has been dispatched.');
-  res.write(`Wait 2 minutes the click on :: <a href=${req.protocol}://${req.get('host')}/gestionDeFacturas'}>${req.protocol}://${req.get('host')}/gestionDeFacturas'}</a>`);
+  res.write(`Wait 2 minutes the click on :: <a href=${req.protocol}://${req.get('host')}/gestionDeFacturas>${req.protocol}://${req.get('host')}/gestionDeFacturas'}</a>`);
   res.write('</body></html>');
   res.end();
 };
