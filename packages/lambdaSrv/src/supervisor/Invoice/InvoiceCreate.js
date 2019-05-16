@@ -107,7 +107,7 @@ export default class {
         newRecord.data.email = lclPerson.docs[0].data.email || 'nulo';
         LG.info(`(Invoice ${newRecord.data.sequential} create) Person : ${lclPerson.docs[0].data.nombre} has email  ${newRecord.data.email}`);
 
-        const previousPeriodEndSequenceNumber = 10595;
+        const previousPeriodEndSequenceNumber = process.env.CYPRESS_CH_FIRSTINVOICE_SEQ;
 
         // const randy = 0;
         // const randy = 100300000;
@@ -171,13 +171,15 @@ export default class {
         }
       }
 
-      try {
-        LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
-        const delrq = await this.lclDB.put(disposableRequest);
-        LG.verbose(`Marked ${moduleTitle} Request Deleted`);
-      } catch (err) {
-        LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
-      }
+      // try {
+      //   LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
+      //   let delrq = await this.lclDB.get(disposableRequest._id);
+      //   delrq._deleted = true;
+      //   delrq = await this.lclDB.put(delrq);
+      //   LG.verbose(`Marked ${moduleTitle} Request Deleted`);
+      // } catch (err) {
+      //   LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
+      // }
 
       const tmp = this.jobStack.pop();
       if (tmp) tmp.process();

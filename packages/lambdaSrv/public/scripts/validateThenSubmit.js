@@ -12,6 +12,7 @@ function validateThenSubmit() {
   for (var ix = rows.length - 1; ix > 0; ix -= 1) {
     const { id } = rows[ix];
     if (id) {
+      if (last === 0) last = id;
       const prp = document.getElementById(`Prp_${id}`).attributes.name.value;
       const anu = document.getElementById(`Anu_${id}`).attributes.name.value;
       const hld = document.getElementById(`h${id}`).checked;
