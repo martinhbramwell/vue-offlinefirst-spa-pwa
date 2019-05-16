@@ -171,15 +171,15 @@ export default class {
         }
       }
 
-      // try {
-      //   LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
-      //   let delrq = await this.lclDB.get(disposableRequest._id);
-      //   delrq._deleted = true;
-      //   delrq = await this.lclDB.put(delrq);
-      //   LG.verbose(`Marked ${moduleTitle} Request Deleted`);
-      // } catch (err) {
-      //   LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
-      // }
+      try {
+        LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
+        let delrq = await this.lclDB.get(disposableRequest._id);
+        delrq._deleted = true;
+        delrq = await this.lclDB.put(delrq);
+        LG.verbose(`Marked ${moduleTitle} Request Deleted`);
+      } catch (err) {
+        LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
+      }
 
       const tmp = this.jobStack.pop();
       if (tmp) tmp.process();
