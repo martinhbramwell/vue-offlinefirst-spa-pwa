@@ -28,7 +28,8 @@ const getFirstSequential = (seqs) => {
     ret.sequential = `${ret.prefix}${ret.strSerial}`;
   } else {
     ret.sequential = seqs[idx].toString();
-    ret.prefix = ret.sequential.slice(0, 4);
+    // ret.prefix = ret.sequential.slice(0, 4);
+    ret.prefix = 0;
     ret.strSerial = ret.sequential.slice(-5);
     ret.intSerial = parseInt(ret.strSerial, 10);
   }

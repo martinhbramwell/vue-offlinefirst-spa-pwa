@@ -109,13 +109,13 @@ export default class {
 
         const previousPeriodEndSequenceNumber = process.env.CYPRESS_CH_FIRSTINVOICE_SEQ;
 
-        // const randy = 0;
         // const randy = 100300000;
         // const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
-        const idem = new Date();
-        const dy = idem.getDate().toString().padStart(2, '4');
-        const hr = idem.getHours().toString().padStart(2, '3');
-        const randy = parseInt(`${dy}${hr}00000`, 10);
+        const randy = 0;
+        // const idem = new Date();
+        // const dy = idem.getDate().toString().padStart(2, '4');
+        // const hr = idem.getHours().toString().padStart(2, '3');
+        // const randy = parseInt(`${dy}${hr}00000`, 10);
 
         const seqib = newRecord.data.sequential + randy;
         newRecord.data.seqib = seqib;
@@ -171,15 +171,15 @@ export default class {
         }
       }
 
-      // try {
-      //   LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
-      //   let delrq = await this.lclDB.get(disposableRequest._id);
-      //   delrq._deleted = true;
-      //   delrq = await this.lclDB.put(delrq);
-      //   LG.verbose(`Marked ${moduleTitle} Request Deleted`);
-      // } catch (err) {
-      //   LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
-      // }
+       try {
+         LG.debug(`Delete :::: ${JSON.stringify(disposableRequest, null, 2)}`);
+         let delrq = await this.lclDB.get(disposableRequest._id);
+         delrq._deleted = true;
+         delrq = await this.lclDB.put(delrq);
+         LG.verbose(`Marked ${moduleTitle} Request Deleted`);
+       } catch (err) {
+         LG.error(`DELETION ERROR :: ${JSON.stringify(err, null, 2)}`);
+       }
 
       const tmp = this.jobStack.pop();
       if (tmp) tmp.process();
