@@ -1,4 +1,12 @@
-export const urlUpload = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline';
+const ambiente = process.env.AMBIENTE;
+
+const PRUEBA = 'celcer';
+const PRODUCCION = 'cel';
+
+const service = ambiente === '2' ? PRODUCCION : PRUEBA;
+
+export const urlUpload = `https://${service}.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline`;
+
 export const soapUploadStart = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ec="http://ec.gob.sri.ws.recepcion">
   <soapenv:Header/>
   <soapenv:Body>

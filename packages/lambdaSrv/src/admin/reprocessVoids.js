@@ -73,8 +73,8 @@ export const processVoids = async (voidsToProcess) => {
       inv.doc.data.codigo = '???-???-?????????';
     } else {
       inv.doc.void = false;
-      const seq = parseInt(seqBAPU.slice(-5), 10);
-      const strSequential = `${seqPrefix}${(seq - subtractor).toString().padStart(5, '0')}`;
+      const seq = parseInt(seqBAPU.slice(-7), 10);
+      const strSequential = `${seqPrefix}${(seq - subtractor).toString().padStart(8, '0')}`;
       inv.doc.data.sequential = strSequential;
       inv.doc.data.codigo = `001-002-${strSequential}`;
     }

@@ -1,22 +1,31 @@
 const LG = console.log; // eslint-disable-line no-unused-vars, no-console
 
+const ambiente = process.env.AMBIENTE;
+
+const razonSocial = process.env.RAZONSOCIAL;
+const nombreComercial = process.env.NOMBRECOMERCIAL;
+const ruc = process.env.RUC;
+
+const dirMatriz = process.env.DIRMATRIZ;
+const dirEstablecimiento = process.env.DIRESTABLECIMIENTO;
+
 export default {
   infoTributaria: {
-    ambiente: '1',
+    ambiente,
     tipoEmision: '1',
-    razonSocial: 'LOGICHEM SOLUTIONS SOCIEDAD ANONIMA',
-    nombreComercial: 'LOGICHEM SOLUTIONS',
-    ruc: '1792177758001',
+    razonSocial,
+    nombreComercial,
+    ruc,
     claveAcceso: { specialCase: 'claveAcceso' },
     codDoc: '01',
     estab: '001',
     ptoEmi: '002',
     secuencial: { specialCase: 'sequential' },
-    dirMatriz: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMINA',
+    dirMatriz,
   },
   infoFactura: {
     fechaEmision: { specialCase: 'fecha' },
-    dirEstablecimiento: 'PICHINCHA / QUITO / CUMBAYA / 23 DE ABRIL S13-205 Y ALFONSO LAMINA',
+    dirEstablecimiento,
     obligadoContabilidad: 'SI',
     tipoIdentificacionComprador: { specialCase: 'tipoIdentificacionComprador' },
     razonSocialComprador: { specialCase: 'nombreCliente' },

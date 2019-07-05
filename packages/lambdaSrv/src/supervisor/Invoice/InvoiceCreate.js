@@ -119,9 +119,12 @@ export default class {
 
         const seqib = newRecord.data.sequential + randy;
         newRecord.data.seqib = seqib;
-        newRecord.data.sequential = seqib - previousPeriodEndSequenceNumber;
+        const newSeq = (seqib - previousPeriodEndSequenceNumber).toString().padStart(9, '0');
+        newRecord.data.sequential = newSeq;
 
-        newRecord.data.codigo = `001-002-${newRecord.data.sequential.toString().padStart(9, '0')}`;
+        // newRecord.data.codigo = `001-002-${newRecord.data.sequential.toString().padStart(9, '0')}`;
+        newRecord.data.codigo = `001-002-${newSeq}`;
+        // LG.info(`(Invoice ${newRecord.data.sequential} has codigo ${newRecord.data.codigo}`);
         newRecord.data.pdv = 2;
 
         newRecord.hold = true;
