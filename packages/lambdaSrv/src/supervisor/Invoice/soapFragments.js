@@ -34,7 +34,7 @@ export const soapUploadRegistered = 'CLAVE ACCESO REGISTRADA';
 */
 
 
-export const urlQuery = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline';
+export const urlQuery = `https://${service}.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline`;
 export const soapQueryStart = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ec="http://ec.gob.sri.ws.autorizacion">
   <soapenv:Header/>
   <soapenv:Body>

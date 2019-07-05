@@ -64,30 +64,15 @@ export default async (req, res) => {
 {
   "docs": [
 </pre>`);
-      // invoices.rows.forEach((_invoice) => {
-      //   const invoice = _invoice;
-      //   if (`${invoice.doc.data.sequential}` >= req.query.f &&
-      //     `${invoice.doc.data.sequential}` <= req.query.l)
-      //   {
-      //     delete invoice.doc._rev; // eslint-disable-line no-underscore-dangle
-      //     res.write(`<pre>${sep}`);
-      //     res.write(JSON.stringify(invoice.doc));
-      //     res.write('</pre>');
-      //     sep = '    , ';
-      //   }
-      //   CLG(`${req.query.f} <= 000${invoice.doc.data.sequential} <= ${req.query.l}`); // eslint-disable-line no-underscore-dangle
-      //   // CLG(invoice.doc._id); // eslint-disable-line no-underscore-dangle
-      //   // CLG(invoice.doc._rev); // eslint-disable-line no-underscore-dangle
-      // });
       const range = invoices.rows.filter((inv) => {
-        const d = inv.doc.data
+        const d = inv.doc.data;
         const bapu = parseInt(d.seqib, 10);
         const ib = parseInt(d.sequential, 10);
         const first = parseInt(req.query.f, 10);
         const last = parseInt(req.query.l, 10);
         const type = typeof req.query.c === 'undefined' ? '' : req.query.c;
 
-        const cmp = type === 'BAPU' ? bapu : ib
+        const cmp = type === 'BAPU' ? bapu : ib;
         // CLG(`${first} <= ${cmp} <= ${last}`);
 
         return (first <= cmp) && (cmp <= last);
