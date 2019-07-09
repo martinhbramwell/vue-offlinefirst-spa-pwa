@@ -14,6 +14,7 @@ const frags = {
   <script src="../scripts/firmar.js"></script>
   <script src="../scripts/enviar.js"></script>
   <script src="../scripts/verificar.js"></script>
+  <script src="../scripts/mail.js"></script>
   <script src="../scripts/parms.js"></script>
 
 
@@ -42,9 +43,10 @@ const frags = {
   <th>Frm</th>
   <th>Env</th>
   <th>Aut</th>
+  <th>Mail</th>
   <th>Fecha</th>
   <th>Nombre</th>
-  <th>Documento</th>
+  <th>Clave de Acceso</th>
   <th>Email</th>
   <th>Telef #1</th>
   <th>Direccion</th>
@@ -79,6 +81,7 @@ const frags = {
   <button class="button" type="button" onclick="firmar()">Firmar Facturas</button>
   <button class="button" type="button" onclick="enviar()">Enviar Facturas</button>
   <button class="button" type="button" onclick="verificar()">Verificar Facturas</button>
+  <button class="button" type="button" onclick="mail()">Mail Facturas</button>
 `,
 
   filterFields: `

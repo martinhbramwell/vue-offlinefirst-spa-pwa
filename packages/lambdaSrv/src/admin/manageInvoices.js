@@ -8,12 +8,13 @@ import bundleInvoices from '../supervisor/Invoice/bundleInvoices';
 import signInvoices from '../supervisor/Invoice/signInvoices';
 import sendInvoices from '../supervisor/Invoice/sendInvoices';
 import queryAuthorizations from '../supervisor/Invoice/queryAuthorizations';
+import mailInvoices from '../supervisor/Invoice/mailInvoices';
 import { processVoids } from './reprocessVoids';
 
 
 import frags from './htmlFragments';
 
-import { booleanVal, logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
+import { booleanVal, validateEmail, logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CLE = console.error; // eslint-disable-line no-unused-vars, no-console
@@ -155,6 +156,15 @@ const clientActions = {
     }
   },
 
+  mail: async (args) => {
+    CLG('mail');
+    CDR(args);
+    if (await saveSettings(args)) {
+      await mailInvoices({ db: databaseLocal });
+      await reHold();
+    }
+  },
+
   NUTHIN: () => {
     CLG('Null client action');
   },
@@ -259,6 +269,11 @@ export default async (req, res) => {
     let aut = 'circle';
     aut = doc.authorized ? 'check-circle' : aut;
     aut = (doc.authorized === 'no timestamp') ? 'times-circle' : aut;
+
+    let mail = 'circle';
+    if (doc.emailed) {
+      mail = doc.emailed.sent ? 'check-circle' : 'times-circle';
+    }
     const fecha = new Date(d.fecha);
 
     /* eslint-disable no-bitwise, no-underscore-dangle, max-len */
@@ -274,6 +289,10 @@ export default async (req, res) => {
     d.sequential = d.sequential > 0
       ? d.sequential.toString().padStart(9, '0')
       : '~~~~~~~~~';
+
+    let sent = validateEmail(d.email) ? 'noMail' : 'badMail';
+    sent = doc.emailed && doc.emailed.sent ? 'goodMail' : sent;
+
     /* eslint-disable no-mixed-operators */
     out.write(`<tr id="${d.seqib}" name=${hider} class="invoiceRow showMe">
       <td>${d.sequential}</td>
@@ -284,11 +303,12 @@ export default async (req, res) => {
       <td style="text-align: center;"><i class="fas fa-${frm ? 'check-circle' : 'circle'}" /></td>
       <td style="text-align: center;"><i class="fas fa-${env}" /></td>
       <td style="text-align: center;"><i class="fas fa-${aut}" /></td>
+      <td style="text-align: center;"><i class="fas fa-${mail}" /></td>
       <!-- td class="fecha">${hider}</td -->
       <td class="fecha">${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}</td>
       <td>${d.nombreCliente}</td>
-      <td>${d.legalId.replace('[', '').replace(']', '')}</td>
-      <td>${d.email}</td>
+      <td class="cda">${doc.accessKey || ''}</td>
+      <td class="${sent}">${d.email}</td>
       <td>${d.telefono}</td>
       <td>${d.direccion}</td>
       </tr>

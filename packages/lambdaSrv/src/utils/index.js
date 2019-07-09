@@ -1,7 +1,13 @@
 import fs from 'fs';
 import EventEmitter from 'events';
 
+import nodemailer from 'nodemailer';
+
 import { createLogger, format, transports } from 'winston';
+
+import badEmailAddresses from '../badEmailAddresses';
+
+const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 const {
   combine,
@@ -54,6 +60,25 @@ export const waitFor = (conditionFunction) => {
 };
 
 export const generateMovementId = user => `${ID()}${user}`;
+
+
+export const mailCfg = {
+  service: 'gmail',
+  auth: {
+    user: process.env.MAILERUID,
+    pass: process.env.MAILERPWD,
+  },
+};
+
+export const getMailer = nodemailer.createTransport(mailCfg);
+
+/* eslint-disable no-useless-escape */
+export const validateEmail = (email) => {
+  if (badEmailAddresses.includes(email)) return false;
+  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(String(email).toLowerCase());
+};
+/* eslint-enable no-useless-escape */
 
 export const logDir = '/tmp/pouchLog';
 

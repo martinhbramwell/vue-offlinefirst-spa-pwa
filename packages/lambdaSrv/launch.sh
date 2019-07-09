@@ -35,10 +35,13 @@ EOF
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-  declare POUCH_DIR="/opt/pouchdb";
   sudo -A mkdir -p ${POUCH_DIR};
   sudo chown ${COUCH_ADM}:${COUCH_ADM} ${POUCH_DIR};
   sudo chmod ugo+rwx ${POUCH_DIR};
+
+  sudo -A mkdir -p ${MAIL_DIR};
+  sudo chown ${COUCH_ADM}:${COUCH_ADM} ${MAIL_DIR};
+  sudo chmod ugo+rwx ${MAIL_DIR};
 
   npm install;
   npm run prestart;

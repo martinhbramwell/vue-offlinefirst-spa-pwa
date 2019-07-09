@@ -31,8 +31,23 @@ a {
 }
 
 td.fecha {
-    width: 1%;
-    white-space: nowrap;
+  width: 1%;
+  white-space: nowrap;
+}
+
+td.cda {
+  font-size: 5pt !important;
+}
+
+td.noMail {
+}
+
+td.goodMail {
+  color: Gold !important;
+}
+
+td.badMail {
+  color: DeepPink !important;
 }
 
 input[type="text"] {
