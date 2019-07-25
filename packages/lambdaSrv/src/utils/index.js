@@ -16,6 +16,12 @@ const {
   printf,
 } = format;
 
+
+export const fechaLong = fecha => (new Date(fecha)).toLocaleDateString('es-ES',
+  { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}); // eslint-disable-line object-curly-spacing, object-curly-newline
+
+export const fechaShort = fecha => (new Date(fecha)).toLocaleDateString('fr-CA').split('/').join('-');
+
 const padVal = (pad, val) => (pad + val).substring(val.length);
 
 const tightDate = () => {

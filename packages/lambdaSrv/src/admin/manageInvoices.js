@@ -268,7 +268,7 @@ export default async (req, res) => {
     env = doc.rejected ? 'times-circle' : env;
     let aut = 'circle';
     aut = doc.authorized ? 'check-circle' : aut;
-    aut = (doc.authorized === 'no timestamp') ? 'times-circle' : aut;
+    aut = doc.failed ? 'times-circle' : aut;
 
     let mail = 'circle';
     if (doc.emailed) {

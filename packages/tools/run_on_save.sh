@@ -10,6 +10,8 @@ IGNORE_PATHS="$@";
 
 declare PKG="inotify-tools";
 dpkg-query -l ${PKG} &>/dev/null || sudo apt -y install ${PKG};
+declare PKG="tree";
+dpkg-query -l ${PKG} &>/dev/null || sudo apt -y install ${PKG};
 
 echo "Will execute : '${EVENT_TASK}'";
 

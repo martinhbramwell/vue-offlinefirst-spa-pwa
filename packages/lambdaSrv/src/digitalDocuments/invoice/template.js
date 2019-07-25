@@ -35,7 +35,7 @@ export default {
     direccionComprador: { alias: 'direccion' },
 
     totalSinImpuestos: { specialCase: 'baseImponible' },
-    totalDescuento: '0.00',
+    totalDescuento: { alias: 'descuento' },
 
     totalConImpuestos: {
       totalImpuesto: {

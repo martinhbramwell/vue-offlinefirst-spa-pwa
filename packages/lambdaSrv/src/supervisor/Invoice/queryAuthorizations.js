@@ -21,8 +21,8 @@ const processing = async (args) => {
         // '_attachments.invoiceRejected': { $exists: false },
       },
     });
-    LG.info(`\n
-      Sent invoices not yet queried :: ${JSON.stringify(result.docs.length, null, 3)}\n
+    LG.info(`
+      Sent invoices not yet queried :: ${JSON.stringify(result.docs.length, null, 3)}
     `);
 
     /* eslint-disable no-restricted-syntax */

@@ -43,6 +43,9 @@ EOF
   sudo chown ${COUCH_ADM}:${COUCH_ADM} ${MAIL_DIR};
   sudo chmod ugo+rwx ${MAIL_DIR};
 
+  export NODE_ICU_DATA='node_modules/full-icu/';
+
+
   npm install;
   npm run prestart;
 

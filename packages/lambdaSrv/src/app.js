@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import routes from './routes';
 
 import dbMonitor from './database';
+import quickTest from './qtst';
 
 // import validations from './validations'; // eslint-disable-line no-unused-vars
 import { logger as LG } from './utils'; // eslint-disable-line no-unused-vars
@@ -44,6 +45,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 });
 
 dbMonitor();
+quickTest();
 // validations();
 // LG(`Got ${dbMonitor()}`);
 

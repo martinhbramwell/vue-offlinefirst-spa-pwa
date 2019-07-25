@@ -1,9 +1,12 @@
 import { promises } from 'fs';
 
+import pdfgen from '../../digitalDocuments/pdf';
 import {
   logger as LG, mailCfg,
   getMailer as mailer,
   validateEmail as validEmail,
+  fechaShort as shortDate,
+  fechaLong as longDate,
 } from '../../utils';
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
@@ -46,32 +49,33 @@ export default async (args) => {
   if (validEmail(d.email)) {
     try {
       const invSigned = await db.getAttachment(inv._id, 'invoiceSigned'); // eslint-disable-line no-underscore-dangle
-      // const invB64 = (Buffer.from(invSigned, 'utf-8')).toString('base64');
+
       const buff = Buffer.from(invSigned, 'base64');
       const content = buff.toString('ascii');
 
-      const fechaLong = (new Date(d.fecha)).toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      const fechaShort = (new Date(d.fecha)).toLocaleDateString('fr-CA').split('/').join('-');
+      const fechaLong = longDate(d.fecha);
+      const fechaShort = shortDate(d.fecha);
 
-      const attachments = [ // eslint-disable-line no-unused-vars
+      const mailFile = `${fechaShort}_${d.sequential}`;
+      let mailDir = '';
+      mailDir += `${process.env.MAIL_DIR}`;
+      mailDir += `/${d.nombreCliente.replace(/ /g, '_')}`;
+      mailDir += `/${fechaShort}`;
+
+      const pdfPath = await pdfgen(inv, { mailDir, mailFile });
+
+
+      const attachments = [
         {
           filename: `Factura_LogiChem_${fechaShort}.xml`,
           content,
         },
+        {
+          path: pdfPath,
+        },
       ];
 
       const text = `
-        (Leo : This is a sample email sent from my development version of the gestor de facturas.
-        Opinions on appearance, layout grammar, spelling?
-        Please note that currently I can only show data taken from text of the actual invoice, so
-        tricks like "Sra. Catalina Izurieta" vs "Sres. Cerveceria SABAIBEER S.A." will have to wait.
-        I still need to generate the PDF version which is fiddly and long to do.)
-
         ${fechaLong}
 
         Estimado ${d.nombreCliente}
@@ -83,14 +87,6 @@ export default async (args) => {
       `;
 
       const html = `
-        <p><i>(Leo : This is a sample email sent from my development version of the gestor de facturas.</i></p>
-        <p><i>Opinions on appearance, layout grammar, spelling?</i></p>
-        <p><i>Please note that currently I can only show data taken from text of the actual invoice, so
-        tricks like "Sra. Catalina Izurieta" vs "Sres. Cerveceria SABAIBEER S.A." will have to wait.</i></p>
-        <p><i>I still need to generate the PDF version which is fiddly and long to do.)</i></p>
-
-        <hr />
-
         <p>${fechaLong}</p>
 
         <p>Estimado <b>${d.nombreCliente}</b></p>
@@ -115,7 +111,8 @@ export default async (args) => {
       // CDR(mail);
       response = await sendIt(mail);
 
-      await promises.writeFile(`${process.env.MAIL_DIR}/factura_${fechaShort}_${d.sequential}.xml`, content);
+      await promises.writeFile(`${mailDir}/factura_${mailFile}.xml`, content);
+      // await promises.writeFile(`${process.env.MAIL_DIR}/factura_${fechaShort}_${d.sequential}.xml`, content);
     } catch (err) {
       LG.error(err);
     }

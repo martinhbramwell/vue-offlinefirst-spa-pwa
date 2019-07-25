@@ -20,5 +20,7 @@ EOF
  popd >/dev/null;
 
 # npm run dev
-npm run dbg
+./unLaunch.sh;
+export NODE_ICU_DATA='node_modules/full-icu/';
+npm run dbg;
 # npm start
