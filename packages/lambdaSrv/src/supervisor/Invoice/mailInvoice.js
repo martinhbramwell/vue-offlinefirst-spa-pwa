@@ -112,7 +112,6 @@ export default async (args) => {
       response = await sendIt(mail);
 
       await promises.writeFile(`${mailDir}/factura_${mailFile}.xml`, content);
-      // await promises.writeFile(`${process.env.MAIL_DIR}/factura_${fechaShort}_${d.sequential}.xml`, content);
     } catch (err) {
       LG.error(err);
     }

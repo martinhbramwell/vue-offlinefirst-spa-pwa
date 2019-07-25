@@ -30,7 +30,6 @@ const qtst = async () => {
     let msg = null;
     let pdfPath = null;
     let fechaShort = null;
-    let clienteTrimmed = null;
     let mailDir = '';
     let mailFile = null;
     switch (test) {
@@ -38,11 +37,10 @@ const qtst = async () => {
         CLG('**** Testing PDF invoice generator ****');
         invoice = await db.get('Invoice_1_0000000000005203');
 
-        // fechaShort = shortDate(invoice.data.fecha);
-        // clienteTrimmed = invoice.data.nombreCliente.replace(/ /g, '_');
+        fechaShort = shortDate(invoice.data.fecha);
         mailDir += `${process.env.MAIL_DIR}`;
         mailDir += `/${invoice.data.nombreCliente.replace(/ /g, '_')}`;
-        mailDir += `/${shortDate(invoice.data.fecha)}`;
+        mailDir += `/${fechaShort}`;
 
         mailFile = `${fechaShort}_${invoice.data.sequential}`;
 
