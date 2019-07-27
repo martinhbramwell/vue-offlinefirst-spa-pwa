@@ -28,3 +28,20 @@ ssh ${COUCH_ADM}@${COUCH_HOST};
 ### Run the script
 ```shell
 pushd /packages/tools/ServerSetUp
+```
+
+### Remote debugging
+```shell
+ssh -L 9221:localhost:9229 you@tstvm01
+
+# In chrome go to URL :
+#     chrome://inspect/#devices
+#
+# Then : select "Open dedicated DevTools for Node"
+#   - Menu >> Connection
+#   - [Add Connection]
+#   - 127.0.0.1:9221
+#
+# shell output trace will then show ...
+Debugger attached.
+```

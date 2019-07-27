@@ -53,28 +53,29 @@ export default async (req, res) => {
       const invoices = await databaseLocal.allDocs({
         include_docs: true,
         attachments: true,
-        startkey: 'Invoice_1',
+        startkey: '00_SpecialFix',
+        // startkey: 'Invoice_1',
         endkey: 'Invoice_2',
       });
 
       // CDR(invoices.rows);
 
       let sep = '    ';
-      res.write(`<pre>
-{
-  "docs": [
-</pre>`);
+      res.write('<pre>{ "docs": [</pre>');
+
+
       const range = invoices.rows.filter((inv) => {
-        const d = inv.doc.data;
-        const bapu = parseInt(d.seqib, 10);
-        const ib = parseInt(d.sequential, 10);
         const first = parseInt(req.query.f, 10);
         const last = parseInt(req.query.l, 10);
-        const type = typeof req.query.c === 'undefined' ? '' : req.query.c;
+        let cmp = 0;
+        if (inv && inv.doc && inv.doc.data) {
+          const d = inv.doc.data;
+          const bapu = parseInt(d.seqib, 10);
+          const ib = parseInt(d.sequential, 10);
+          const type = typeof req.query.c === 'undefined' ? '' : req.query.c;
 
-        const cmp = type === 'BAPU' ? bapu : ib;
-        // CLG(`${first} <= ${cmp} <= ${last}`);
-
+          cmp = type === 'BAPU' ? bapu : ib;
+        }
         return (first <= cmp) && (cmp <= last);
       });
 
@@ -95,10 +96,11 @@ export default async (req, res) => {
       res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
     }
   } else {
+    const url = `${req.protocol}://${req.headers.host}${req.url}`;
     res.write(`Usage: </br> &nbsp; &nbsp; &nbsp;
-      https://${req.headers.host}${req.url}?f=20&l=24  </br> &nbsp; &nbsp; &nbsp;
+      <a href="${url}?f=20&l=24">${url}?f=20&l=24</a>  </br> &nbsp; &nbsp; &nbsp;
        &nbsp; &nbsp; &nbsp;OR  </br> &nbsp; &nbsp; &nbsp;
-      https://${req.headers.host}${req.url}?f=11371&l=011373&c=BAPU
+      <a href="${url}?f=11371&l=011373&c=BAPU">${url}?f=11371&l=011373&c=BAPU</a>
       `);
   }
 

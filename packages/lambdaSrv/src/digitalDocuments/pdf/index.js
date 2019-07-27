@@ -492,6 +492,7 @@ const totalsTitles = [
   { title: 'Valor Total', field: 'total' },
 ];
 
+
 const placeTotalsBox = (doc, dims, invoice) => {
   const { top, left, width, height } = dims; // eslint-disable-line object-curly-newline
 
@@ -536,6 +537,8 @@ const placeTotalsBox = (doc, dims, invoice) => {
   });
 };
 
+const closeStream = stream => new Promise(resolve => stream.on('finish', resolve));
+
 const pdfgen = async (invoice, names) => {
   const inv = invoice;
   const { data: d } = inv;
@@ -555,8 +558,10 @@ const pdfgen = async (invoice, names) => {
 
   await QRCode.toFile(`${mailDir}/${mailFile}.png`, inv.accessKey);
 
+  const writeStream = fs.createWriteStream(theFile);
   const doc = new PDF();
-  doc.pipe(fs.createWriteStream(`${theFile}`));
+  doc.pipe(writeStream);
+
   if (showCornerMarkers) {
     doc.lineJoin('miter')
       .roundedRect(HE + CNV(0), VE + CNV(0), CNV(20) * HA, CNV(20) * WA, 8)
@@ -642,6 +647,9 @@ const pdfgen = async (invoice, names) => {
 
   /* Finalize PDF file */
   doc.end();
+
+  /* Finalize writer stream */
+  await closeStream(writeStream);
 
   return theFile;
 };

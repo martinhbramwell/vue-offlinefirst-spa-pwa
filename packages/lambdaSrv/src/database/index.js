@@ -168,6 +168,7 @@ export default () => {
     } = filter;
     // const dir = direction.toUpperCase();
 
+
     db.sync(databaseRemote, {
       live: true,
       retry: true,
@@ -175,6 +176,9 @@ export default () => {
       query_params: { agent: userId },
     })
       .on('change', (response) => {
+        if (name === 'post_processing/by_test') {
+          LG.info(`${lclDb} ${name}  *** ${label} sync DELTA *** `);
+        }
         const dir = response.direction;
         const { docs } = response.change;
         LG.info(`${lclDb} ${name} *** ${label} ${dir} sync delta *** `);
@@ -189,10 +193,14 @@ export default () => {
         // LG.debug(`The request(s) : ${JSON.stringify(docs, null, 2)}`);
       })
       .on('active', () => {
-        // LG.info(`${lclDb} ${name} *** ${label} sync resumed *** `);
+        if (name === 'post_processing/by_test') {
+          LG.info(`${lclDb} ${name} *** ${label} sync resumed *** `);
+        }
       })
       .on('paused', () => {
-        // LG.info(`${lclDb} ${name}  *** ${label} sync on hold *** `);
+        if (name === 'post_processing/by_test') {
+          LG.info(`${lclDb} ${name}  *** ${label} sync on hold *** `);
+        }
         action(db);
       })
       .on('denied', (info) => {
@@ -218,13 +226,13 @@ export default () => {
 
   const invoicesReplicationFilter = {
     name: 'post_processing/by_invoice',
-    label: 'INVOICE',
+    label: 'INVOICES',
     action: nullAction,
   };
 
-  const personssReplicationFilter = {
+  const personsReplicationFilter = {
     name: 'post_processing/by_person',
-    label: 'PERSON',
+    label: 'PERSONS',
     action: nullAction,
   };
 
@@ -234,13 +242,20 @@ export default () => {
     action: nullAction,
   };
 
+  const testReplicationFilter = {
+    name: 'post_processing/by_test',
+    label: 'TESTS',
+    action: nullAction,
+  };
+
 
   const replicationFilters = [
     coreReplicationFilter,
     requestsReplicationFilter,
     invoicesReplicationFilter,
-    personssReplicationFilter,
+    personsReplicationFilter,
     specialReplicationFilter,
+    testReplicationFilter,
   ];
 
   let secondaryReplicationsWaiting = true;

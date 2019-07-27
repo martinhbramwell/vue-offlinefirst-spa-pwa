@@ -12,14 +12,16 @@ export default async (req, res) => {
   CDR(req.query);
 
   res.write('<html><body>');
-  res.write(`</br>Start key : ${req.query.s}`);
-  res.write(`</br>End key : ${req.query.e}`);
-  const alteration = JSON.parse(req.query.alt);
-  CDR(alteration);
-  res.write(`</br>Alteration : ${req.query.alt}`);
-  res.write('</br>');
 
   if (req.query.e && req.query.s && req.query.alt) {
+    res.write(`</br>Start key : ${req.query.s}`);
+    res.write(`</br>End key : ${req.query.e}`);
+    // CDR(req.query.alt);
+    const alteration = JSON.parse(req.query.alt);
+    // CDR(alteration);
+    res.write(`</br>Alteration : ${req.query.alt}`);
+    res.write('</br>');
+
     const config = {
       startkey: req.query.s,
       endkey: req.query.e,
@@ -27,16 +29,18 @@ export default async (req, res) => {
     };
 
     const updates = await listRange(res, db, config);
-    CDR(updates);
+    // CDR(updates);
     await db.bulkDocs(updates);
 
     processVoids([]);
 
     res.write('</br></br>Updated some "Invoice" records');
   } else {
+    const url = `${req.protocol}://${req.headers.host}${req.url}`;
+
     res.write('</br></br>No range specified.');
-    res.write('</br>Example usage:');
-    res.write('</br>&nbsp; &nbsp; &nbsp; https://spvr.iridium.blue/updateRange?s=Invoice_1_0000000000004685&e=Invoice_1_0000000000004685&alt={%22_deleted%22:%22true%22}  }');
+    res.write('</br>Example usage ::');
+    res.write(`</br>&nbsp; &nbsp; &nbsp; <a href="${url}?s=Invoice_1_0000000000004685&e=Invoice_1_0000000000004685&alt={%22dummy%22:%22xxx%22}">${url}?s=Invoice_1_0000000000004685&e=Invoice_1_0000000000004685&alt={%22dummy%22:%22xxx%22}</a>`);
   }
 
   res.write('</body></html>');

@@ -16,8 +16,8 @@ const CDR = console.dir; // eslint-disable-line no-console
 const tstPDFGEN = 'pdfgen';
 const tstSRIXML = 'srixml';
 const tstFNTDIM = 'fontdims';
-// const test = null;
-const test = tstPDFGEN;
+const test = null;
+// const test = tstPDFGEN;
 // const test = tstSRIXML;
 // const test = tstFNTDIM;
 
