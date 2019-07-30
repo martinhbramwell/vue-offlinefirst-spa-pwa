@@ -483,7 +483,7 @@ const totalsTitles = [
   { title: 'Subtotal 0%', field: 'zero' },
   { title: 'Subtotal No Objeto De Iva', field: 'zero' },
   { title: 'Subtotal Exento De Iva', field: 'zero' },
-  { title: 'Subtotal Sin Impuestos', field: 'subTotalConImpuesto' },
+  { title: 'Subtotal Sin Impuestos', field: 'subTotal' },
   { title: 'Total Descuento', field: 'descuento' },
   { title: 'ICE', field: 'zero' },
   { title: 'IVA 12%', field: 'totalImpuesto' },
@@ -568,6 +568,10 @@ const pdfgen = async (invoice, names) => {
       .stroke();
 
     doc.lineJoin('miter')
+      .roundedRect(HE + CNV(0), VE + CNV(245), CNV(20) * HA, CNV(2) * WA, 8)
+      .stroke();
+
+    doc.lineJoin('miter')
       .roundedRect(HE + CNV(165), VE + CNV(230), CNV(20) * HA, CNV(20) * WA, 8)
       .stroke();
   }
@@ -635,6 +639,10 @@ const pdfgen = async (invoice, names) => {
   };
   placeTotalsBox(doc, totalsDimensions, invoice);
 
+  doc.info.Title = `Factura de LogiChem #${invoice.data.codigo}`;
+  doc.info.Author = `${invoice.data.nombreResponsable}`;
+  doc.info.Subject = `Para ${invoice.data.nombreCliente}`;
+  doc.info.Keywords = `${invoice._id} ==> BAPU : ${invoice.data.seqib}`; // eslint-disable-line no-underscore-dangle
   try {
     await fs.ensureSymlink(
       `${mailDir}`,

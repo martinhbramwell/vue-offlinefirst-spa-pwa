@@ -9,6 +9,7 @@ import {
   urlUpload,
   headers,
   soapUploadReceived,
+  soapUploadRegistered,
 } from './soapFragments';
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
@@ -34,10 +35,11 @@ const send = async (args) => {
     // CLG(bundle);
 
     const sriResponse = await axios.post(urlUpload, bundle, headers);
+    const { data: d } = sriResponse;
     CLG(`\n\nsriResponse.data for :: ${inv._id}. Rev :: ${inv._rev}`); // eslint-disable-line quotes, no-underscore-dangle
-    CDR(sriResponse.data);
+    CDR(d);
 
-    xml2js.parseString(sriResponse.data, async (err, result) => {
+    xml2js.parseString(d, async (err, result) => {
       if (err) {
         CLG(`\n\n ***** Error *****\n\n`); // eslint-disable-line quotes
         CDR(err);
@@ -45,8 +47,11 @@ const send = async (args) => {
       }
 
       CLG(`\n\nparse result`); // eslint-disable-line quotes
+      CDR(d.includes(soapUploadReceived));
+      CDR(d.includes(soapUploadRegistered));
 
-      const success = sriResponse.data.includes(soapUploadReceived) ? 'accepted' : 'rejected';
+      const success = d.includes(soapUploadReceived) || d.includes(soapUploadRegistered) ? 'accepted' : 'rejected';
+      CDR(success);
       inv[success] = true; // eslint-disable-line no-param-reassign, max-len
 
 

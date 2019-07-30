@@ -12,7 +12,7 @@ const processing = async (args) => {
         type: 'invoice',
         void: false,
         hold: false,
-        accepted: { $exists: false },
+        rejected: { $exists: false },
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: true },
         '_attachments.invoiceSigned': { $exists: true },

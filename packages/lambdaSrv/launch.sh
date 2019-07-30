@@ -4,6 +4,7 @@ source ${HOME}/.bash_login;
 source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )";
+
 pushd ${DIR} >/dev/null;
 
   pushd './public/scripts/' >/dev/null;
@@ -44,9 +45,20 @@ EOF
   sudo chmod ugo+rwx ${MAIL_DIR};
 
   export NODE_ICU_DATA='node_modules/full-icu/';
-
-
   npm install;
+  if [ $? -ne 0 ]
+  then
+    echo -e "Full install attempt failed.  Separately installing 'full-icu'."
+    export NODE_ICU_DATA=
+    npm install full-icu;
+    export NODE_ICU_DATA='node_modules/full-icu/';
+    echo -e "
+
+
+       Retrying full install."
+    npm install;
+  fi;
+
   npm run prestart;
 
   node dist/index.js &

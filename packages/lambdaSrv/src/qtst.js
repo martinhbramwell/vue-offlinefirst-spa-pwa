@@ -35,7 +35,7 @@ const qtst = async () => {
     switch (test) {
       case tstPDFGEN:
         CLG('**** Testing PDF invoice generator ****');
-        invoice = await db.get('Invoice_1_0000000000005203');
+        invoice = await db.get('Invoice_1_0000000000005218');
 
         fechaShort = shortDate(invoice.data.fecha);
         mailDir += `${process.env.MAIL_DIR}`;

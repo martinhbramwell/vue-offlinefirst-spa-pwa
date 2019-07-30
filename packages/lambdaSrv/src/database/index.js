@@ -242,11 +242,11 @@ export default () => {
     action: nullAction,
   };
 
-  const testReplicationFilter = {
-    name: 'post_processing/by_test',
-    label: 'TESTS',
-    action: nullAction,
-  };
+  // const testReplicationFilter = {
+  //   name: 'post_processing/by_test',
+  //   label: 'TESTS',
+  //   action: nullAction,
+  // };
 
 
   const replicationFilters = [
@@ -255,7 +255,7 @@ export default () => {
     invoicesReplicationFilter,
     personsReplicationFilter,
     specialReplicationFilter,
-    testReplicationFilter,
+    // testReplicationFilter,
   ];
 
   let secondaryReplicationsWaiting = true;

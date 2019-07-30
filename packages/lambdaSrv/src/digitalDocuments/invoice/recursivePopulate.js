@@ -3,8 +3,8 @@ import template from './template'; // eslint-disable-line no-unused-vars
 
 import { logger as LG } from '../../utils'; // eslint-disable-line no-unused-vars
 
-const IVA = '0.12';
-const fpIVA = parseFloat(IVA);
+const IVA = process.env.IMPUESTO_VALOR_AGGREGADO;
+export const fpIVA = parseFloat(IVA);
 const pctIVA = fpIVA * 100;
 
 
