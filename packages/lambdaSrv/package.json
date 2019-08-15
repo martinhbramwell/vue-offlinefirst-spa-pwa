@@ -16,10 +16,8 @@
     "dbg": "esw src test && nodemon --ignore cypress/ --inspect src/index.js --exec \"node -r dotenv/config -r babel-register\"",
     "clean": "rimraf dist",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
-    "test": "snyk test && jest --watch",
-    "lint": "esw -w src test",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "test": "jest --watch",
+    "lint": "esw -w src test"
   },
   "repository": {
     "type": "git",
@@ -63,7 +61,6 @@
     "queue": "^4.5.0",
     "relational-pouch": "^3.1.0",
     "rimraf": "^2.6.2",
-    "snyk": "^1.199.2",
     "winston": "^3.1.0",
     "xml2js": "^0.4.19",
     "xmldom": "^0.1.27"
@@ -128,6 +125,5 @@
   },
   "jest": {
     "testEnvironment": "node"
-  },
-  "snyk": true
+  }
 }

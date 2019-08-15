@@ -100,8 +100,7 @@ export default async (args) => {
 
       const mail = {
         from: mailCfg.auth.user,
-        // to: [ 'yourself.yourorg@gmail.com', 'martinhbramwell@gmail.com' ],
-        to: [d.email],
+        to: [d.email, 'water.iridium.blue@gmail.com', 'facturacionlogichem@gmail.com'],
         subject: `Factura de LogiChem S.A. Fecha: ${fechaShort} (#${d.codigo})`,
         text,
         html,
