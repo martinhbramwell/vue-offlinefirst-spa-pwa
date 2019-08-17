@@ -3,7 +3,7 @@ import { processPage } from '../support/couchdb';
 describe('BAPU Scraper', function() {
 
   it('Scrapes BAPU for Persons', function() {
-    cy.readFile('/cypress/nextPage.json').then((text) => {
+    cy.readFile('./cypress/nextPage.json').then((text) => {
       const { thisPage } = text;
       cy.log(`Next page ${thisPage}`);
 

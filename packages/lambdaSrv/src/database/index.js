@@ -17,7 +17,7 @@ const runInMemory = false;
 const adapter = runInMemory ? 'memory' : null;
 const lclDb = runInMemory ? 'theDB' : process.env.LOCAL_DB;
 const rmtDb = process.env.REMOTE_DB;
-const rmtDbHost = process.env.COUCH_HOST;
+const rmtDbHost = process.env.COUCH_HOST_INTERNAL;
 
 // LG.verbose(`UTILS : ${JSON.stringify(logger, null, 2)}`)
 LG.info(`Logs written to ${process.env.LOG_DIR}`);

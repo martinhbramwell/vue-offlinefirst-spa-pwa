@@ -14,7 +14,7 @@ pushd './public/scripts/' >/dev/null;
     cat << EOF > parms.js
 const envServerURL = '${COUCH_PROTOCOL}://${COUCH_HOST}';
 const envDbName = '${COUCH_DATABASE}';
-const envAuth = { username: '${COUCH_USR}', password: '${COUCH_PWD}' };
+const envAuth = { username: '', password: '' };
 EOF
 
  popd >/dev/null;

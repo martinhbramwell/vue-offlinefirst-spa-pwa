@@ -1,8 +1,8 @@
 import fs from 'fs'; // eslint-disable-line no-unused-vars
 
 import { databaseLocal } from '../database';
-import findMaxRow from '../utils/findMaxRow';
-import getInvoice from '../digitalDocuments/invoice';
+// import findMaxRow from '../utils/findMaxRow';
+// import getInvoice from '../digitalDocuments/invoice';
 
 import bundleInvoices from '../supervisor/Invoice/bundleInvoices';
 import signInvoices from '../supervisor/Invoice/signInvoices';
@@ -198,47 +198,47 @@ export default async (req, res) => {
     CLG(`Could not get user from cookie. Err : >${err}<`);
   }
 
-  const CATEGORY_FIELD = {
-    fieldName: 'data.type',
-    sortOrder: 'desc',
-    value: 'invoice',
-    purge: true,
-  };
-  const SERIAL_INDEX = [
-    {
-      fieldName: '_id',
-      first: 'Invoice_1_0000000000000000',
-      last: 'Invoice_9',
-    },
-    {
-      fieldName: 'data.sucursal',
-      first: 0,
-      last: 999,
-    },
-    {
-      fieldName: 'data.pdv',
-      first: 0,
-      last: 999,
-    },
-    {
-      fieldName: 'data.sequential',
-      first: 0,
-      last: 999999999,
-    },
-  ];
+  // const CATEGORY_FIELD = {
+  //   fieldName: 'data.type',
+  //   sortOrder: 'desc',
+  //   value: 'invoice',
+  //   purge: true,
+  // };
+  // const SERIAL_INDEX = [
+  //   {
+  //     fieldName: '_id',
+  //     first: 'Invoice_1_0000000000000000',
+  //     last: 'Invoice_9',
+  //   },
+  //   {
+  //     fieldName: 'data.sucursal',
+  //     first: 0,
+  //     last: 999,
+  //   },
+  //   {
+  //     fieldName: 'data.pdv',
+  //     first: 0,
+  //     last: 999,
+  //   },
+  //   {
+  //     fieldName: 'data.sequential',
+  //     first: 0,
+  //     last: 999999999,
+  //   },
+  // ];
 
-  const CODE_INDEX = [
-    {
-      fieldName: '_id',
-      first: 'Invoice_1_0000000000000000',
-      last: 'Invoice_9',
-    },
-    {
-      fieldName: 'data.idib',
-      first: 0,
-      last: 99999999,
-    },
-  ];
+  // const CODE_INDEX = [
+  //   {
+  //     fieldName: '_id',
+  //     first: 'Invoice_1_0000000000000000',
+  //     last: 'Invoice_9',
+  //   },
+  //   {
+  //     fieldName: 'data.idib',
+  //     first: 0,
+  //     last: 99999999,
+  //   },
+  // ];
 
   // const getPersonRecord = async (name) => { // eslint-disable-line arrow-body-style
   //   return databaseLocal.find({
@@ -316,43 +316,43 @@ export default async (req, res) => {
     /* eslint-enable no-mixed-operators */
   };
 
-  const serialIndexName = 'invoice_serial';
-  const serialIndex = { name: serialIndexName, category: CATEGORY_FIELD, indexer: SERIAL_INDEX };
-  const codeIndexName = 'invoice_code';
-  const codeIndex = { name: codeIndexName, category: CATEGORY_FIELD, indexer: CODE_INDEX };
+  // const serialIndexName = 'invoice_serial';
+  // const serialIndex = { name: serialIndexName, category: CATEGORY_FIELD, indexer: SERIAL_INDEX };
+  // const codeIndexName = 'invoice_code';
+  // const codeIndex = { name: codeIndexName, category: CATEGORY_FIELD, indexer: CODE_INDEX };
 
-  try {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.write('<!DOCTYPE html><html>');
-    res.write(frags.documentHead);
-    res.write('<body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.write('<!DOCTYPE html><html>');
+  res.write(frags.documentHead);
+  res.write('<body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
 
-    res.write('<i>Última factura extraida ... </i><br /><br />');
+  // try {
+  //   res.write('<i>Última factura extraida ... </i><br /><br />');
 
-    const maxSerial = (await findMaxRow(databaseLocal, serialIndex));
-    if (!maxSerial.data) throw new Error(`Unable to get results using index ${serialIndexName}!`);
-    const { data: serial } = maxSerial;
+  //   const maxSerial = (await findMaxRow(databaseLocal, serialIndex));
+  //   if (!maxSerial.data) throw new Error(`Unable to get results of index ${serialIndexName}!`);
+  //   const { data: serial } = maxSerial;
 
-    const maxCode = (await findMaxRow(databaseLocal, codeIndex));
-    if (!maxCode.data) throw new Error(`Unable to get results using index ${codeIndexName}!`);
-    const { data: code } = maxCode;
+  //   const maxCode = (await findMaxRow(databaseLocal, codeIndex));
+  //   if (!maxCode.data) throw new Error(`Unable to get results using index ${codeIndexName}!`);
+  //   const { data: code } = maxCode;
 
-    LG.info(`
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
-    const invoice = `Invoice_1_${code.idib.toString().padStart(16, '0')}`;
+  //   LG.info(`
+  //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
+  //   const invoice = `Invoice_1_${code.idib.toString().padStart(16, '0')}`;
 
-    const jsonInvoice = (await getInvoice(databaseLocal, invoice));
-    if (!jsonInvoice) throw new Error(`Unable to get invoice ${invoice}!`);
-    const T = jsonInvoice.infoTributaria;
-    const uniqueId = T.claveAcceso;
-    LG.info(`Got invoice ${uniqueId}`);
+  //   const jsonInvoice = (await getInvoice(databaseLocal, invoice));
+  //   if (!jsonInvoice) throw new Error(`Unable to get invoice ${invoice}!`);
+  //   const T = jsonInvoice.infoTributaria;
+  //   const uniqueId = T.claveAcceso;
+  //   LG.info(`Got invoice ${uniqueId}`);
 
-    res.write(`</div>Numero serial :: ${T.estab}-${T.ptoEmi}-${T.secuencial}</div>`);
-    res.write(`<br /></div>Cliente :: ${jsonInvoice.infoFactura.razonSocialComprador}</div>`);
-    res.write(`<br /></div>Codigo interno :: ${serial.idib}</div>`);
-  } catch (err) {
-    res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
-  }
+  //   res.write(`</div>Numero serial :: ${T.estab}-${T.ptoEmi}-${T.secuencial}</div>`);
+  //   res.write(`<br /></div>Cliente :: ${jsonInvoice.infoFactura.razonSocialComprador}</div>`);
+  //   res.write(`<br /></div>Codigo interno :: ${serial.idib}</div>`);
+  // } catch (err) {
+  //   res.write(`<br /></div>Query error ::  ${JSON.stringify(err, null, 2)}</div>`);
+  // }
 
 
   try {
