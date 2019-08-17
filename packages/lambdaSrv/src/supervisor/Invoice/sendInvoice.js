@@ -23,8 +23,6 @@ const send = async (args) => {
 
   // if (inv.data.idib !== 4257) return;
 
-
-  let fresh = null;
   try {
     const invSigned = await db.getAttachment(inv._id, 'invoiceSigned'); // eslint-disable-line no-underscore-dangle
 
@@ -46,37 +44,57 @@ const send = async (args) => {
         return;
       }
 
-      CLG(`\n\nparse result`); // eslint-disable-line quotes
-      CDR(d.includes(soapUploadReceived));
-      CDR(d.includes(soapUploadRegistered));
+      // CLG(`\n\nparse result`); // eslint-disable-line quotes
+      // CDR(d.includes(soapUploadReceived));
+      // CDR(d.includes(soapUploadRegistered));
 
-      const success = d.includes(soapUploadReceived) || d.includes(soapUploadRegistered) ? 'accepted' : 'rejected';
-      CDR(success);
-      inv[success] = true; // eslint-disable-line no-param-reassign, max-len
+      try {
+        const success = d.includes(soapUploadReceived) || d.includes(soapUploadRegistered) ? 'accepted' : 'rejected';
+        LG.info(`Upload response for invoice #${inv.data.codigo} : ${success}`);
 
+        const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+        fresh[success] = true; // eslint-disable-line no-param-reassign, max-len
+        const pt = await db.put(fresh);
+        LG.info(`Put acceptance result : ${JSON.stringify(pt, null, 2)}`);
+      } catch (errResult) {
+        CLG(`Error saving acceptance result for ${inv.data.codigo}`);
+        LG.error(errResult);
+      }
 
-      const response = result['soap:Envelope']['soap:Body'][0]['ns2:validarComprobanteResponse'][0];
+      try {
+        CLG(`Saving 'respuestaSRI' attachment for #${inv.data.codigo}`);
+        const response = result['soap:Envelope']['soap:Body'][0]['ns2:validarComprobanteResponse'][0];
+        const reception = (new xml2js.Builder())
+          .buildObject(response.RespuestaRecepcionComprobante[0]);
+        const attachment = (Buffer.from(reception, 'utf-8')).toString('base64');
 
-      // const builder = new xml2js.Builder();
-      const reception = (new xml2js.Builder())
-        .buildObject(response.RespuestaRecepcionComprobante[0]);
+        const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+        LG.info(`Will save reception response invoice as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
+        const attch = await db.putAttachment(fresh._id, 'respuestaSRI', fresh._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
+        LG.info(`Saved reception response as attachment ${JSON.stringify(attch, null, 2)}`);
+      } catch (errAttch) {
+        CLG(`Error saving attachment for ${inv.data.codigo}`);
+        LG.error(errAttch);
+      }
 
-      const attachment = (Buffer.from(reception, 'utf-8')).toString('base64');
+      /* eslint-disable max-len */
+      // setTimeout(async () => {
+      //   CLG(`Saving 'respuestaSRI' attachment for #${inv.data.codigo}`);
+      //   try {
+      //     const response = result['soap:Envelope']['soap:Body'][0]['ns2:validarComprobanteResponse'][0];
+      //     const reception = (new xml2js.Builder())
+      //       .buildObject(response.RespuestaRecepcionComprobante[0]);
+      //     const attachment = (Buffer.from(reception, 'utf-8')).toString('base64');
 
-      const pt = await db.put(inv);
-      LG.info(`Put acceptance result : ${JSON.stringify(pt, null, 2)}`);
-
-      setTimeout(async () => {
-        CLG('delayed');
-        try {
-          fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
-          LG.info(`Will save reception response invoice as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
-          const attch = await db.putAttachment(fresh._id, 'respuestaSRI', fresh._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
-          LG.info(`Saved reception response as attachment ${JSON.stringify(attch, null, 2)}`);
-        } catch (errAttch) {
-          LG.error(errAttch);
-        }
-      }, 1000);
+      //     const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+      //     LG.info(`Will save reception response invoice as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
+      //     const attch = await db.putAttachment(fresh._id, 'respuestaSRI', fresh._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
+      //     LG.info(`Saved reception response as attachment ${JSON.stringify(attch, null, 2)}`);
+      //   } catch (errAttch) {
+      //     LG.error(errAttch);
+      //   }
+      // }, 1000);
+      /* eslint-enable max-len */
     });
   } catch (err) {
     LG.error(err);
