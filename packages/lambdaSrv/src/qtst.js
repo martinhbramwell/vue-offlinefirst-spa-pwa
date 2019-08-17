@@ -13,13 +13,32 @@ import { fechaShort as shortDate } from './utils'; // eslint-disable-line no-unu
 const CLG = console.log; // eslint-disable-line no-console
 const CDR = console.dir; // eslint-disable-line no-console
 
+const tstDLYLUP = 'delayLoop';
 const tstPDFGEN = 'pdfgen';
 const tstSRIXML = 'srixml';
 const tstFNTDIM = 'fontdims';
+
 const test = null;
+// const test = tstDLYLUP;
 // const test = tstPDFGEN;
 // const test = tstSRIXML;
 // const test = tstFNTDIM;
+
+
+const mailInvoice = (task) => {
+  const { doc, Xdb } = task;
+  CLG(`Use ${doc} for ${Xdb}`);
+};
+
+const docs = [44, 77, 99, 33, 22];
+const Xdb = 'database';
+const dispatchInvoice = () => {
+  if (docs.length < 1) return;
+  const doc = docs.shift();
+  // console.log(`Use ${doc} for ${Xdb}`);
+  mailInvoice({ doc, Xdb });
+  setTimeout(dispatchInvoice, 3000);
+};
 
 const qtst = async () => {
   try {
@@ -33,6 +52,13 @@ const qtst = async () => {
     let mailDir = '';
     let mailFile = null;
     switch (test) {
+      case tstDLYLUP:
+        CLG('**** Testing Delay Loop ****');
+
+        dispatchInvoice();
+        CLG('done');
+
+        break;
       case tstPDFGEN:
         CLG('**** Testing PDF invoice generator ****');
         invoice = await db.get('Invoice_1_0000000000005218');
