@@ -53,12 +53,17 @@ export const processVoids = async (voidsToProcess) => {
   const invoices = dbInvoices.rows;
   const voidedIds = voidsToProcess.map(inv => inv[0].replace('h', ''));
 
-  const seqs = invoices.map(seq => seq.doc.data.sequential);
-  const firstSequential = getFirstSequential(seqs);
-
-  const { prefix: seqPrefix } = firstSequential;
-  // const seqPrefix = getRandomInt(9999).toString().padStart(4, '0');
-  // const seqPrefix = invoices[0].doc.data.sequential.toString().slice(0, 4);
+  let seqPrefix = null;
+  const randomPrefix = false;
+  if (randomPrefix) {
+    seqPrefix = getRandomInt(9999).toString().padStart(4, '0');
+  } else {
+    const seqs = invoices.map(seq => seq.doc.data.sequential);
+    const firstSequential = getFirstSequential(seqs);
+    const { prefix } = firstSequential;
+    seqPrefix = prefix;
+    // const seqPrefix = invoices[0].doc.data.sequential.toString().slice(0, 4);
+  }
 
   let subtractor = parseInt(invoices[0].doc.data.seqib.toString().slice(-5), 10) - 1;
 
@@ -74,7 +79,8 @@ export const processVoids = async (voidsToProcess) => {
     } else {
       inv.doc.void = false;
       const seq = parseInt(seqBAPU.slice(-7), 10);
-      const strSequential = `${seqPrefix}${(seq - subtractor).toString().padStart(8, '0')}`;
+      const maxSeqLen = 9;
+      const strSequential = `${seqPrefix}${(seq - subtractor).toString().padStart(maxSeqLen - seqPrefix.toString().length, '0')}`;
       inv.doc.data.sequential = strSequential;
       inv.doc.data.codigo = `001-002-${strSequential}`;
     }
