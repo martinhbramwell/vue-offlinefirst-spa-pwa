@@ -4,14 +4,6 @@ version: v1.13.5
 ignore:
   'npm:braces:20180219':
     - babel-cli > chokidar > anymatch > micromatch > braces:
-        reason: None available
-        expires: '2019-08-24T14:56:04.363Z'
-  SNYK-JS-LODASH-450202:
-    - cypress > lodash:
-        reason: None available
-        expires: '2019-08-24T14:56:04.363Z'
-# patches apply the minimum changes required to fix a vulnerability
-patch:
-  SNYK-JS-LODASH-450202:
-    - cypress > lodash:
-        patched: '2019-07-25T13:58:55.707Z'
+        reason: No fix available
+        expires: '2019-09-14T15:17:56.704Z'
+patch: {}

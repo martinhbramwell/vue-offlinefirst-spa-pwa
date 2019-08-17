@@ -16,7 +16,7 @@
     "dbg": "esw src test && nodemon --ignore cypress/ --inspect src/index.js --exec \"node -r dotenv/config -r babel-register\"",
     "clean": "rimraf dist",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
-    "test": "jest --watch",
+    "test": "snyk test && jest --watch",
     "lint": "esw -w src test"
   },
   "repository": {
@@ -83,6 +83,7 @@
     "jest": "^23.6.0",
     "nodemon": "^1.18.7",
     "reload": "^2.3.1",
+    "snyk": "^1.216.5",
     "supertest": "^3.0.0"
   },
   "babel": {
