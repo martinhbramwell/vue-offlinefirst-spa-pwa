@@ -13,14 +13,14 @@ export attachments=( );
 # export attachments=( "respuestaSRI" );
 # export attachments=( "invoiceXml" "invoiceSigned" "respuestaSRI" );
 
-# export fakeEmailTarget="yourself.yourorg@gmail.com";
 export fakeEmailTarget="";
+# export fakeEmailTarget="yourself.yourorg@gmail.com";
 
 export statusFlags="";
 # export statusFlags=".hold, .emailed";
 # export statusFlags=".hold, .authorized, .authorizationStatus, .emailed";
 # export statusFlags=".hold, .accepted, .rejected, .authorized, .authorizationStatus, .emailed";
-# export statusFlags=".hold, .accessKey, .accepted, .rejected, .authorized, .authorizationStatus, .emailed";
+# export statusFlags=".hold, .accessKey, .accepted, .rejected, .authorized, .failed, .authorizationStatus, .emailed";
 
 echo -e "For these invoices...";
 for invoice in "${invoices[@]}"
