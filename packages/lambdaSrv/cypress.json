@@ -1,9 +1,16 @@
 {
-  "animationDistanceThreshold": 20,
-  "viewportHeight": 1024,
-  "viewportWidth": 1366,
-  "numTestsKeptInMemory": 5,
-  "video": false,
-  "watchForFileChanges": false,
-  "videoUploadOnPasses": false
+  "env": {
+    "CH_FIRSTINVOICE": "2019 06 28 16 00 00",
+    "EP_UID": "Leonardo Wild",
+    "CH_URL": "http:\/\/admin:plokplok.0.0.0@localhost:5984\/ib201908_002",
+    "CH_DB": "ib201908_002",
+    "ENDPNT": "http:\/\/www.iridiumblue.ec\/erp\/bapu\/test\/index.php",
+    "EP_PWD": "Leonardo_123aSd",
+    "SKIP_PERSONS": false,
+    "CH_FIRSTINVOICE_SEQ": 11360,
+    "CH_LATESTINVOICE": "_design\/bapu\/_view\/latestInvoice?stable=true&update=true&descending=true&limit=1",
+    "CH_SPECIALFIX": "_design\/bapu\/_view\/specialFix?stable=true&update=true&descending=true&limit=1",
+    "SKIP_INVOICES": false
+  },
+  "projectId": "jd90q7"
 }

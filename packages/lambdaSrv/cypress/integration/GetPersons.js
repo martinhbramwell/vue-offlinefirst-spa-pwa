@@ -32,7 +32,7 @@ describe('BAPU Scraper', function() {
                     if (page === thisPage) {
                       processPage({acc, page});
                     } else {
-                      cy.log(`Skipping page #${page}.`)
+                      cy.log(`Skipping page #${page} (found #${thisPage}).`)
                     }
                   });
               });
