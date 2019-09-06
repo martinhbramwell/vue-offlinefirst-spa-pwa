@@ -3,6 +3,9 @@ import path from 'path';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
 import routes from './routes';
+import root from './modules/root';
+import invoices from './modules/invoices';
+import deliveryNotes from './modules/deliveryNotes';
 
 import dbMonitor from './database';
 import quickTest from './qtst';
@@ -15,7 +18,8 @@ const app = express();
 app.disable('x-powered-by');
 
 // View engine setup
-app.set('views', path.join(__dirname, '../views'));
+app.set('views', [__dirname + '/../views', __dirname + '/modules']);
+
 app.set('view engine', 'pug');
 
 app.use(logger('dev', {
@@ -27,6 +31,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/', routes);
+app.use('/a', root);
+app.use('/a/factura', invoices);
+app.use('/a/guia', deliveryNotes);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {

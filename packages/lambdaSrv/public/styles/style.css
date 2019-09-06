@@ -1,6 +1,8 @@
 body {
   padding: 50px;
   font: 14px sans-serif;
+  background-color: #000007;
+  color: lightyellow;
 }
 
 a {
