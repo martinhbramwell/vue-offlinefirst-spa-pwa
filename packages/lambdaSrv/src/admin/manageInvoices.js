@@ -148,8 +148,8 @@ const clientActions = {
   },
 
   verificar: async (args) => {
-    CLG('verificar');
-    CDR(args);
+    // CLG('verificar');
+    // CDR(args);
     if (await saveSettings(args)) {
       await queryAuthorizations({ db: databaseLocal });
       await reHold();
@@ -265,6 +265,7 @@ export default async (req, res) => {
 
     let env = 'circle';
     env = doc.accepted ? 'check-circle' : env;
+    env = doc.returned ? 'question-circle' : env;
     env = doc.rejected ? 'times-circle' : env;
     let aut = 'circle';
     aut = doc.authorized ? 'check-circle' : aut;

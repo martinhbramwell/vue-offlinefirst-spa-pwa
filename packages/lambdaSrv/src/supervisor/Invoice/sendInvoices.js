@@ -16,9 +16,6 @@ const processing = async (args) => {
         authorized: { $exists: false },
         '_attachments.invoiceXml': { $exists: true },
         '_attachments.invoiceSigned': { $exists: true },
-        // '_attachments.invoiceAuthorized': { $exists: false },
-        // '_attachments.invoiceNotAuthorized': { $exists: false },
-        // '_attachments.invoiceRejected': { $exists: false },
       },
     });
     LG.info(`\n
@@ -26,15 +23,6 @@ const processing = async (args) => {
     `);
 
     result.docs.forEach(async doc => sendInvoice({ doc, db }));
-
-    // /* eslint-disable no-restricted-syntax */
-    // const proms = [];
-    // for (const doc of result.docs) {
-    //   proms.push(sendInvoice({ doc, db }));
-    // }
-    // /* eslint-enable no-restricted-syntax */
-
-    // await Promise.all(proms);
   } catch (err) {
     LG.error(`Error signing invoices: ${JSON.stringify(err, null, 3)}`);
   }
