@@ -19,7 +19,7 @@ export fakeEmailTarget="";
 export statusFlags="";
 # export statusFlags=".hold, .emailed";
 # export statusFlags=".hold, .authorized, .authorizationStatus, .emailed";
-# export statusFlags=".hold, .accepted, .rejected, .authorized, .authorizationStatus, .emailed";
+# export statusFlags=".hold, .accepted, .rejected, .returned, .reason, .authorized, .authorizationStatus, .emailed";
 # export statusFlags=".hold, .accessKey, .accepted, .rejected, .authorized, .failed, .authorizationStatus, .emailed";
 
 echo -e "For these invoices...";
@@ -55,9 +55,13 @@ fi;
 
 echo "
 ";
-
-read -p "Are you sure? " -n 1 -r
-echo    # (optional) move to a new line
+if [[ $1 = "-f" ]]
+then
+  REPLY="y";
+else
+  read -p "Are you sure? " -n 1 -r
+fi;
+echo "";
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
   for invoice in "${invoices[@]}"
