@@ -172,7 +172,8 @@ importSecretFiles () {
   declare HDR="Content-Type: application/json";
   pwd;
   echo -e "Download secret files from secure cloud locations";
-  curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L http://bit.ly/vue-offlinefirst-spa-pwa > tmp.json;
+  curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L ${BITLY_LINK} > tmp.json;
+  # curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L http://bit.ly/vue-offlinefirst-spa-pwa > tmp.json;
   mv tmp.json ./serverSideFiles/virtualHostsConfigParameters.json;
 };
 
@@ -196,8 +197,6 @@ prepareTimeZone () {
   echo -e "Set up Time Zone"
   TZCMD="${GET_ASK_PASS_FUNC} source \${HOME}/${DIR_SETUP_FILES}/${TZ_SETUP_FILE}; prepareTZ;";
   ssh -t ${NEW_HOST_NAME} ${TZCMD};
-};
-
 };
 
 
@@ -306,7 +305,8 @@ unWrapSignature() {
 ########
 downLoadSignature () {
   export DLD_TYPE="signature";
-  export DLD_URL="http://bit.ly/vue-offlinefirst-spa-pwa";
+  export DLD_URL="${BITLY_LINK}";
+  # export DLD_URL="http://bit.ly/vue-offlinefirst-spa-pwa";
 
   pushd ${XDG_RUNTIME_DIR} > /dev/null;
     curl -sH "Content-Type: application/json" -d '{"mode":"'"${MODE}"'","type":"'"${DLD_TYPE}"'","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${DLD_URL} > ${SIG_B64};
@@ -329,7 +329,8 @@ prepareNodeApp () {
   declare SECRETS_FILE="${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME}";
 
   declare HDR="Content-Type: application/json";
-  declare HOST="http://bit.ly/vue-offlinefirst-spa-pwa";
+  declare HOST="${BITLY_LINK}";
+  # declare HOST="http://bit.ly/vue-offlinefirst-spa-pwa";
 
   pushd ${XDG_RUNTIME_DIR} >/dev/null;
     pwd;
@@ -420,9 +421,9 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   # prepareUFW;
   # prepareNodeJS;
   # prepareCouchDB;
-  # prepareLetsEncrypt;
+  prepareLetsEncrypt;
   # prepareNginx;
-  prepareNodeApp;
+  # prepareNodeApp;
 else
   echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;
