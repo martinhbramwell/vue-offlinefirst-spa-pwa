@@ -6,14 +6,15 @@ echo ${SCRIPTPATH};
 . ${SCRIPTPATH}/initializeConstants.sh;
 initializeLocalConstants;
 
-export DATABASE_NAME="${PRD_COUCH_DATABASE_NAME}_${PRD_VERSION}";
+export DATABASE_NAME="${MASTER_COUCH_DATABASE_NAME}_${MASTER_COUCH_DATABASE_VERSION}";
 
 export NOW=$(date +"%Y%m%d_%H%M");
 export TARGZ_FILE="pouchdb_${DATABASE_NAME}_${NOW}.tar.gz";
 
 sudo -A mkdir -p ${BACKUPS_DIR};
 sudo -A chown ${USER}:${USER} ${BACKUPS_DIR};
-echo "Will backup ${POUCH_DIR}/${DATABASE_NAME} to ${BACKUPS_DIR}/${TARGZ_FILE}"
+echo "Will backup ${POUCH_DIR}/${DATABASE_NAME} to ${BACKUPS_DIR}/${TARGZ_FILE}";
+
 if [[ $1 = "-f" ]]
 then
   REPLY="y";
@@ -35,3 +36,6 @@ fi
 
 echo -e "> ~~~~~~~~  Backed Up to '${BACKUPS_DIR}/${TARGZ_FILE}' ~~~~~~~~ <
 ";
+
+# echo -e " *** Test mode exit  (backup.sh) ***";
+# exit;

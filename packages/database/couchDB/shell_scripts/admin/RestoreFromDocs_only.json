@@ -1,0 +1,25 @@
+{
+  "user_ctx": {
+    "name": "admin",
+    "roles": [
+      "_admin",
+      "_reader",
+      "_writer"
+    ]
+  },
+  "source": {
+    "url": "http://localhost:5984/ddocs_only",
+    "headers": {
+      "Authorization": "Basic YWRtaW46cGxva3Bsb2suMC4wLjA="
+    }
+  },
+  "target": {
+    "url": "http://localhost:5984/ib201908_002",
+    "headers": {
+      "Authorization": "Basic YWRtaW46cGxva3Bsb2suMC4wLjA="
+    }
+  },
+  "create_target": true,
+  "continuous": false,
+  "owner": "admin"
+}

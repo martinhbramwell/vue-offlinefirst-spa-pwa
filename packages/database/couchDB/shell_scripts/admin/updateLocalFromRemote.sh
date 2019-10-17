@@ -4,12 +4,12 @@ set -e;
 
 export SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )";
 
-echo -e "    .    .    .    .    .    .    .    .    .    .    .
+# echo -e "    .    .    .    .    .    .    .    .    .    .    .
 
- *** Pulling from remote ***
+#  *** Pulling from remote ***
 
-";
-${SCRIPTPATH}/pullFromRemote.sh -f;
+# ";
+# ${SCRIPTPATH}/pullFromRemote.sh -f;
 
 echo -e "
 
@@ -17,6 +17,8 @@ echo -e "
 
 ";
 ${SCRIPTPATH}/restartWithNewDatabase.sh -f;
+echo -e " *** Test mode exit (updateLocalFromRemote.sh) ***";
+exit;
 
 
 echo -e "

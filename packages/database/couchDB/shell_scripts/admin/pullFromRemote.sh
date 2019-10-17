@@ -14,11 +14,13 @@ pushd ${BACKUPS_DIR} > /dev/null;
   echo -e "Getting backup file name from '${REMOTE}:~/LATEST_POUCHDB_${REMOTE_DATABASE_NAME}_BACKUP.txt'";
   scp ${REMOTE}:~/LATEST_POUCHDB_${REMOTE_DATABASE_NAME}_BACKUP.txt .  > /dev/null;
   export LATEST=$(cat LATEST_POUCHDB_${REMOTE_DATABASE_NAME}_BACKUP.txt) > /dev/null;
-  echo -e "Pulling remote backup file '${REMOTE}:${LATEST}' to '${BACKUPS_DIR}'";
+  echo -e "Pulling remote backup file '${REMOTE}:${BACKUPS_DIR}/${LATEST}' to '${BACKUPS_DIR}'";
   scp ${REMOTE}:${BACKUPS_DIR}/${LATEST} .;
   cp ${LATEST} LATEST_${REMOTE_DATABASE_NAME}.tar.gz;
 popd > /dev/null;
 
 echo -e "~~~~~~~~~  Obtained ${LATEST}  ~~~~~~~~~~
  ";
-exit;
+
+# echo -e " *** Test mode exit  (pullFromRemote.sh)***";
+# exit;

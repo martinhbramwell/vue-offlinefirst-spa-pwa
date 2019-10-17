@@ -14,13 +14,13 @@ export APT_UPDATE_FILE="aptFix.sh";
 ########  Function definitions
 usage () {
   echo -e "
-Usage:
+  Usage:
 
-${SCRIPT_NAME} [ROOT_PASSWORD]
+  ${SCRIPT_NAME} [ROOT_PASSWORD]
 
- Note 1: ROOT_PASSWORD is required for first run.
- Note 2: expects a config file at: '${CONFIG_FILE}'";
- exit 1;
+   Note 1: ROOT_PASSWORD is required for first run.
+   Note 2: expects a config file at: '${CONFIG_FILE}'";
+   exit 1;
 };
 
 
@@ -45,6 +45,7 @@ createNewUser () {
   else
     echo -e "Create new user: '${NEW_HOST_ADMIN}'";
 
+    command -v mkpasswd &> /dev/null || sudo -A apt install whois;
     # echo ${NEW_HOST_ADMIN};
     # echo ${NEW_HOST_PWD};
     # echo ${NEW_HOST};
@@ -183,6 +184,20 @@ uploadServerSideFiles () {
   from : '${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*'
   to   : '~/${DIR_SETUP_FILES}'";
   rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
+};
+
+
+
+########
+prepareTimeZone () {
+  sudo timedatectl set-timezone America/Guayaquil
+  declare TZ_SETUP_FILE="SetUpTZ.sh";
+
+  echo -e "Set up Time Zone"
+  TZCMD="${GET_ASK_PASS_FUNC} source \${HOME}/${DIR_SETUP_FILES}/${TZ_SETUP_FILE}; prepareTZ;";
+  ssh -t ${NEW_HOST_NAME} ${TZCMD};
+};
+
 };
 
 
@@ -396,19 +411,20 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;
 
-
-echo -e "Attempting to connect as admin user '${NEW_HOST_ADMIN}'.";
-if ssh -oBatchMode=yes -tl ${NEW_HOST_ADMIN} ${NEW_HOST} "pwd" &> /dev/null; then
+echo -e "Attempting to connect to host alias ${NEW_HOST_NAME} as admin user '${NEW_HOST_ADMIN}:${NEW_HOST}'.";
+if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
+  echo -e "Logged in. Building server now";
   importSecretFiles;
   uploadServerSideFiles;
-  prepareAPT;
-  prepareUFW;
-  prepareNodeJS;
-  prepareCouchDB;
-  prepareLetsEncrypt;
-  prepareNginx;
+  # prepareAPT;
+  # prepareUFW;
+  # prepareNodeJS;
+  # prepareCouchDB;
+  # prepareLetsEncrypt;
+  # prepareNginx;
   prepareNodeApp;
 else
+  echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;
 fi;
 

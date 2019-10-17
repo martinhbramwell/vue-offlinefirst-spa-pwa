@@ -12,6 +12,19 @@ say () {
   echo "'${1}'${MSG}";
 }
 
+upgrade_jq () {
+  export JQ_VRSN=$(jq --version)
+  if [[ "${JQ_VRSN}" < "jq-1.6" ]]; then
+    echo "Upgrading jq from '${JQ_VRSN}' to 'jq-1.6'";
+    pushd /tmp;
+      wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64;
+      chmod +x jq-linux64;
+      sudo -A mv jq-linux64 $(which jq);
+    popd;
+  else
+    echo "jq version :: ${JQ_VRSN}";
+  fi;
+}
 
 
 ########
@@ -24,7 +37,6 @@ aptInstallIfNotInstalled() {
   sudo -A add-apt-repository -y ppa:certbot/certbot;
   sudo -A apt-get -y update;
 
-  X="jq"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="git"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="ufw"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="curl"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
@@ -34,6 +46,9 @@ aptInstallIfNotInstalled() {
   X="debconf-utils"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="apt-transport-https"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="python-certbot-nginx"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+
+  X="jq"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  upgrade_jq;
 }
 
 

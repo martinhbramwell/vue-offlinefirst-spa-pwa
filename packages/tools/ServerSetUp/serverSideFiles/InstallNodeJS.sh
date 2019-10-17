@@ -17,8 +17,14 @@ installNodeJs()
   # export PURGE="nodejs";
   # dpkg-query -s ${PURGE} &>/dev/null && sudo apt-get purge -y ${PURGE} || echo " - ${PURGE} has been purged";
 
-  export NVM_VERSION=$(curl -s https://api.github.com/repos/creationix/nvm/releases/latest | jq -r ".name");
+  export NVM_URL=$(curl -s https://api.github.com/repos/creationix/nvm/releases/latest | jq -r ".url");
+  # echo -e "NVM_URL :: ${NVM_URL}";
+  export NVM_VERSION=$(curl -s ${NVM_URL} | jq -r ".name");
+  # echo -e "NVM_VERSION :: ${NVM_VERSION}";
+
   export NVM_INSTALLED=$(nvm --version &>/dev/null);
+  echo -e "${NVM_URL} :: ${NVM_VERSION} vs v${NVM_INSTALLED}"
+
   if [[  "${NVM_VERSION}" = "v${NVM_INSTALLED}"  ]]; then
     echo -e " - nvm '${NVM_VERSION}' is installed";
   else
