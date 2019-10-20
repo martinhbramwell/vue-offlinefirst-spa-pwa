@@ -361,6 +361,67 @@ prepareNodeApp () {
 
 
 ########
+prepareMasterDbAccess () {
+  echo -e "\n\n\nStart prepareMasterDbAccess...";
+
+  declare SSH_ALIAS=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .NODEJS_APP.SSH_ALIAS);
+  # echo ${SSH_ALIAS};
+  declare TMP_KEYS_DIR=tmp_keys_dir;
+  pushd ${XDG_RUNTIME_DIR} >/dev/null;
+    declare REMOTE_XDG_RUNTIME_DIR=$(ssh ${MASTER_HOST_USER}@${MASTER_HOST} "cd \${XDG_RUNTIME_DIR}; pwd;");
+    echo -e "Copy ${NEW_HOST_NAME} public key to ${MASTER_HOST_USER}@${MASTER_HOST}:${REMOTE_XDG_RUNTIME_DIR}";
+
+    scp -3 ${NEW_HOST_NAME}:${HOME}/.ssh/${SSH_ALIAS}.pub ${MASTER_HOST_USER}@${MASTER_HOST}:${REMOTE_XDG_RUNTIME_DIR};
+
+    cat << EOFPAK > patch_authorized_keys.sh
+#!/usr/bin/env bash
+#
+declare KEYS_FILE="authorized_keys";
+declare PUB_KEY=\$(cat ${SSH_ALIAS}.pub);
+# PUB_KEY=\${PUB_KEY};";
+pushd \${HOME}/.ssh >/dev/null;
+  echo -e "Patching authorized_keys if needed";
+  cat \${KEYS_FILE} | grep "\${PUB_KEY}" >/dev/null && echo -e "Key already added" || (echo "\${PUB_KEY}" >> \${KEYS_FILE}; echo -e "Added new key.";);
+popd >/dev/null;
+EOFPAK
+
+    chmod +x patch_authorized_keys.sh;
+    scp patch_authorized_keys.sh ${MASTER_HOST_USER}@${MASTER_HOST}:${REMOTE_XDG_RUNTIME_DIR};
+    ssh ${MASTER_HOST_USER}@${MASTER_HOST} "cd ${REMOTE_XDG_RUNTIME_DIR}; ./patch_authorized_keys.sh";
+
+    scp ${NEW_HOST_NAME}:~/.ssh/config .;
+
+    # cat config;
+    sed "/# ^^^^ HostAlias ${MASTER_HOST} ^^^^/,/# vvvv HostAlias ${MASTER_HOST} vvvv/d" config > cfg.txt;
+    sed -i '/^$/N;/^\n$/D' ./cfg.txt;
+
+    cat << EOFSCP > ssh_config_patch.txt
+
+# ^^^^ HostAlias ${MASTER_HOST} ^^^^
+Host ${MASTER_HOST}
+  HostName ${MASTER_HOST}
+  User ${MASTER_HOST_USER}
+  IdentityFile ~/.ssh/${SSH_ALIAS}
+
+# vvvv HostAlias ${MASTER_HOST} vvvv
+EOFSCP
+
+    cat cfg.txt ssh_config_patch.txt > config;
+
+    # echo -e "..............................";
+    # cat config;
+    # echo -e "..............................\n\n\n";
+
+    scp config ${NEW_HOST_NAME}:~/.ssh;
+
+  popd >/dev/null;
+
+  echo -e "Done prepareMasterDbAccess.";
+};
+
+
+
+########
 qTst () {
   echo -e "Quick test...";
   pushd serverSideFiles/SecretsCollector >/dev/null;
@@ -417,13 +478,14 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "Logged in. Building server now";
   importSecretFiles;
   uploadServerSideFiles;
-  # prepareAPT;
-  # prepareUFW;
-  # prepareNodeJS;
-  # prepareCouchDB;
+  prepareAPT;
+  prepareUFW;
+  prepareNodeJS;
+  prepareCouchDB;
+  prepareMasterDbAccess;
   prepareLetsEncrypt;
-  # prepareNginx;
-  # prepareNodeApp;
+  prepareNginx;
+  prepareNodeApp;
 else
   echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;
