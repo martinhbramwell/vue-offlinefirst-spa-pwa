@@ -19,9 +19,9 @@ configureSSL()
     If so, you will need to have ${SSL_CERT_OWNER_EMAIL} manually
     authorize 'collectSecret.js'\n     Run:
 
-        cd $(pwd);
-        npm install;
-        node collectSecret.js ${SSL_DFH_ID} \"${DHPARMS_FILE}\" ${XDG_RUNTIME_DIR};
+cd $(pwd);
+npm install;
+node collectSecret.js ${SSL_DFH_ID} \"${DHPARMS_FILE}\" ${XDG_RUNTIME_DIR};
            *****************************************
     ";
 

@@ -63,8 +63,8 @@ EOF
 
   ./preBuild.sh;
 
-  export LOCAL_DB="/opt/pouchdb/ib201908_002";
-  export REMOTE_DB="https://admin:plokplok.0.0.0@chdb2.iridium.blue/ib201910_001";
+  # export LOCAL_DB="/opt/pouchdb/ib201908_002";
+  # export REMOTE_DB="https://admin:plokplok.0.0.0@chdb2.iridium.blue/ib201910_001";
 
   node dist/index.js &
 

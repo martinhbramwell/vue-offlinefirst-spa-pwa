@@ -485,7 +485,7 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   prepareMasterDbAccess;
   prepareLetsEncrypt;
   prepareNginx;
-  prepareNodeApp;
+  # prepareNodeApp;
 else
   echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;

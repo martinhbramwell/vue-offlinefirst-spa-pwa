@@ -83,9 +83,10 @@ then
     tar -ztvf ${BACKUPS_DIR}/LATEST_${DEV_COUCH_DATABASE_NAME}_${DEV_VERSION}.tar.gz;
   popd > /dev/null;
 
-# echo -e "*** Test mode exit  (restartWithNewDatabase.sh) ***\n\n";
-# exit;
-  ${SCRIPTPATH}/${PATH_TO_LAMBDA_SRV}/launch.sh;
+  # ${SCRIPTPATH}/${PATH_TO_LAMBDA_SRV}/launch.sh;
+  ./launch.sh;
+echo -e "*** Test mode exit  (restartWithNewDatabase.sh) ***\n\n";
+exit;
 
 fi
 

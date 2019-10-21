@@ -7,6 +7,7 @@ initializeAllConstants;
 ###  Use current script path and remote script's installed path to build full path to remote backup script
 export WORK_PATH=${PROJ_DIR}/$(echo ${SCRIPTPATH} | sed 's/^.*vue-/vue-/');
 
+# echo -e "\n\n************** TEMPORARILY SKIPPING BACKUP **********************\n\n";
 echo -e "Executing remote script '${WORK_PATH}/backup.sh'";
 ssh -t  -o LogLevel=QUIET ${REMOTE} "export SUDO_ASKPASS=\"\${HOME}/.ssh/.supwd.sh\"; ${WORK_PATH}/backup.sh -f;";
 

@@ -35,7 +35,7 @@ function initializeLocalConstants() {
     sudo -A chown ${USER}:${USER} ${BACKUPS_DIR};
   fi
 
-  export REMOTE="${MASTER_HOST_ADMIN}@${MASTER_HOST}";
+  export REMOTE="${MASTER_HOST_USER}@${MASTER_HOST}";
   export REMOTE_DATABASE_NAME="${MASTER_COUCH_DATABASE_NAME}_${MASTER_COUCH_DATABASE_VERSION}";
   export LOCAL_DBNAME="${SLAVE_COUCH_DATABASE_NAME}_${SLAVE_COUCH_DATABASE_VERSION}";
   export CLEAN_DB="${DEV_COUCH_DATABASE_NAME}_${DEV_VERSION}_clean";
@@ -50,7 +50,7 @@ function initializeLocalConstants() {
   export COUCH_DB="${DEV_COUCH_PROTOCOL}://${DEV_COUCH_HOST_INTERNAL}";
 
   export MASTER_COUCH_CREDS="${DEV_COUCH_PROTOCOL}://${DEV_COUCH_ADMIN}:${DEV_COUCH_ROOT_PWD}@${DEV_COUCH_HOST_INTERNAL}";
-  export MASTER_COUCH_DB="${DEV_COUCH_PROTOCOL}://${DEV_COUCH_HOST_INTERNAL}";
+  # export MASTER_COUCH_DB="${DEV_COUCH_PROTOCOL}://${DEV_COUCH_HOST_INTERNAL}";
 
   export ACTIVE="_active_tasks";
   export ACTIVE_URI="${COUCH_CREDS}/${ACTIVE}";
@@ -76,7 +76,7 @@ function initializeAllConstants() {
   upgrade_jq;
   initializeLocalConstants;
 
-  export REMOTE_CONFIGURATION="/home/${MASTER_HOST_ADMIN}/${CONFIG_DIR}";
+  export REMOTE_CONFIGURATION="/home/${MASTER_HOST_USER}/${CONFIG_DIR}";
   export REMOTE_CONFIG_FILE="REMOTE_${CONFIG_FILE}";
 
   echo -e "~~~~~~~~~  Reading configuration '${REMOTE}:${REMOTE_CONFIGURATION}' into '${REMOTE_CONFIG}' ~~~~~~~~~~
