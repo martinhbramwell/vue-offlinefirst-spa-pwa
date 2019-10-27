@@ -10,13 +10,12 @@ installCert(){
     sudo -A certbot certificates 2>/dev/null | grep -B 1 ${VHOST_NAME}/fullchain.pem;
   else
     echo "Now making certificate for '${VHOST_NAME}'";
-    sudo -A certbot --noninteractive --nginx --agree-tos --email "${CERTIFICATE_OWNER_EMAIL}" --domain ${VHOST_NAME} certonly
+    sudo -A certbot --noninteractive --nginx --agree-tos --email "${CERTIFICATE_OWNER_EMAIL}" --domain ${VHOST_NAME} certonly;
   fi;
 }
 
 installSslCertificates()
 {
-  declare PARMS="./setupScripts/virtualHostsConfigParameters.json";
   # cat ${PARMS};
   declare CERTIFICATE_OWNER_EMAIL=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTIFICATE_OWNER_EMAIL);
   echo -e "CERTIFICATE_OWNER_EMAIL=\"${CERTIFICATE_OWNER_EMAIL}\"";
@@ -34,5 +33,18 @@ installSslCertificates()
 
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  installSslCertificates;
+  declare PARMS="./setupScripts/virtualHostsConfigParameters.json";
+  declare CERTS_BACKUP_FILE=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTS_BACKUP_FILE);
+  declare BACKUP=${SCRIPT_DIR}/${CERTS_BACKUP_FILE};
+
+  echo -e "\n\n\nDo we possess a 'letsencrypt' backup?";
+  if [[ -f "${BACKUP}" ]]; then
+    echo -e "Restoring 'letsencrypt' directory from ${BACKUP}.";
+    pushd / >/dev/null;
+      sudo -A tar zxvf ${BACKUP};
+    popd >/dev/null;
+  else
+    echo -e "Found no 'letsencrypt' directory backup :: ${BACKUP}. Starting new install...";
+    installSslCertificates;
+  fi
 fi;

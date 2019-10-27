@@ -1,0 +1,25 @@
+{
+  "user_ctx": {
+    "name": "admin",
+    "roles": [
+      "_admin",
+      "_reader",
+      "_writer"
+    ]
+  },
+  "source": {
+    "url": "",
+    "headers": {
+      "Authorization": ""
+    }
+  },
+  "target": {
+    "url": "",
+    "headers": {
+      "Authorization": ""
+    }
+  },
+  "create_target": true,
+  "continuous": false,
+  "owner": "admin"
+}

@@ -6,6 +6,7 @@ export SCRIPT_NAME=$(basename "$0");
 
 configureSSL()
 {
+  declare SSL_CERT_OWNER_EMAIL=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTIFICATE_OWNER_EMAIL);
   declare SSL_DFH_ID=$(cat ${PARMS} | jq -r .SSL_PARMS.SSL_DFH_ID);
   declare DHPARMS_FILE="dhparams_4096.pem";
   declare SSLD_SERVER="/etc/ssl/private/";
@@ -13,6 +14,17 @@ configureSSL()
   declare SSL_DFH_FILE_NAME="";
   pushd SecretsCollector >/dev/null;
     [ -e ./node_modules/axios/lib/axios.js ] || npm install;
+    echo -e "\n\n
+           *****  The following step may hang. *****
+    If so, you will need to have ${SSL_CERT_OWNER_EMAIL} manually
+    authorize 'collectSecret.js'\n     Run:
+
+cd $(pwd);
+npm install;
+node collectSecret.js ${SSL_DFH_ID} \"${DHPARMS_FILE}\" ${XDG_RUNTIME_DIR};
+           *****************************************
+    ";
+
     SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID} "${DHPARMS_FILE}" ${XDG_RUNTIME_DIR});
   popd >/dev/null;
 

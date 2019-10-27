@@ -17,6 +17,8 @@ echo -e "
 
 ";
 ${SCRIPTPATH}/restartWithNewDatabase.sh -f;
+echo -e " *** Test mode exit (updateLocalFromRemote.sh) ***";
+exit;
 
 
 echo -e "
