@@ -1,5 +1,6 @@
 import { default as processYear } from './ProcessYear';
 import { default as processPage } from './ProcessPage';
+import { default as scrapeClient } from './ScrapeClient';
 
 import { default as utils } from './utils';
 
@@ -10,5 +11,6 @@ export default {
   couchPutOpts,
   couchPayload,
   processYear,
-  processPage
+  processPage,
+  scrapeClient
 };

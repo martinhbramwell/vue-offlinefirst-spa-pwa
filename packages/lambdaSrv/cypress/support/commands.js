@@ -1,3 +1,5 @@
+import 'cypress-wait-until';
+
 // -- These are parent commands --
 Cypress.Commands.add("login", () => {
 

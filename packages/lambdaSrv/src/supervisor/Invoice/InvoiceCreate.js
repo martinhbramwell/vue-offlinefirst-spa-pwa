@@ -105,6 +105,11 @@ export default class {
         newRecord._id = `Invoice_1_${newRecord.data.idib.toString().padStart(16, '0')}`;
 
         newRecord.data.email = lclPerson.docs[0].data.email || 'nulo';
+        newRecord.data.direccion = lclPerson.docs[0].data.direccion || 'nulo';
+        newRecord.data.legalId = `[${lclPerson.docs[0].data.ruc_cedula}]` || 'nulo';
+        newRecord.data.telefono = lclPerson.docs[0].data.telefono_1 || 'nulo';
+        newRecord.data.telefono_2 = lclPerson.docs[0].data.telefono_2 || 'nulo';
+        newRecord.data.mobile = lclPerson.docs[0].data.mobile || 'nulo';
         LG.info(`(Invoice ${newRecord.data.sequential} create) Person : ${lclPerson.docs[0].data.nombre} has email  ${newRecord.data.email}`);
 
         const previousPeriodEndSequenceNumber = process.env.CYPRESS_CH_FIRSTINVOICE_SEQ;

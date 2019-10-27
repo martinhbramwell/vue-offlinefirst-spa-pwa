@@ -3,37 +3,20 @@ import { couchGetOpts, processYear } from '../support/couchdb';
 
 const years = [ '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023' ];
 
-const getLastInvoiceDate = (startDate) => {
-  let opts = couchGetOpts(Cypress.env('CH_SPECIALFIX'));
+const getContext = (startDate) => {
+  let opts = couchGetOpts(Cypress.env('CH_SCRAPERCONTROL'));
 
-  cy.log('-------------------');
-  cy.log(JSON.stringify(opts, null, 2));
-  cy.log('-------------------');
-
+  cy.task('consoleLogger', `\n\n\n###### BAPU Scraper --> getContext()
+    CH_SCRAPERCONTROL :: ${Cypress.env('CH_SCRAPERCONTROL')}
+    opts :: ${JSON.stringify(opts, null, 2)}`);
   cy.request(opts)
     .then((r) => {
       try {
-        console.log(JSON.stringify(r.body.rows[0].value.invoices, null, 2));
-        // return false;
-        return r.body.rows[0].value.invoices;
-        // return [
-        //     {
-        //       "date": "2019-04-09 13:45:13",
-        //       "number": "10946"
-        //     },
-        //     {
-        //       "date": "2019-04-09 15:53:10",
-        //       "number": "10964"
-        //     },
-        //     {
-        //       "date": "2019-04-12 12:27:17",
-        //       "number": "10975"
-        //     }
-        //   ];
+        return r.body;
       } catch {
         return false;
       }
-    }).as('specials');
+    }).as('context');
 
   opts = couchGetOpts(Cypress.env('CH_LATESTINVOICE'));
 
@@ -54,7 +37,7 @@ const getLastInvoiceDate = (startDate) => {
     }).as('latestInvoice');
 }
 
-const startProcessing = (single) => {
+const startProcessing = (args) => {
 /*
       cy.log('DISABLED');
 */
@@ -66,22 +49,30 @@ const startProcessing = (single) => {
 
   // cy.get('#form-status').select('Pagada Parcial');
 
+  // cy.task('consoleLogger', `\n###### Start processing ${JSON.stringify(args, null, 2)}.`);
+  const { skim, single } = args;
+
   cy.get('@latestInvoice').then((lastAccess) => {
     const d = lastAccess;
     cy.log(`Last access ${JSON.stringify(d, null, 2)}.`);
 
-    const lastTime = new Date(d[0], parseInt(d[1])  - 1, d[2], d[3], d[4], d[5]);
-    let testTime = new Date(2015, 0, 0, 23, 59, 59);
+    let lastTime = new Date(d[0], parseInt(d[1])  - 1, d[2], d[3], d[4], d[5]);
+    let testTime = new Date(2019, 8, 20, 18, 9, 30);
 
-    console.log('lastTime  & testTime');
-    console.log(lastTime);
-    console.log(testTime);
+    // cy.task('consoleLogger', `\n\n### START TIME ###   ${lastTime}\n\n`);
+    // lastTime = testTime;
+    // cy.task('consoleLogger', `\n\n###### FAKE START TIME !!!! ########\n     ${lastTime}.\n\####################\n\n`);
 
     const acc = { years: {} };
+    debugger;
+
+    if (skim) {
+      cy.task('initCouchClientList');
+    }
 
     years.forEach((year) => {
       testTime = new Date(parseInt(year) + 1, 0, 0, 23, 59, 59);
-      processYear({ acc, year, lastTime, testTime, single });
+      processYear({ acc, year, lastTime, testTime, single, skim });
     });
     cy.log(`Accumulator : ${JSON.stringify(acc, null, 2)}.`);
   });
@@ -109,12 +100,13 @@ describe('BAPU Scraper', function() {
 
   beforeEach(function () {
 
+    cy.task('consoleLogger', `\n\n\n###### BAPU Scraper --> beforeEach()`);
     cy.fixture('../fixtures/couch.json').as('couchData');
 
     const startDateStr = Cypress.env('CH_FIRSTINVOICE');
     const startDate = startDateStr.split(' ').map(x=>+x);
 
-    getLastInvoiceDate(startDate);
+    getContext(startDate);
 
   });
 
@@ -126,22 +118,26 @@ describe('BAPU Scraper', function() {
 
     cy.visit(`${Cypress.env('ENDPNT')}?m=invoice_control`);
 
-    cy.get('@specials').then((specialCases) => {
-      debugger;
+    cy.get('@context').then((context) => {
+      // debugger;
+      cy.task('consoleLogger', `\n###### Context : ${JSON.stringify(context, null, 2)}.`);
+      const { skim, invoices: specialCases } = context;
       if (specialCases && specialCases.length > 0) {
+        cy.task('consoleLogger', `\n###### Handling special cases ${JSON.stringify(specialCases, null, 2)}.`);
         cy.wrap(specialCases).each((aCase) => {
           cy.log(`Got special :: ${JSON.stringify(aCase, null, 2)}.`);
 
           splitDate(aCase.date);
-          startProcessing(aCase.number);
+          startProcessing({ skim, single: aCase.number });
 
         });
       } else {
-        cy.get('@latestInvoice').then((latest) => {
-          cy.log(`Processing from last invoice ${JSON.stringify(latest, null, 2)}.`);
+        cy.get('@latestInvoice').then((dt) => {
+          const type = skim ? 'Listing' : 'Processing';
+          cy.task('consoleLogger', `\n###### ${type} from last invoice :: "${dt[0]}-${dt[1]}-${dt[2]} ${dt[3]}:${dt[4]}".`);
         });
 
-        startProcessing();
+        startProcessing({ skim });
       }
 
     });

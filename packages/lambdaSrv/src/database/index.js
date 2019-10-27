@@ -12,6 +12,7 @@ import query from '../utils/query'; // eslint-disable-line no-unused-vars
 
 
 const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
+const CLD = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 const runInMemory = false;
 const adapter = runInMemory ? 'memory' : null;
@@ -181,8 +182,8 @@ export default () => {
         }
         const dir = response.direction;
         const { docs } = response.change;
-        LG.info(`${lclDb} ${name} *** ${label} ${dir} sync delta *** `);
-        LG.info(`Database replication : ${dir}ed ${docs.length} record${docs.length === 1 ? '' : 's'}.`);
+        LG.debug(`${lclDb} ${name} *** ${label} ${dir} sync delta *** `);
+        LG.debug(`Database replication : ${dir}ed ${docs.length} record${docs.length === 1 ? '' : 's'}.`);
         docs.forEach((doc) => {
           if (!replicatedEntityCounters[doc.data.type]) {
             replicatedEntityCounters[doc.data.type] = 0;
@@ -237,8 +238,8 @@ export default () => {
   };
 
   const specialReplicationFilter = {
-    name: 'post_processing/special',
-    label: 'SPECIAL',
+    name: 'post_processing/scraper_control',
+    label: 'SCRAPER_CONTROL',
     action: nullAction,
   };
 
@@ -310,7 +311,10 @@ export default () => {
     INITIAL REPLICATION COMPLETE ***  (${JSON.stringify(rslt, null, 3)})`);
       startSecondaryReplications();
     })
-    .catch(err => LG.error(`Database replication error ${err}`));
+    .catch((err) => {
+      LG.error(`Database replication error ${err}`);
+      CLD(err);
+    });
 };
 
 /*                                      SAVED FOR A RAINY DAY

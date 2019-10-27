@@ -24,7 +24,7 @@ const processing = async (args) => {
 
     result.docs.forEach(async doc => sendInvoice({ doc, db }));
   } catch (err) {
-    LG.error(`Error signing invoices: ${JSON.stringify(err, null, 3)}`);
+    LG.error(`Error sending invoices: ${JSON.stringify(err, null, 3)}`);
   }
 };
 

@@ -19,7 +19,7 @@ const months = [
 ];
 
 const processYear = (pyld) => {
-  const { acc, year, lastTime, testTime: T, single } = pyld;
+  const { acc, year, lastTime, testTime: T, single, skim = false } = pyld;
   let testTime = T;
   const lastRunYear = lastTime.getFullYear();
   cy.log(`Test year: ${JSON.stringify(year, null, 2)} vs Last run year ${JSON.stringify(lastRunYear, null, 2)}`);
@@ -34,10 +34,10 @@ const processYear = (pyld) => {
       acc[year] = {};
       months.forEach((month, idx) => {
         testTime = new Date(testTime.getFullYear(), idx + 1, 0, 23, 59, 59);
-        cy.log('testTime');
-        cy.log(testTime);
+        // cy.log('testTime');
+        // cy.log(testTime);
         // debugger;
-        processMonth({ acc, year, month, lastTime, testTime, single });
+        processMonth({ acc, year, month, lastTime, testTime, single, skim });
       });
       // lastTime[MTH] = 1;
     });

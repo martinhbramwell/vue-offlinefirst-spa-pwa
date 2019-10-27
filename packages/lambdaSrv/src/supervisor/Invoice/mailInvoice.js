@@ -2,7 +2,7 @@ import { promises } from 'fs';
 
 import pdfgen from '../../digitalDocuments/pdf';
 import {
-  logger as LG, mailCfg,
+  logger as LG, mailCfg, // eslint-disable-line no-unused-vars
   getMailer as mailer,
   validateEmail as validEmail,
   fechaShort as shortDate,
@@ -99,15 +99,20 @@ export default async (args) => {
       `;
 
       const mail = {
-        from: mailCfg.auth.user,
-        to: [d.email, 'water.iridium.blue@gmail.com', 'facturacionlogichem@gmail.com'],
+        from: 'Logichem Solutions <facturacionlogichem@gmail.com>',
+        // sender: mailCfg.auth.user,
+        to: [d.email],
+        // cc: ['facturacionlogichem@gmail.com'],
+        replyTo: 'Doowa Diddee <doowa.diddee@gmail.com>',
+        // replyTo: 'Logichem Ecuador <logichemec@gmail.com>',
         subject: `Factura de LogiChem S.A. Fecha: ${fechaShort} (#${d.codigo})`,
         text,
         html,
         attachments,
       };
-      // CLG('######################################################');
-      // CDR(mail);
+
+      CLG('######################################################');
+      CDR(mail);
       response = await sendIt(mail);
 
       await promises.writeFile(`${mailDir}/factura_${mailFile}.xml`, content);

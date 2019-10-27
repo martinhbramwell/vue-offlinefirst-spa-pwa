@@ -1,9 +1,22 @@
 import { couchPutOpts, couchPayload, uniqueRequest } from './utils';
 
+// const getClientDetails = async (name) => {
+//   cy.task('getCouchSingle', { query: `_design/visible/_view/compact_person?key="${name}"` }).then((data) => {
+//     // cy.log(`-------------------\n${JSON.stringify(data.rows[0], null, 2)}\n-------------------`);
+//     cy.task('getCouchSingle', { query: data.rows[0].id }).then((rec) => {
+//       cy.log(`-------------------\n${JSON.stringify(rec, null, 2)}\n-------------------`);
+//       cy.wrap(rec).as('clientRecord');
+//     });
+//   });
+// };
+
+
 const processInvoice = (elem, pyld) => {
   const { acc, year, month, codigo } = pyld;
 
   const invoice = acc[year][month][codigo];
+
+
 
   cy.log('-------- SCRAPE INVOICE ---------');
   cy.log(invoice.data.codigo);
@@ -15,7 +28,12 @@ const processInvoice = (elem, pyld) => {
         console.log('nombreCliente');
         console.log(v);
         invoice.data.nombreCliente = v.replace(/\s\s+/g, ' ').trim();
+        // cy.log(`###########  getting client: ${invoice.data.nombreCliente}`);
+        // getClientDetails(invoice.data.nombreCliente);
+
       });
+
+
     cy.get('.project-title').get('span').eq(1).invoke('text')
       .then(v => invoice.data.fecha = v);
     cy.get('.project-status').get('span').eq(0).invoke('text')
@@ -23,7 +41,7 @@ const processInvoice = (elem, pyld) => {
     cy.get('.project-people').invoke('text')
       .then(v => invoice.data.nombreResponsable = v);
 
-    cy.get('.project-actions').first().click();
+    cy.get('.project-actions').first().click();8002779914
 
   });
 
@@ -38,12 +56,22 @@ const processInvoice = (elem, pyld) => {
     });
     cy.get('#modal-lista-factura-invoice_id')
     .then(e => invoice.data.idib = parseInt(e.text()));
-    cy.get('#modal-lista-factura-street_res')
-    .then(e => invoice.data.direccion = e.text());
-    cy.get('#modal-lista-factura-partner_legal_id')
-    .then(e => invoice.data.legalId = `[${e.text()}]`);
-    cy.get('#modal-lista-factura-partner_telf_primary')
-    .then(e => invoice.data.telefono = e.text());
+    // cy.get('#modal-lista-factura-street_res')
+    // .then(e => invoice.data.direccion = e.text());
+    // cy.get('#modal-lista-factura-partner_legal_id')
+    // .then(e => invoice.data.legalId = `[${e.text()}]`);
+    // cy.get('#modal-lista-factura-partner_telf_primary')
+    // .then(e => invoice.data.telefono = e.text());
+    // cy.get('@clientRecord').then((clientRecord) => {
+    //   cy.log(`-------------------\n${JSON.stringify(clientRecord, null, 2)}\n-------------------`);
+    //   invoice.data.idib = clientRecord.data.idib;
+    //   invoice.data.direccion = clientRecord.data.direccion;
+    //   invoice.data.legalId =  `[${clientRecord.data.ruc_cedula}]`;
+    //   invoice.data.telefono = clientRecord.data.telefono_1;
+    //   invoice.data.telefono_2 = clientRecord.data.telefono_2;
+    //   invoice.data.mobile = clientRecord.data.mobile;
+    //   invoice.data.email = clientRecord.data.email;
+    // });
 
     invoice.data.itemes = [];
     let idx = 0;
@@ -103,6 +131,9 @@ const processInvoice = (elem, pyld) => {
 
 
       cy.request(opts);
+
+      cy.task('consoleLogger', `\n==============================\n --> Invoice : ${invoice.data.codigo}.`);
+      cy.task('updateCouch', { action: 'delete', list: 'facturas', value: invoice.data.codigo });
 
       // cy.log(`Accumulated Invoice Data: ${JSON.stringify(acc[year][month][codigo].data, null, 2)}.`);
 

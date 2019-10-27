@@ -112,21 +112,16 @@ const frags = {
         <h2>Recuperación de datos de BAPU</h2>
       </div>
       <div class="modal-body">
-        <p>Avance de extracción de Clientes : </p>
-        <div id="extractPersons"></div>
-        <br />
-        <br />
-        <p>Avance de extracción de Facturas: </p>
-        <p>
-          <table>
-            <tr>
-              <td class='alnright'>Última factura antes extracción :: <span id="spnInitialInvoice">001-002-10604</span></td>
-            </tr>
-            <tr>
-              <td class='alnright'>Última factura ahora :: <span id="spnCurrentInvoice">001-002-10604</span></td>
-            </tr>
-          </table>
-        </p>
+        <table style="width:90%;"cellspacing="20px">
+          <tr>
+            <td>
+              <div id="extractedPersons"></div>
+            </td>
+            <td>
+              <div id="extractedInvoices"></div>
+            </td>
+          </tr>
+        </table>
       </div>
       <!-- div class="modal-footer">
         <h3>Modal Footer</h3>

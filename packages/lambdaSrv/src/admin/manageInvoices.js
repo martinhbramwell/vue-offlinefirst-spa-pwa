@@ -157,8 +157,8 @@ const clientActions = {
   },
 
   mail: async (args) => {
-    CLG('mail');
-    CDR(args);
+    // CLG('mail');
+    // CDR(args);
     if (await saveSettings(args)) {
       await mailInvoices({ db: databaseLocal });
       await reHold();

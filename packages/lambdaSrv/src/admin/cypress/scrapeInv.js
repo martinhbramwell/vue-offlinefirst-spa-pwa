@@ -1,38 +1,42 @@
 import cypress from 'cypress';
-import fs from 'fs';
+import fs from 'fs'; // eslint-disable-line no-unused-vars
 
 import { logger as LG } from '../../utils'; // eslint-disable-line no-unused-vars
-import { databaseLocal } from '../../database';
+import { databaseRemote, databaseLocal } from '../../database'; // eslint-disable-line no-unused-vars
 
 import { processVoids } from '../reprocessVoids';
 
 const sanityCheck = 'cypress/integration/SanityCheck.js'; // eslint-disable-line no-unused-vars
-const scrapePersons = 'cypress/integration/GetPersons.js';
+const scrapePersons = 'cypress/integration/GetPersons.js'; // eslint-disable-line no-unused-vars
 const scrapeInvoices = 'cypress/integration/GetInvoices.js';
 
 const jsonStart = '{ "starts": "OK"';
 const jsonEnd = '}';
 
-const pages = { thisPage: 0 };
+const pages = { thisPage: 0 }; // eslint-disable-line no-unused-vars
 const path = process.cwd();
-const controlFile = `${path}/cypress/nextPage.json`;
+const controlFile = `${path}/cypress/nextPage.json`; // eslint-disable-line no-unused-vars
 let resultSanityCheck = null; // eslint-disable-line no-unused-vars, prefer-const
-let resultPersons = null;
 
-const setSpecialFix = async (Fix) => {
-  const fix = Fix;
+const controlRecord = '00_ScraperControl';
+const setScraperControl = async (fix) => {
   let resp = null;
   try {
-    resp = await databaseLocal.get('00_SpecialFix');
+    resp = await databaseRemote.get(controlRecord);
+    // resp = await databaseLocal.get(controlRecord);
   } catch (err) {
     if (err.message !== 'missing') LG.error(`>${err.message}<`);
   }
-  if (resp && resp._rev) fix._rev = resp._rev; // eslint-disable-line no-underscore-dangle
-  LG.info(JSON.stringify(fix, null, 2));
+  resp = resp || { _id: controlRecord, facturas: [], clientes: [] };
+
+  const rslt = Object.assign(resp, fix);
+  LG.info(JSON.stringify(rslt, null, 2));
   try {
-    await databaseLocal.put(fix);
+    await databaseRemote.put(rslt);
+    // await databaseLocal.put(rslt);
+    LG.info(`Wrote '${controlRecord}' to local database. Remote DB is ${process.env.REMOTE_DB}`);
   } catch (err) {
-    LG.error(`Failed write to '00_SpecialFix' :: >${err.message}<`);
+    LG.error(`Failed write to ${controlRecord} :: >${err.message}<`);
   }
 };
 
@@ -45,31 +49,53 @@ export default async (req, res) => {
   try {
     /* eslint-disable max-len */
 
-    setSpecialFix({ _id: '00_SpecialFix', invoices: [] });
+    setScraperControl({ _id: controlRecord, clientes: [], facturas: [], skim: true }); // eslint-disable-line object-curly-newline
+    const resultClientsList = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
+    LG.info(`Invoices listing results:\n${JSON.stringify(resultClientsList.config.env, null, 3)}`);
+    res.write(', "type": "PersonsList"');
 
-    if (process.env.CYPRESS_SKIP_PERSONS && process.env.CYPRESS_SKIP_PERSONS === 'true') {
-      const message = 'Will not scrape persons data';
-      LG.info(message);
-      res.write(`, "msg": "${message}"`);
-    } else {
-      for (let pg = 8; pg > 0; pg -= 1) {
-        pages.thisPage = pg;
-        fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
-        resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
-        LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
-        res.write(', "type": Persons"');
-      }
-    }
+    const resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
+    LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
+    res.write(', "type": Persons"');
 
-    if (process.env.CYPRESS_SKIP_INVOICES && process.env.CYPRESS_SKIP_INVOICES === 'true') {
-      const message = 'Will not scrape invoice data';
-      LG.info(message);
-      res.write(', "type": "message"');
-    } else {
-      const resultInvoices = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
-      LG.info(`Invoices page scraper results:\n${JSON.stringify(resultInvoices.config.env, null, 3)}`);
-      res.write(', "type": "Invoices"');
-    }
+    // setScraperControl({ _id: controlRecord, clientes: [], facturas: [], skim: false });
+    const resultInvoices = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
+    LG.info(`Invoices page scraper results:\n${JSON.stringify(resultInvoices.config.env, null, 3)}`);
+    res.write(', "type": "Invoices"');
+
+
+    // // if (process.env.CYPRESS_SKIP_PERSONS && process.env.CYPRESS_SKIP_PERSONS === 'true') {
+    // //   const message = 'Will not scrape persons data';
+    // //   LG.info(message);
+    // //   res.write(`, "msg": "${message}"`);
+    // // } else {
+    // //   for (let pg = 8; pg > 0; pg -= 1) {
+    // //     pages.thisPage = pg;
+    // //     fs.writeFileSync(controlFile, JSON.stringify(pages, null, 3));
+    // //     const resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
+    // //     LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
+    // //     res.write(', "type": Persons"');
+    // //   }
+    // // }
+
+    // // if (process.env.CYPRESS_SKIP_INVOICES && process.env.CYPRESS_SKIP_INVOICES === 'true') {
+    // //   const message = 'Will not scrape invoice data';
+    // //   LG.info(message);
+    // //   res.write(', "type": "message"');
+    // // } else {
+    // //   setScraperControl({ _id: controlRecord, invoices: [], skim: true });
+    // //   const resultInvoicesList = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
+    // //   LG.info(`Invoices listing results:\n${JSON.stringify(resultInvoicesList.config.env, null, 3)}`);
+
+    // //   const resultPersons = await cypress.run({ spec: `${path}/${scrapePersons}` }); // eslint-disable-line no-await-in-loop
+    // //   LG.info(`Persons pages scraper results:\n${JSON.stringify(resultPersons.config.env, null, 3)}`);
+    // //   res.write(', "type": Persons"');
+
+    // //   // setScraperControl({ _id: controlRecord, invoices: [], skim: false });
+    // //   // const resultInvoices = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
+    // //   // LG.info(`Invoices page scraper results:\n${JSON.stringify(resultInvoices.config.env, null, 3)}`);
+    // //   // res.write(', "type": "Invoices"');
+    // // }
 
     /* eslint-enable max-len */
   } catch (err) {
@@ -120,7 +146,7 @@ export default async (req, res) => {
       });
       LG.info(JSON.stringify(missed, null, 2));
 
-      setSpecialFix({ _id: '00_SpecialFix', invoices: missed });
+      setScraperControl({ _id: controlRecord, invoices: missed });
       const resultInvoices = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
       LG.info(`Invoices page scraper results:\n${JSON.stringify(resultInvoices.config.env, null, 3)}`);
       res.write(', "type": "Invoices"');

@@ -53,7 +53,7 @@ export default async (req, res) => {
       const invoices = await databaseLocal.allDocs({
         include_docs: true,
         attachments: true,
-        startkey: '00_SpecialFix',
+        startkey: '00_ScraperControl',
         // startkey: 'Invoice_1',
         endkey: 'Invoice_2',
       });

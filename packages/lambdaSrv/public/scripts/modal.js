@@ -7,10 +7,11 @@ var btnOpenBapuModal = document.getElementById("btnOpenBapuModal");
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("closeModal")[0];
 
-alertify.defaults.glossary.title = 'Logichem';
-alertify.defaults.notifier.closeButton = true;
-alertify.defaults.glossary.ok = 'Entendido';
-
+const remove_duplicates_es6 = (arr) => {
+    let s = new Set(arr);
+    let it = s.values();
+    return Array.from(it);
+}
 
 const tStamp = D => ''.concat(
   D.getFullYear().toString(),
@@ -21,95 +22,92 @@ const tStamp = D => ''.concat(
 );
 
 let timer = null;
-let progressBar = null;
 // When the user clicks the button, open the modal
 btnOpenBapuModal.onclick = async (event) => {
   CLG(`  *** DISPLAY IT  ***  ${event}`);
   event.stopPropagation();
 
-  progressBar = startProgress(document.getElementById("extractPersons"));
-  const spnInitialInvoice = document.getElementById("spnInitialInvoice");
-  const spnCurrentInvoice = document.getElementById("spnCurrentInvoice");
+  const divExtractedPersons = document.getElementById("extractedPersons");
+  const divExtractedInvoices = document.getElementById("extractedInvoices");
+  // const spnInitialInvoice = document.getElementById("spnInitialInvoice");
+  // const spnCurrentInvoice = document.getElementById("spnCurrentInvoice");
 
   const dd = 'bapu';
   const vwAll = 'allPersons';
-  const vwRefd = 'refreshedPersons';
+  // const vwRefd = 'refreshedPersons';
   const prms = 'reduce=true&update=true';
 
+  const uriScraperControl = `${envServerURL}/${envDbName}/00_ScraperControl`;
   const uriAll = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwAll}?${prms}`;
-  const uriRefd = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwRefd}?${prms}`;
-  const startkey = `startkey=%22${tStamp(new Date())}%22`;
+  // const uriRefd = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwRefd}?${prms}`;
+  // const startkey = `startkey=%22${tStamp(new Date())}%22`;
   const config = { auth: envAuth };
 
-  const vwLastInv = 'latestInvoice';
-  const invPrms = 'update=true&descending=true&limit=1';
-  const uriLastInv = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwLastInv}?${invPrms}`;
+  // const vwLastInv = 'latestInvoice';
+  // const invPrms = 'update=true&descending=true&limit=1';
+  // const uriLastInv = `${envServerURL}/${envDbName}/_design/${dd}/_view/${vwLastInv}?${invPrms}`;
 
-  let refreshedPersonsCount = 1;
-  let allPersonsCount = 1;
-  let initialInvoice = 'esperando inicio';
-  let currentInvoice = 'esperando inicio';
-  let pct = 0;
-  let rsltAll = null;
+  // let refreshedPersonsCount = 1;
+  // let allPersonsCount = 1;
+  // let initialInvoice = 'esperando inicio';
+  // let currentInvoice = 'esperando inicio';
+  // let pct = 0;
+  // let rsltAll = null;
 
   const creds = await authenticate();
-  // CLG(`Creds are ${creds}`);
-  // CDR(creds);
   if (creds == null) return;
-
-  // if (elemCouchUid.value.length < 1 || elemCouchPwd.value.length < 1) {
-  //   alertify.alert(`
-  //     <h4>Hay que ingresar nombre de usuario y clave</h4>
-  //   `);
-  //   return;
-  // } else {
     try {
-      // config.auth.username = elemCouchUid.value;
-      // config.auth.password = elemCouchPwd.value;
       config.auth = creds;
       rsltAll = await axios.get(`${uriAll}`, config);
-//       CDR(rsltAll);
     } catch (err) {
       CDR(err);
-      // const msg = err.response.status === 401 ? 'Usuario o contraseña inválida.' : err;
-      // alertify.alert(`
-      //   <h3>El intento de conexión a la base de datos falló.</h3>
-      //   <p>${msg}</p>
-      // `);
       return;
     }
-  // }
 
   try {
 
-    allPersonsCount = 1000;
-    // allPersonsCount = rsltAll.data.rows[0].value - 5;
+    // allPersonsCount = 1000;
+    // // allPersonsCount = rsltAll.data.rows[0].value - 5;
 
-    const rsltIniInv = await axios.get(`${uriLastInv}`, config);
-    CDR(rsltIniInv);
-    if (rsltIniInv && rsltIniInv.data && rsltIniInv.data.rows && rsltIniInv.data.rows.length > 0) {
-      if (rsltIniInv.data.rows[0].value) {
-        initialInvoice = `001-001-${rsltIniInv.data.rows[0].value} [de la fecha: ${rsltIniInv.data.rows[0].key}]`;
-      }
-    }
-    spnInitialInvoice.innerHTML = initialInvoice;
-    spnCurrentInvoice.innerHTML = currentInvoice;
+    // const rsltIniInv = await axios.get(`${uriLastInv}`, config);
+    // CDR(rsltIniInv);
+    // if (rsltIniInv && rsltIniInv.data && rsltIniInv.data.rows && rsltIniInv.data.rows.length > 0) {
+    //   if (rsltIniInv.data.rows[0].value) {
+    //     initialInvoice = `001-001-${rsltIniInv.data.rows[0].value} [de la fecha: ${rsltIniInv.data.rows[0].key}]`;
+    //   }
+    // }
+
+    const personsList_In = '<div style="text-align:center">Clientes</div><hr/><ol>';
+    const personsList_Out = '</ol>';
+    divExtractedPersons.innerHTML = `${personsList_In}<li></li>${personsList_Out}`;
+
+    const invoicesList_In = '<div style="text-align:center">Facturas</div><hr/><ol>';
+    const invoicesList_Out = '</ol>';
+    divExtractedInvoices.innerHTML = `${invoicesList_In}<li></li>${invoicesList_Out}`;
+
     timer = setInterval(async () => {
-      const rsltRef = await axios.get(`${uriRefd}&${startkey}`, config);
-      refreshedPersonsCount = rsltRef.data.rows.length > 0 ? rsltRef.data.rows[0].value : 0;
-      pct = refreshedPersonsCount / allPersonsCount;
-      CLG(`URL : ${uriRefd}&${startkey} Rows : ${rsltRef.data.rows.length}  Total : ${allPersonsCount}  Current ${refreshedPersonsCount}   Progress :: ${pct}`);
-      progressBar.animate(pct);
+      const { data } = await axios.get(`${uriScraperControl}`, config);
+      const controlRecord = JSON.stringify(data, null, 2);
+      CDR(controlRecord.clientes);
+      CDR(controlRecord.facturas);
 
-      const rsltCurrInv = await axios.get(`${uriLastInv}`, config);
-      CDR(rsltCurrInv);
-      if (rsltCurrInv && rsltCurrInv.data && rsltCurrInv.data.rows && rsltCurrInv.data.rows.length > 0) {
-        if (rsltCurrInv.data.rows[0].value) {
-          currentInvoice = `001-001-${rsltCurrInv.data.rows[0].value} [de la fecha: ${rsltCurrInv.data.rows[0].key}]`;
-        }
-      }
-      spnCurrentInvoice.innerHTML = currentInvoice;
-    }, 10000);
+      let personsList = personsList_In;
+      let clientes = remove_duplicates_es6(data.clientes);
+      clientes.forEach((cliente) => {
+        personsList += `<li>${cliente}</li>`;
+      });
+      personsList += personsList_Out;
+      divExtractedPersons.innerHTML = personsList;
+      // CLG(`${personsList}`);
+
+      let invoicesList = invoicesList_In;
+      data.facturas.forEach((invoice) => {
+        invoicesList += `<li>${invoice}</li>`;
+      });
+      invoicesList += invoicesList_Out;
+      divExtractedInvoices.innerHTML = invoicesList;
+      // CLG(`${invoicesList}`);
+    }, 5000);
   } catch (error) {
     console.error(error);
   }
@@ -123,7 +121,6 @@ btnOpenBapuModal.onclick = async (event) => {
 span.onclick = function(event) {
   event.stopPropagation();
   clearInterval(timer)
-  if (progressBar) progressBar.destroy();
   bapuModal.style.display = "none";
 }
 
@@ -135,7 +132,6 @@ window.onclick = function(event) {
     if (event.target == bapuModal) {
       bapuModal.style.display = "none";
     }
-    if (progressBar) progressBar.destroy();
   } catch (err) {
     CLG(`Error while destroying unwanted progress bar.`);
   }
