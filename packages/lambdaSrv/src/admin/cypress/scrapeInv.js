@@ -15,7 +15,7 @@ const jsonEnd = '}';
 
 const pages = { thisPage: 0 }; // eslint-disable-line no-unused-vars
 const path = process.cwd();
-const controlFile = `${path}/cypress/nextPage.json`; // eslint-disable-line no-unused-vars
+// const controlFile = `${path}/cypress/nextPage.json`; // eslint-disable-line no-unused-vars
 let resultSanityCheck = null; // eslint-disable-line no-unused-vars, prefer-const
 
 const controlRecord = '00_ScraperControl';

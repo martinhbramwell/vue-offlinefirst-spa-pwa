@@ -35,9 +35,9 @@ const tStamp = D => ''.concat(
 describe('BAPU Scraper', function() {
 
   it('Scrapes BAPU for Persons', function() {
-    cy.readFile('./cypress/nextPage.json').then((text) => {
-      const { thisPage } = text;
-      cy.log(`Next page ${thisPage}`);
+    // cy.readFile('./cypress/nextPage.json').then((text) => {
+    //   const { thisPage } = text;
+    //   cy.log(`Next page ${thisPage}`);
 
       cy.visit(Cypress.env('ENDPNT'));
 
@@ -149,6 +149,6 @@ describe('BAPU Scraper', function() {
           });
         });
       });
-    });
+    // });
   });
 });

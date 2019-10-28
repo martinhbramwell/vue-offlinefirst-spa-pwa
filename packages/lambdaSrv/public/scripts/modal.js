@@ -87,9 +87,11 @@ btnOpenBapuModal.onclick = async (event) => {
 
     timer = setInterval(async () => {
       const { data } = await axios.get(`${uriScraperControl}`, config);
-      const controlRecord = JSON.stringify(data, null, 2);
-      CDR(controlRecord.clientes);
-      CDR(controlRecord.facturas);
+      // const controlRecord = JSON.stringify(data, null, 2);
+      // CDR(controlRecord);
+      CLG(`\nClientes :: \n${JSON.stringify(data.clientes, null, 2)}\nFacturas :: \n${JSON.stringify(data.facturas, null, 2)}`);
+      // CDR(data.clientes);
+      // CDR(data.facturas);
 
       let personsList = personsList_In;
       let clientes = remove_duplicates_es6(data.clientes);

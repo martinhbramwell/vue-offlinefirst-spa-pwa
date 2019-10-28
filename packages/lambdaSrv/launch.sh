@@ -73,10 +73,10 @@ EOF
 popd >/dev/null;
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 #  while inotifywait -r -e modify,create,delete,move ./lambdaSrv/; do rsync -avz ./lambdaSrv/ IridiumBlueGDF:/home/you/services/vue-offlinefirst-spa-pwa/packages/lambdaSrv; done;
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
