@@ -49,7 +49,7 @@ describe('BAPU Scraper', function() {
 
       cy.task('getCouchLists').then((data) => {
         data.clientes.forEach((cliente) => {
-          const client = latinise(cliente);
+          const client = latinise(cliente).trim();
           cy.log(`Client : ${client}`);
           cy.get('#dataTables_clients_length > label > .form-control').select('5');
           cy.get('#dataTables_clients_filter > label > .form-control').as('Buscar')
@@ -57,9 +57,10 @@ describe('BAPU Scraper', function() {
           cy.get('@Buscar').type(client);
           cy.get('table#dataTables_clients > tbody > tr').eq(0).children().as('TopRowCells');
           cy.waitUntil(() => {
-            cy.task('consoleLogger', `\n --> Client : ${client} (was ${cliente}).`);
+            cy.task('consoleLogger', `\n --> Client : >${client}< (was >${cliente}<).`);
             return cy.get('@TopRowCells').eq(1).then(($cl) => {
-              const res = Boolean($cl[0].innerText === cliente);
+              const row0_col1_text = latinise($cl[0].innerText.trim());
+              const res = Boolean(row0_col1_text === client);
               console.log(res);
               return res;
             });
