@@ -1,4 +1,4 @@
-import scrapePerson from './ScrapePerson';
+import scrapeClient from './ScrapeClient';
 
 let not516 = true;
 const processPage = (pyld) => {
@@ -13,7 +13,7 @@ const processPage = (pyld) => {
         const namePerson = elem[0].children[1].innerText;
         acc[page][codigo] = { name: namePerson };
         cy.task('consoleLogger', `\n###### Scraping person: ${namePerson}`);
-        scrapePerson(elem, { acc, page, codigo });
+        scrapeClient(elem, { acc, page, codigo });
       }
     });
 }
