@@ -61,13 +61,17 @@ EOF
 
   # npm run prestart;
 
+  echo "$(date) |  Running preBuild ..." | tee -a /tmp/pouchLog;
   ./preBuild.sh;
 
   # export LOCAL_DB="/opt/pouchdb/ib201908_002";
   # export REMOTE_DB="https://admin:plokplok.0.0.0@chdb2.iridium.blue/ib201910_001";
+  echo "$(date) |    Loading NVM" | tee -a /tmp/pouchLog;
+  export NVM_DIR="$HOME/.nvm";
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-  echo -e "
-     Starting now ...."
+  echo "$(date) |  Starting now ..." | tee -a /tmp/pouchLog;
   node dist/index.js &
 
 popd >/dev/null;
