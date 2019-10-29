@@ -30,8 +30,8 @@ const sendIt = async (message) => { // eslint-disable-line no-unused-vars
     r.search = `rfc822msgid:${r.result.messageId.replace('<', '').replace('>', '')}`;
   }
 
-  CLG('Result ====>');
-  CDR(r);
+  // CLG('Result ====>');
+  // CDR(r);
 
   return r;
 };
@@ -98,21 +98,28 @@ export default async (args) => {
 
       `;
 
-      const mail = {
-        from: 'Logichem Solutions <facturacionlogichem@gmail.com>',
-        // sender: mailCfg.auth.user,
+      const unique = {
         to: [d.email],
-        // cc: ['facturacionlogichem@gmail.com'],
-        replyTo: 'Doowa Diddee <doowa.diddee@gmail.com>',
-        // replyTo: 'Logichem Ecuador <logichemec@gmail.com>',
         subject: `Factura de LogiChem S.A. Fecha: ${fechaShort} (#${d.codigo})`,
-        text,
-        html,
-        attachments,
       };
 
-      CLG('######################################################');
-      CDR(mail);
+      CLG(`Will send ... \n${JSON.stringify(unique, null, 2)}`);
+
+      const headers = Object.assign(unique, {
+        from: mailCfg.send_from,
+        sender: mailCfg.send_sender,
+        replyTo: mailCfg.send_replyto,
+      });
+
+      if (mailCfg.send_bcc) headers.bcc = mailCfg.send_bcc;
+
+      const mail = Object.assign(headers, {text, html, attachments});
+
+      // mail.text = text,
+      // mail.html = html,
+      // mail.attachments = attachments,
+
+
       response = await sendIt(mail);
 
       await promises.writeFile(`${mailDir}/factura_${mailFile}.xml`, content);
@@ -124,7 +131,7 @@ export default async (args) => {
   }
 
   CLG(`Mailer result :: ${response}`);
-  CDR(response);
+  // CDR(response);
 
   const invoice = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
   invoice.emailed = response;

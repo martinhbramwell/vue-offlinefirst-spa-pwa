@@ -5,9 +5,11 @@ source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 # export COUCH_PROTOCOL="http"; export COUCH_HOST="localhost";
 export URL="${COUCH_PROTOCOL}://${COUCH_HOST}/${COUCH_DATABASE_NAME}_${VERSION}/Invoice_1_000000000000";
 
-export invoices=( "9999" );
-# export invoices=( "5337" "5338" "5339" "5340" "5341" "5342" "5343" "5345" "5347" "5348" "5349" "5350" "5351" "5352" "5353" "5354" "5355" "5356" "5357" "5358" "5359" "5360" "5361" "5362" "5363" "5364" "5365" "5366" "5367" "5368" );
-# export invoices=( "5310" "5311" "5312" "5313" "5314" "5315" "5316" "5317" "5318" "5319" "5320" "5321" "5322" "5323" "5324" "5327" "5328" "5330" "5331" "5332" "5333" "5334" "5335" "5336" "5337" "5338" "5339" "5340" "5341" "5342" "5343" "5345" "5347" "5348" "5349" "5350" "5351" "5352" "5353" "5354" "5355" "5356" "5357" "5358" "5359" "5360" "5361" "5362" "5363" "5364" "5365" "5366" "5367" "5368" );
+declare START_RNG=0;
+# declare START_RNG=5744;
+declare END_RNG=${START_RNG};
+# declare END_RNG=5768;
+export invoices=( $(eval "echo {${START_RNG}..${END_RNG}..1}") );
 
 export attachments=( );
 # export attachments=( "respuestaSRI" );
@@ -21,6 +23,12 @@ export statusFlags="";
 # export statusFlags=".hold, .authorized, .authorizationStatus, .emailed";
 # export statusFlags=".hold, .accepted, .rejected, .returned, .reason, .authorized, .authorizationStatus, .emailed";
 # export statusFlags=".hold, .accessKey, .accepted, .rejected, .authorized, .failed, .authorizationStatus, .emailed";
+
+if [[ ${START_RNG} -lt 1 ]];
+then
+  echo "Nothing to do.";
+  exit;
+fi;
 
 echo -e "For these invoices...";
 for invoice in "${invoices[@]}"

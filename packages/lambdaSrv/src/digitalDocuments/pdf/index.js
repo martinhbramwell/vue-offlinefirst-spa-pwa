@@ -544,11 +544,11 @@ const pdfgen = async (invoice, names) => {
   const { data: d } = inv;
   const { mailDir, mailFile } = names;
 
-  CDR(inv);
-  CDR(d.itemes);
-  CLG(`
-  +++++++++++++++++++ ${__dirname}
-  `);
+  // CDR(inv);
+  // CDR(d.itemes);
+  // CLG(`
+  // +++++++++++++++++++ ${__dirname}
+  // `);
 
 
   const fechaShort = shortDate(d.fecha);
