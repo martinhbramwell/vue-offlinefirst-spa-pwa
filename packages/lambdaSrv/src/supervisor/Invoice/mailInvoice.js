@@ -13,9 +13,7 @@ const CLG = console.log; // eslint-disable-line no-unused-vars, no-console
 const CDR = console.dir; // eslint-disable-line no-unused-vars, no-console
 
 const sendIt = async (message) => { // eslint-disable-line no-unused-vars
-  LG.info(`Mailing :: ${process.env.MAILERUID}`);
-
-  CLG('Sending now ===========> ');
+  LG.info(`Mailing via ${process.env.MAILERUID} to '${mailCfg.send_to}'' now == >>`);
 
   const r = {};
   r.result = await mailer.sendMail(message);
@@ -98,8 +96,12 @@ export default async (args) => {
 
       `;
 
+      const PROTECTOR = 'GET FROM DATABASE';
+      const to = mailCfg.send_to === PROTECTOR ? d.email : mailCfg.send_to;
+      // CLG(`mailCfg.send_to = >${mailCfg.send_to}< PROTECTOR = >${PROTECTOR}<. Equal? ${mailCfg.send_to === PROTECTOR}. To = ${to}.`);
+
       const unique = {
-        to: [d.email],
+        to,
         subject: `Factura de LogiChem S.A. Fecha: ${fechaShort} (#${d.codigo})`,
       };
 
@@ -130,7 +132,7 @@ export default async (args) => {
     response = { result: { status: `Dirección inválida: ${d.email}` }, sent: false };
   }
 
-  CLG(`Mailer result :: ${response}`);
+  // CLG(`Mailer result :: ${response}`);
   // CDR(response);
 
   const invoice = await db.get(inv._id); // eslint-disable-line no-underscore-dangle

@@ -70,6 +70,7 @@ export const generateMovementId = user => `${ID()}${user}`;
 
 export const mailCfg = {
   service: 'gmail',
+  send_to: process.env.SEND_TO,
   send_from: process.env.SEND_FROM,
   send_sender: process.env.SEND_SENDER,
   send_bcc: process.env.SEND_BCC,
