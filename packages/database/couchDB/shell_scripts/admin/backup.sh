@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 export SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-echo ${SCRIPTPATH};
+echo -e "SCRIPTPATH :: ${SCRIPTPATH}";
 
 . ${SCRIPTPATH}/initializeConstants.sh;
 initializeLocalConstants;
@@ -26,7 +26,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
   export NAME_HOLDER="${BACKUP_NAME_HOLDER_start}${DATABASE_NAME}${BACKUP_NAME_HOLDER_end}";
   pushd ${POUCH_DIR} > /dev/null;
-    tar -Pzcvf ${BACKUPS_DIR}/${TARGZ_FILE} ${DATABASE_NAME}*;
+    tar -Pzcf ${BACKUPS_DIR}/${TARGZ_FILE} ${DATABASE_NAME}*;
     echo "${TARGZ_FILE}" > ${BACKUPS_DIR}/${NAME_HOLDER};
     cat ${BACKUPS_DIR}/${NAME_HOLDER};
     cp ${BACKUPS_DIR}/${NAME_HOLDER} ${HOME};
@@ -34,7 +34,7 @@ then
 
 fi
 
-echo -e "> ~~~~~~~~  Backed Up to '${BACKUPS_DIR}/${TARGZ_FILE}' ~~~~~~~~ <
+echo -e ">> ~~~~~~~~~  Backed Up to '${BACKUPS_DIR}/${TARGZ_FILE}' ~~~~~~~~ <<
 ";
 
 # echo -e " *** Test mode exit  (backup.sh) ***";
