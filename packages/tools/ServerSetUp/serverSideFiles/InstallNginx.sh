@@ -3,13 +3,21 @@
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
 
+export SECRETS_FILE_PATH=".ssh/secrets";
+export SECRETS_FILE_DIR="${HOME}/${SECRETS_FILE_PATH}";
+export GOOGLE_CREDS_FILE="credentials.json";
 
 configureSSL()
 {
-  declare SSL_CERT_OWNER_EMAIL=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTIFICATE_OWNER_EMAIL);
-  declare SSL_DFH_ID=$(cat ${PARMS} | jq -r .SSL_PARMS.SSL_DFH_ID);
+  echo -e "PARMS = ${PARMS}";
+  declare SSL_PARMS=$(cat ${PARMS} | jq -r .SSL_PARMS);
+  declare SSL_CERT_OWNER_EMAIL=$(echo ${SSL_PARMS} | jq -r .CERTIFICATE_OWNER_EMAIL);
+  declare SSL_DFH_ID=$(echo ${SSL_PARMS} | jq -r .SSL_DFH_ID);
   declare DHPARMS_FILE="dhparams_4096.pem";
   declare SSLD_SERVER="/etc/ssl/private/";
+
+  echo -e "SSL_DFH_ID = ${SSL_DFH_ID}";
+
 
   declare SSL_DFH_FILE_NAME="";
   pushd SecretsCollector >/dev/null;
@@ -21,11 +29,15 @@ configureSSL()
 
 cd $(pwd);
 npm install;
+export SECRETS_FILE_PATH=\".ssh/secrets\";
+export SECRETS_FILE_DIR=\"\${HOME}/${SECRETS_FILE_PATH}\";
+export GOOGLE_CREDS_FILE=\"credentials.json\";
 node collectSecret.js ${SSL_DFH_ID} \"${DHPARMS_FILE}\" ${XDG_RUNTIME_DIR};
            *****************************************
     ";
 
     SSL_DFH_FILE_NAME=$(node collectSecret.js ${SSL_DFH_ID} "${DHPARMS_FILE}" ${XDG_RUNTIME_DIR});
+    ls -la ${XDG_RUNTIME_DIR};
   popd >/dev/null;
 
   echo -e "SSL_DFH_FILE_NAME = ${SSL_DFH_FILE_NAME}";
@@ -90,7 +102,7 @@ installNginx()
 
 
   pushd ${SCRIPT_DIR} >/dev/null;
-    declare PARMS="virtualHostsConfigParameters.json";
+    declare PARMS="${SECRETS_FILE_DIR}/virtualHostsConfigParameters.json";
 
     export HTTPD_SERVER="/etc/nginx";
 
@@ -113,7 +125,7 @@ installNginx()
   sudo -A service nginx stop;
   sudo -A service nginx start;
 
-  echo "### Nginx installed ";
+  echo "### Nginx installed ###";
   echo -e "";
 
 }

@@ -50,7 +50,7 @@ installNodeJs()
   #   && echo " - node '$( nvm version ${NODE_VERSION})' is installed" \
   #   || nvm install ${NODE_VERSION};
 
-  nvm install node;
+  nvm install "11.11";
 
   echo "### Npm and NodeJS installed ";
   nvm use stable;

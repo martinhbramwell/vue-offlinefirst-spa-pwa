@@ -4,7 +4,8 @@ export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
 
 # export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
-export CONFIG_FILE="${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config";
+export SECRETS_DIR="${HOME}/.ssh/secrets";
+export CONFIG_FILE="${SECRETS_DIR}/vue-offlinefirst-spa-pwa.config";
 export DIR_FILES_FOR_UPLOAD="serverSideFiles";
 export DIR_SETUP_FILES="setupScripts";
 
@@ -175,6 +176,7 @@ importSecretFiles () {
   curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L ${BITLY_LINK} > tmp.json;
   # curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L http://bit.ly/vue-offlinefirst-spa-pwa > tmp.json;
   mv tmp.json ./serverSideFiles/virtualHostsConfigParameters.json;
+  echo -e "Imported secret files.";
 };
 
 ########
@@ -187,11 +189,16 @@ uploadServerSideFiles () {
   rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
 };
 
+########
+protectSecrets () {
+  echo -e "Move secrets files to '${SECRETS_DIR}'";
+  ssh -t ${NEW_HOST_NAME} "\${HOME}/${DIR_SETUP_FILES}/protectSecrets.sh";
+};
+
 
 
 ########
 prepareTimeZone () {
-  sudo timedatectl set-timezone America/Guayaquil
   declare TZ_SETUP_FILE="SetUpTZ.sh";
 
   echo -e "Set up Time Zone"
@@ -205,12 +212,14 @@ prepareTimeZone () {
 prepareAPT () {
   echo -e "Refresh APT"
   declare APTCMD="${GET_ASK_PASS_FUNC}";
-  APTCMD="${APTCMD} source \${HOME}/${DIR_SETUP_FILES}/${APT_UPDATE_FILE};";
+  declare APT_UPDATE="\${HOME}/${DIR_SETUP_FILES}/${APT_UPDATE_FILE}";
+  APTCMD="${APTCMD} source ${APT_UPDATE};";
   # APTCMD="${APTCMD} pushd ${DIR_SETUP_FILES};";
   APTCMD="${APTCMD} lazyUpdate;";
   APTCMD="${APTCMD} aptInstallIfNotInstalled;";
   # APTCMD="${APTCMD} popd;";
   ssh -t ${NEW_HOST_NAME} ${APTCMD};
+  ssh -t ${NEW_HOST_NAME} "mv ${APT_UPDATE} ${HOME}";
 };
 
 
@@ -302,19 +311,38 @@ unWrapSignature() {
   tar zxvf ${SIG_TARGZ};
 };
 
-########
-downLoadSignature () {
-  export DLD_TYPE="signature";
-  export DLD_URL="${BITLY_LINK}";
-  # export DLD_URL="http://bit.ly/vue-offlinefirst-spa-pwa";
 
-  pushd ${XDG_RUNTIME_DIR} > /dev/null;
-    curl -sH "Content-Type: application/json" -d '{"mode":"'"${MODE}"'","type":"'"${DLD_TYPE}"'","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${DLD_URL} > ${SIG_B64};
-    export isERROR=$(grep -c "Error" ${SIG_B64});
-    if [[ ${isERROR} -lt 1 ]]; then unWrapSignature; fi;
-    rm -f "${SIG_FILE}*";
-    # ls -la;
-  popd >/dev/null;
+
+# ########
+# obtainSignature () {
+#   export DLD_TYPE="signature";
+#   export DLD_URL="${BITLY_LINK}";
+#   # export DLD_URL="http://bit.ly/vue-offlinefirst-spa-pwa";
+
+#   pushd ${XDG_RUNTIME_DIR} > /dev/null;
+#     echo -e "
+# export MODE=${MODE}
+# export DLD_TYPE=${DLD_TYPE}
+# export WEBTASK_SECRET=${WEBTASK_SECRET}
+# export DLD_URL=${DLD_URL}
+#     ";
+#     curl -sH "Content-Type: application/json" -d '{"mode":"'"${MODE}"'","type":"'"${DLD_TYPE}"'","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${DLD_URL};
+#     # curl -sH "Content-Type: application/json" -d '{"mode":"'"${MODE}"'","type":"'"${DLD_TYPE}"'","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${DLD_URL} > ${SIG_B64};
+#     export isERROR=$(grep -c "Error" ${SIG_B64});
+#     if [[ ${isERROR} -lt 1 ]]; then unWrapSignature; fi;
+#     rm -f "${SIG_FILE}*";
+#     # ls -la;
+#   popd >/dev/null;
+# };
+
+
+
+########
+obtainSignature () {
+  declare SIGNATURE_RECOVERY="obtainP12Signature.sh";
+  echo -e "Running ${SIGNATURE_RECOVERY}...";
+  APPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${SIGNATURE_RECOVERY};";
+  ssh -t ${NEW_HOST_NAME} ${APPCMD};
 };
 
 
@@ -323,6 +351,49 @@ downLoadSignature () {
 prepareNodeApp () {
   declare NODE_APP_SETUP_FILE="InstallNodeApplication.sh";
   declare PARMS=./serverSideFiles/virtualHostsConfigParameters.json;
+  declare SECRETS_FILE_PATH=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_PATH);
+  declare SECRETS_FILE_NAME=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_NAME);
+  declare SECRETS_FILE="${HOME}/${SECRETS_FILE_PATH}/${SECRETS_FILE_NAME}";
+
+  # declare HDR="Content-Type: application/json";
+  # declare HOST="${BITLY_LINK}";
+  # # declare HOST="http://bit.ly/vue-offlinefirst-spa-pwa";
+
+  # pushd ${XDG_RUNTIME_DIR} >/dev/null;
+  #   pwd;
+  #   echo -e "Download secret files from secure cloud locations";
+  #   curl -sH "${HDR}" -d '{"mode":"PRD","type":"configuration","scrt":"'"${WEBTASK_SECRET}"'"}' --post301 -X POST -L ${HOST} > ${SECRETS_FILE_NAME};
+
+  #   ssh -t ${NEW_HOST_NAME} "mkdir -p ${SECRETS_FILE_PATH}";
+  #   scp ${SECRETS_FILE_NAME} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+
+  #   rm -f ${SECRETS_FILE_NAME};
+  # popd >/dev/null;
+
+  declare MATCH="SIGNING_CERTIFICATE";
+  declare TMP=$(cat ${SECRETS_FILE} | grep -m 1 ${MATCH} | cut -d'"' -f 2);
+  declare SIGNING_CERTIFICATE_FILE=$(eval "echo ${TMP}");
+
+
+  # eval "echo ${TMP}";
+
+  obtainSignature;
+  # ls -la ${XDG_RUNTIME_DIR}/${SIGNING_CERTIFICATE_FILE};
+  # scp ${XDG_RUNTIME_DIR}/${SIGNING_CERTIFICATE_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
+
+  echo -e "Set up Node Application";
+  APPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${NODE_APP_SETUP_FILE};";
+
+  ssh -t ${NEW_HOST_NAME} ${APPCMD};
+
+};
+
+
+
+########
+prepareSecrets () {
+  echo -e "\n\n\nStart prepareSecrets...";
+  declare PARMS=./serverSideFiles/virtualHostsConfigParameters.json;
 
   declare SECRETS_FILE_PATH=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_PATH);
   declare SECRETS_FILE_NAME=$(cat ${PARMS} | jq -r .NODEJS_APP.SECRETS_FILE_NAME);
@@ -330,7 +401,6 @@ prepareNodeApp () {
 
   declare HDR="Content-Type: application/json";
   declare HOST="${BITLY_LINK}";
-  # declare HOST="http://bit.ly/vue-offlinefirst-spa-pwa";
 
   pushd ${XDG_RUNTIME_DIR} >/dev/null;
     pwd;
@@ -343,37 +413,27 @@ prepareNodeApp () {
     rm -f ${SECRETS_FILE_NAME};
   popd >/dev/null;
 
-  declare MATCH="SIGNING_CERTIFICATE";
-  declare TMP=$(cat ${SECRETS_FILE} | grep -m 1 ${MATCH} | cut -d'"' -f 2);
-  declare SIGNING_CERTIFICATE_FILE=$(eval "echo ${TMP}");
-  # eval "echo ${TMP}";
-
-  downLoadSignature;
-  ls -la ${XDG_RUNTIME_DIR}/${SIGNING_CERTIFICATE_FILE};
-  scp ${XDG_RUNTIME_DIR}/${SIGNING_CERTIFICATE_FILE} ${NEW_HOST_NAME}:~/${SECRETS_FILE_PATH};
-
-  echo -e "Set up Node Application";
-  APPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${NODE_APP_SETUP_FILE};";
-  ssh -t ${NEW_HOST_NAME} ${APPCMD};
 
 };
 
 
 
 ########
-prepareMasterDbAccess () {
-  echo -e "\n\n\nStart prepareMasterDbAccess...";
+prepareClientSSH () {
+  echo -e "\n\n\nStart prepareClientSSH...";
+  ssh ${NEW_HOST_NAME} "./setupScripts/prepareClientSSH.sh;";
 
+  declare PATCH_AUTHORIZED_KEYS="patch_authorized_keys.sh";
   declare SSH_ALIAS=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .NODEJS_APP.SSH_ALIAS);
   # echo ${SSH_ALIAS};
   declare TMP_KEYS_DIR=tmp_keys_dir;
   pushd ${XDG_RUNTIME_DIR} >/dev/null;
-    declare REMOTE_XDG_RUNTIME_DIR=$(ssh ${MASTER_HOST_USER}@${MASTER_HOST} "cd \${XDG_RUNTIME_DIR}; pwd;");
-    echo -e "Copy ${NEW_HOST_NAME} public key to ${MASTER_HOST_USER}@${MASTER_HOST}:${REMOTE_XDG_RUNTIME_DIR}";
+    # declare REMOTE_XDG_RUNTIME_DIR=$(ssh ${MASTER_HOST_USER}@${MASTER_NAME} "cd \${XDG_RUNTIME_DIR}; pwd;");
+    echo -e "Copy ${NEW_HOST_NAME} public key to ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME}";
 
-    scp -3 ${NEW_HOST_NAME}:${HOME}/.ssh/${SSH_ALIAS}.pub ${MASTER_HOST_USER}@${MASTER_HOST}:${REMOTE_XDG_RUNTIME_DIR};
+    scp -3 ${NEW_HOST_NAME}:${HOME}/.ssh/${SSH_ALIAS}.pub ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME};
 
-    cat << EOFPAK > patch_authorized_keys.sh
+    cat << EOFPAK > ${PATCH_AUTHORIZED_KEYS}
 #!/usr/bin/env bash
 #
 declare KEYS_FILE="authorized_keys";
@@ -385,25 +445,28 @@ pushd \${HOME}/.ssh >/dev/null;
 popd >/dev/null;
 EOFPAK
 
-    chmod +x patch_authorized_keys.sh;
-    scp patch_authorized_keys.sh ${MASTER_HOST_USER}@${MASTER_HOST}:${REMOTE_XDG_RUNTIME_DIR};
-    ssh ${MASTER_HOST_USER}@${MASTER_HOST} "cd ${REMOTE_XDG_RUNTIME_DIR}; ./patch_authorized_keys.sh";
+    chmod +x ${PATCH_AUTHORIZED_KEYS};
+    echo -e "Copy '${PATCH_AUTHORIZED_KEYS}' to '${MASTER_HOST_USER}@${MASTER_NAME}:${HOME}'";
+    scp ${PATCH_AUTHORIZED_KEYS} ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME};
+
+    echo -e "Execute '${PATCH_AUTHORIZED_KEYS}' on remote host '${MASTER_NAME}'";
+    # ssh ${MASTER_HOST_USER}@${MASTER_HOST} "pwd; ls -la;";
+    ssh ${MASTER_HOST_USER}@${MASTER_NAME} "./${PATCH_AUTHORIZED_KEYS}; rm -f ./${PATCH_AUTHORIZED_KEYS}";
 
     scp ${NEW_HOST_NAME}:~/.ssh/config .;
-
     # cat config;
-    sed "/# ^^^^ HostAlias ${MASTER_HOST} ^^^^/,/# vvvv HostAlias ${MASTER_HOST} vvvv/d" config > cfg.txt;
+    sed "/# ^^^^ HostAlias ${MASTER_NAME} ^^^^/,/# vvvv HostAlias ${MASTER_NAME} vvvv/d" config > cfg.txt;
     sed -i '/^$/N;/^\n$/D' ./cfg.txt;
 
     cat << EOFSCP > ssh_config_patch.txt
 
-# ^^^^ HostAlias ${MASTER_HOST} ^^^^
-Host ${MASTER_HOST}
-  HostName ${MASTER_HOST}
+# ^^^^ HostAlias ${MASTER_NAME} ^^^^
+Host ${MASTER_NAME}
+  HostName ${MASTER_NAME}
   User ${MASTER_HOST_USER}
   IdentityFile ~/.ssh/${SSH_ALIAS}
 
-# vvvv HostAlias ${MASTER_HOST} vvvv
+# vvvv HostAlias ${MASTER_NAME} vvvv
 EOFSCP
 
     cat cfg.txt ssh_config_patch.txt > config;
@@ -416,7 +479,143 @@ EOFSCP
 
   popd >/dev/null;
 
-  echo -e "Done prepareMasterDbAccess.";
+  echo -e "Done prepareClientSSH.";
+  # echo -e "***************  CURTAILED **************";
+  # exit;
+
+};
+
+function uriencode() {
+  declare VAL="${1}";
+  # declare VAL=$(echo -e "${1}" | sed "s/'/%27/g");
+  jq -nr --arg v "${VAL}" '$v|@uri';
+};
+
+
+
+########
+replicationBuilder () {
+  echo -e "\n\n\nreplicationBuilder ...";
+
+  declare NAME=$1;
+
+  declare SOURCE_URL=$2;
+  declare SOURCE_AUTH=$3;
+
+  declare TARGET_URL=$4;
+  declare TARGET_AUTH=$5;
+
+  pushd ${XDG_RUNTIME_DIR} >/dev/null;
+
+    cat > ${REPLICATOR} <<EOF
+{
+  "_id": "${NAME}",
+  "user_ctx": {
+    "name": "admin",
+    "roles": [
+      "_admin",
+      "_reader",
+      "_writer"
+    ]
+  },
+  "source": {
+    "url": "${SOURCE_URL}",
+    "headers": {
+      "Authorization": "Basic ${SOURCE_AUTH}"
+    }
+  },
+  "target": {
+    "url": "${TARGET_URL}",
+    "headers": {
+      "Authorization": "Basic ${TARGET_AUTH}"
+    }
+  },
+  "create_target": true,
+  "continuous": false,
+  "owner": "admin"
+}
+EOF
+
+  popd >/dev/null;
+
+};
+
+
+
+########
+replicator () {
+  declare FILE=${1};
+  declare REMOTE_URI=${2};
+  declare HEADER="Content-Type: application/json";
+  echo -e "\n\n\nreplicator ... Delete First? ${DELETE_FIRST}";
+  pushd ${XDG_RUNTIME_DIR} >/dev/null;
+    chmod +x ${REPLICATOR};
+    # ls -la ${REPLICATOR};
+    # cat ${REPLICATOR};
+
+    declare REV=$(curl -H "${HEADER}" ${REMOTE_URI} | jq -r ._rev);
+    if [[ "X${REV}" != "Xnull" ]]; then
+      echo -e "REV :: ${REV}";
+      cp ${FILE} ${FILE}.tmp;
+      jq "._rev = \"${REV}\"" ${FILE}.tmp > ${FILE}
+      rm ${FILE}.tmp;
+      # cat ${FILE} | jq -r .;
+    fi;
+    curl -X PUT -H "${HEADER}" -d @${FILE} ${REMOTE_URI};
+  popd >/dev/null;
+
+};
+
+
+
+########
+initializeCouchDB () {
+  declare REPLICATOR="replicate.json";
+
+  echo -e "\n\n\nStart initializeCouchDB ...";
+  echo -e "${MASTER_HOST}";
+  echo -e "${XDG_RUNTIME_DIR}";
+
+  declare SOURCE_AUTH="$(echo -n ${MASTER_USER_CREDS} | base64)";
+  declare TARGET_AUTH="$(echo -n ${SLAVE_USER_CREDS} | base64)";
+
+  declare MASTER="http://localhost:5984"
+
+  declare ARTEFACT="";
+  declare NAME="";
+  declare SOURCE_URL="";
+  declare TARGET_URL="";
+
+  ARTEFACT="${MASTER_COUCH_DB}";
+  NAME="00_Push '${ARTEFACT}' to '${SLAVE_HOST}'";
+  SOURCE_URL="${MASTER}/${ARTEFACT}";
+  TARGET_URL="${SLAVE_URL}/${ARTEFACT}";
+  replicationBuilder "${NAME}" "${SOURCE_URL}" "${SOURCE_AUTH}" "${TARGET_URL}" "${TARGET_AUTH}";
+  replicator ${REPLICATOR} ${MASTER_CRED_URL}/_replicator/$(uriencode "${NAME}");
+
+  ARTEFACT="_replicator";
+  NAME="00_Push '${ARTEFACT}' to '${SLAVE_HOST}'";
+  SOURCE_URL="${MASTER}/${ARTEFACT}";
+  TARGET_URL="${SLAVE_URL}/${ARTEFACT}";
+  replicationBuilder "${NAME}" "${SOURCE_URL}" "${SOURCE_AUTH}" "${TARGET_URL}" "${TARGET_AUTH}";
+  replicator ${REPLICATOR} ${MASTER_CRED_URL}/_replicator/$(uriencode "${NAME}");
+
+  ARTEFACT="_users";
+  NAME="00_Push '${ARTEFACT}' to '${SLAVE_HOST}'";
+  SOURCE_URL="${MASTER}/${ARTEFACT}";
+  TARGET_URL="${SLAVE_URL}/${ARTEFACT}";
+  replicationBuilder "${NAME}" "${SOURCE_URL}" "${SOURCE_AUTH}" "${TARGET_URL}" "${TARGET_AUTH}";
+  replicator ${REPLICATOR} ${MASTER_CRED_URL}/_replicator/$(uriencode "${NAME}");
+
+  ARTEFACT="ddocs_only";
+  NAME="01_Push '${ARTEFACT}' to '${SLAVE_HOST}'";
+  SOURCE_URL="${MASTER}/${ARTEFACT}";
+  TARGET_URL="${SLAVE_URL}/${ARTEFACT}";
+  replicationBuilder "${NAME}" "${SOURCE_URL}" "${SOURCE_AUTH}" "${TARGET_URL}" "${TARGET_AUTH}";
+  replicator ${REPLICATOR} ${MASTER_CRED_URL}/_replicator/$(uriencode "${NAME}");
+
+
+
 };
 
 
@@ -470,22 +669,25 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 # # # # pushAndRunAskPassServiceMaker;
 # prepareNodeApp;
 # echo -e "
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;
-
 echo -e "Attempting to connect to host alias ${NEW_HOST_NAME} as admin user '${NEW_HOST_ADMIN}:${NEW_HOST}'.";
 if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "Logged in. Building server now";
   importSecretFiles;
   uploadServerSideFiles;
+  protectSecrets;
   prepareAPT;
   prepareUFW;
+  prepareTimeZone;
   prepareNodeJS;
   prepareCouchDB;
-  prepareMasterDbAccess;
   prepareLetsEncrypt;
   prepareNginx;
-  # prepareNodeApp;
+  prepareSecrets;
+  prepareClientSSH;
+  prepareNodeApp;
+  initializeCouchDB;
 else
   echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;
@@ -494,8 +696,5 @@ fi;
 
 echo -e "";
 echo -e "   DONE    ";
-echo -e "
-                                    time zone  ????
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo -e "";
 echo -e "";

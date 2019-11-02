@@ -3,6 +3,9 @@
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
 
+export SECRETS_FILE_PATH=".ssh/secrets";
+export SECRETS_FILE_DIR="${HOME}/${SECRETS_FILE_PATH}";
+
 installCert(){
   export VHOST_NAME=$(echo ${VHOSTS} | jq -r .[$1].VHOST_NAME);
   echo -e "Doing cert #$1  ${VHOST_NAME}";
@@ -33,9 +36,9 @@ installSslCertificates()
 
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  declare PARMS="./setupScripts/virtualHostsConfigParameters.json";
+  declare PARMS="${SECRETS_FILE_DIR}/virtualHostsConfigParameters.json";
   declare CERTS_BACKUP_FILE=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTS_BACKUP_FILE);
-  declare BACKUP=${SCRIPT_DIR}/${CERTS_BACKUP_FILE};
+  declare BACKUP=${SECRETS_FILE_DIR}/${CERTS_BACKUP_FILE};
 
   echo -e "\n\n\nDo we possess a 'letsencrypt' backup?";
   if [[ -f "${BACKUP}" ]]; then

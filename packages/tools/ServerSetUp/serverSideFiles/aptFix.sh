@@ -6,6 +6,21 @@ echo -e "${SCRIPT_DIR}/setupScripts/utils.sh"
 source ${SCRIPT_DIR}/setupScripts/utils.sh;
 
 
+########
+apt_wait () {
+  while sudo -A fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    sleep 1
+  done
+  while sudo -A fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
+    sleep 1
+  done
+  if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
+    while sudo -A fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do
+      sleep 1
+    done
+  fi
+}
+
 
 ########
 say () {
@@ -64,6 +79,8 @@ get_date() {
 forceUpdate() {
 
   export DEBIAN_FRONTEND=noninteractive;
+
+  apt_wait;
 
   echo -e "\n    ********* Updating ********* \n\n";
   sudo -A apt -y update;

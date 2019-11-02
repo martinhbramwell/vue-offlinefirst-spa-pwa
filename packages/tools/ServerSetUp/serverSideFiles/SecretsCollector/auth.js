@@ -72,7 +72,14 @@ function authorize(credentials, callback, parms) {
   });
 };
 
+const secrets = `${process.env.HOME}/${process.env.SECRETS_FILE_PATH}`;
+const credentials = `${secrets}/${process.env.GOOGLE_CREDS_FILE}`;
+
+// console.log(`Creds are : ${secrets}, ${credentials}`);
+
 
 // exports.getAccessToken = getAccessToken;
 exports.loadToken = loadToken;
 exports.authorize = authorize;
+exports.credentials = credentials;
+
