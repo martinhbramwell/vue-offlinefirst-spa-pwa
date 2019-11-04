@@ -12,6 +12,8 @@ import inspectInvoices from './inspections/inspectInvoices';
 import inspectPersons from './inspections/inspectPersons';
 import inspectTest from './inspections/inspectTest';
 
+import invoicesByMonth from './digitalDocuments/reports/invoices/invoicesByMonth';
+
 const routes = Router();
 const BY_BOTTLE = 'byBottle';
 
@@ -28,7 +30,6 @@ routes.get('/', (req, res) => {
 routes.get('/exp', (req, res) => {
   res.render('index', { title: 'Running experiment. See log file and terminal output.' });
 });
-
 
 routes.get(`/${BY_BOTTLE}`, (req, res, next) => { // eslint-disable-line no-unused-vars
   const title = 'Analyzing by bottle number ....!...';
@@ -101,6 +102,10 @@ routes.get('/updateRange', (req, res, next) => {
 
 routes.get('/reprocessVoids', (req, res, next) => {
   reprocessVoids(req, res, next);
+});
+
+routes.get('/facturasPorMes', (req, res, next) => {
+  invoicesByMonth(req, res, next);
 });
 
 export default routes;
