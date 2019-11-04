@@ -43,6 +43,14 @@ pushd ${DIR} >/dev/null;
   sudo chown ${COUCH_ADM}:${COUCH_ADM} ${POUCH_DIR};
   sudo chmod ugo+rwx ${POUCH_DIR};
 
+  sudo -A mkdir -p ${BACKUPS_DIR};
+  sudo chown ${COUCH_ADM}:${COUCH_ADM} ${BACKUPS_DIR};
+  sudo chmod ugo+rwx ${BACKUPS_DIR};
+
+  sudo -A mkdir -p ${REPORTS_DIR}/invoices;
+  sudo chown -R ${COUCH_ADM}:${COUCH_ADM} ${REPORTS_DIR};
+  sudo chmod -R ugo+rwx ${REPORTS_DIR};
+
   sudo -A mkdir -p ${MAIL_DIR};
   sudo chown ${COUCH_ADM}:${COUCH_ADM} ${MAIL_DIR};
   sudo chmod ugo+rwx ${MAIL_DIR};
