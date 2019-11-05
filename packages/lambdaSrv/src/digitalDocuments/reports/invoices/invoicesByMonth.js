@@ -42,9 +42,19 @@ function defineMonth(monthCode) {
   };
 }
 
+const css = `
+a {font-size: 18px;}
+a:link {color: #66ff33;}
+a:visited {color: #33cc33;}
+a:hover {color: hotpink;}
+a:active {color: #FF0000;}
+`;
+
 const reply = (res, message) => {
   res.set('Content-Type', 'text/html');
-  res.write('<html><body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
+  res.write(`<html><head><style>${css}</style></head>`);
+  res.write('<body text="lightyellow" bgcolor="#000007">');
+  res.write('<font face="Arial, Helvetica, sans-serif">');
   res.write(`</br>${message}`);
   res.write('</body></html>');
   res.end();
@@ -53,10 +63,12 @@ const reply = (res, message) => {
 const listReports = (req, res) => {
   const url = `${req.protocol}://${req.headers.host}${req.url}`;
   res.set('Content-Type', 'text/html');
-  res.write('<html><body text="lightyellow" bgcolor="#000007" link="#C0C0C0" vlink="#808080" alink="#FF0000">');
-  res.write('<font face="Arial, Helvetica, sans-serif" size="10">');
+  res.write(`<html><head><style>${css}</style></head>`);
+  res.write('<body text="lightyellow" bgcolor="#000007">');
+  res.write('<font face="Arial, Helvetica, sans-serif">');
 
-  res.write('</br><h2>Reportes de facturación por mes</h2><hr />');
+  res.write('</br>');
+  res.write('<h2>Reportes de facturación por mes</h2><hr />');
   res.write('<ul>');
   res.write('   <li>');
   res.write('     <h3>2019</h3>');
@@ -81,6 +93,7 @@ const listReports = (req, res) => {
   res.write('    </ul>');
   res.write('  </li>');
   res.write('</ul>');
+  res.write('<a href="./gestionDeFacturas">Gestor de Facturas</a>');
 
   res.write('</body></html>');
   res.end();
@@ -92,10 +105,10 @@ const generateXlsxFromJson = (invoices, month) => {
 
   const wb = XLSX.utils.book_new();
   wb.Props = {
-    Title: 'SheetJS Tutorial',
-    Subject: 'Test',
+    Title: `${month.fullName} ${month.fullYear}`,
+    Subject: 'Informe de facturación',
     Author: 'Iridium Blue Water',
-    CreatedDate: new Date(2017, 12, 19),
+    CreatedDate: new Date(),
   };
 
   const colName = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
@@ -184,7 +197,7 @@ export default async (req, res) => {
             TOTAL: total,
           };
         });
-        CDR(invoices[0]);
+        // CDR(invoices[0]);
       } catch (err) {
         CDR(err);
       }

@@ -78,11 +78,25 @@ const frags = {
 `,
 
   taskButtons: `
-  <button class="button" type="button" onclick="firmar()">Firmar Facturas</button>
-  <button class="button" type="button" onclick="enviar()">Enviar Facturas</button>
-  <button class="button" type="button" onclick="verificar()">Verificar Facturas</button>
-  <button class="button" type="button" onclick="mail()">Mail Facturas</button>
+  <div class="border d-table w-100">
+    <p class="d-table-cell">
+      <button class="button" type="button" onclick="firmar()">Firmar Facturas</button>
+      <button class="button" type="button" onclick="enviar()">Enviar Facturas</button>
+      <button class="button" type="button" onclick="verificar()">Verificar Facturas</button>
+      <button class="button" type="button" onclick="mail()">Mail Facturas</button>
+    </p>
+    <div class="d-table-cell tar">
+      <p><a href="./FacturasPorMes">Informes</a></p>
+    </div>
+  </div>
 `,
+
+//   taskButtons: `
+//   <button class="button" type="button" onclick="firmar()">Firmar Facturas</button>
+//   <button class="button" type="button" onclick="enviar()">Enviar Facturas</button>
+//   <button class="button" type="button" onclick="verificar()">Verificar Facturas</button>
+//   <button class="button" type="button" onclick="mail()">Mail Facturas</button>
+// `,
 
   filterFields: `
   &nbsp; &nbsp; <span class="spanBox">

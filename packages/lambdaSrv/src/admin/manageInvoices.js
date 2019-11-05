@@ -325,7 +325,8 @@ export default async (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.write('<!DOCTYPE html><html>');
   res.write(frags.documentHead);
-  res.write('<body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
+  res.write('<body text="lightyellow" bgcolor="#000007" link="#C0C0C0" vlink="#808080" alink="#FF0000">');
+  res.write('<font face="Arial, Helvetica, sans-serif">');
 
   // try {
   //   res.write('<i>Última factura extraida ... </i><br /><br />');

@@ -4,9 +4,11 @@ body {
   width: 80%;
 }
 
-a {
-  color: #00B7FF;
-}
+a {font-size: 22px;}
+a:link {color: #66ff33;}
+a:visited {color: #33cc33;}
+a:hover {color: hotpink;}
+a:active {color: #FF0000;}
 
 #facturas {
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
