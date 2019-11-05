@@ -59,9 +59,6 @@ function initializeLocalConstants() {
   export REPL_DONE_FLAGS="._replication_state, ._replication_state_time, ._replication_stats";
   export REVISION_ATTRIBUTE="_rev";
 
-  export BACKUP_NAME_HOLDER_start="LATEST_POUCHDB_";
-  export BACKUP_NAME_HOLDER_end="_BACKUP.txt";
-
   export PATH_TO_LAMBDA_SRV="../../../../lambdaSrv";
 
   # echo -e "*********\n${REMOTE}\n${REMOTE_DATABASE_NAME}\n${LOCAL_DBNAME}\n${COUCH_CREDS}\n${COUCH_DB}\n********"

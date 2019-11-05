@@ -2,14 +2,16 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
-const TOKEN_PATH = 'token.json';
-
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
+const secrets = `${process.env.HOME}/${process.env.SECRETS_FILE_PATH}`;
+
+// The file token.json stores the user's access and refresh tokens, and is
+// created automatically when the authorization flow completes for the first
+// time.
+const TOKEN_FILE = 'token.json';
+const TOKEN_PATH = `${secrets}/${TOKEN_FILE}`;
 
 /**
  * Get and store new token after prompting for user authorization, and then
@@ -72,7 +74,6 @@ function authorize(credentials, callback, parms) {
   });
 };
 
-const secrets = `${process.env.HOME}/${process.env.SECRETS_FILE_PATH}`;
 const credentials = `${secrets}/${process.env.GOOGLE_CREDS_FILE}`;
 
 // console.log(`Creds are : ${secrets}, ${credentials}`);

@@ -161,6 +161,8 @@ installNodeApplication ()
   ${NODEJS_APP_WATCHDOG};
   configureCronJob;
 
+  ${SCRIPT_DIR}/setAppDataBackupCronJob.sh;
+
   echo -e "Installed Node app.";
 
     # echo -e "|..............  prepareNodeApp";
