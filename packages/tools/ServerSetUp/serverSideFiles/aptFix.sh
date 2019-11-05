@@ -2,20 +2,37 @@
 #
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
-echo -e "${SCRIPT_DIR}/setupScripts/utils.sh"
+echo -e "${SCRIPT_DIR}/setupScripts/utils.sh";
 source ${SCRIPT_DIR}/setupScripts/utils.sh;
 
 
 ########
 apt_wait () {
-  while sudo -A fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+  declare DPKG_LCK="/var/lib/dpkg/lock";
+  while sudo -A fuser ${DPKG_LCK} >/dev/null 2>&1 ; do
+    echo -e "Waiting for ${DPKG_LCK}";
     sleep 1
   done
-  while sudo -A fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
+
+
+  declare APTLSTS_LCK="/var/lib/apt/lists/lock";
+  while sudo -A fuser ${APTLSTS_LCK} >/dev/null 2>&1 ; do
+    echo -e "Waiting for ${APTLSTS_LCK}";
     sleep 1
   done
-  if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
-    while sudo -A fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do
+
+
+  declare FRNT_LCK="/var/lib/dpkg/lock-frontend";
+  while sudo -A fuser ${FRNT_LCK} >/dev/null 2>&1 ; do
+    echo -e "Waiting for ${FRNT_LCK}";
+    sleep 1
+  done
+
+
+  declare UPGRADES_LOG="/var/log/unattended-upgrades/unattended-upgrades.log";
+  if [ -f ${UPGRADES_LOG} ]; then
+    while sudo -A fuser ${UPGRADES_LOG} >/dev/null 2>&1 ; do
+      echo -e "Waiting for ${UPGRADES_LOG}";
       sleep 1
     done
   fi

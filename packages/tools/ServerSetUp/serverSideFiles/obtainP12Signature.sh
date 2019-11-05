@@ -31,7 +31,6 @@ pushd ${SCRIPT_DIR} >/dev/null;
   # popd >/dev/null;
   # echo -e "";
 
-  export SIGNATURE_FILE_ID="1nu1N3Use6iVOlEt1YuUV72HSBylcj3Dq";
   echo -e "Obtaining '${ENCODED_SIGNATURE_FILE_NAME}' from Google Drive with ID:  '${SIGNATURE_FILE_ID}'";
   pushd SecretsCollector >/dev/null;
     npm install;

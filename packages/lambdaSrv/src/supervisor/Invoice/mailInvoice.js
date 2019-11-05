@@ -98,7 +98,8 @@ export default async (args) => {
 
       const PROTECTOR = 'GET FROM DATABASE';
       const to = mailCfg.send_to === PROTECTOR ? d.email : mailCfg.send_to;
-      // CLG(`mailCfg.send_to = >${mailCfg.send_to}< PROTECTOR = >${PROTECTOR}<. Equal? ${mailCfg.send_to === PROTECTOR}. To = ${to}.`);
+      // CLG(`mailCfg.send_to = >${mailCfg.send_to}< PROTECTOR = >${PROTECTOR}<.
+      // Equal? ${mailCfg.send_to === PROTECTOR}. To = ${to}.`);
 
       const unique = {
         to,
@@ -115,7 +116,7 @@ export default async (args) => {
 
       if (mailCfg.send_bcc) headers.bcc = mailCfg.send_bcc;
 
-      const mail = Object.assign(headers, {text, html, attachments});
+      const mail = Object.assign(headers, { text, html, attachments });
 
       // mail.text = text,
       // mail.html = html,

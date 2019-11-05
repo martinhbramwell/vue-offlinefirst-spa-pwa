@@ -132,15 +132,8 @@ export default async (req, res) => {
     const fullMonthName = `${defMonth.fullName}_${defMonth.fullYear}`;
     CLG(`defMonth = ${JSON.stringify(defMonth, null, 2)}`);
     const filePath = `${reportsLocation}/Facturacion_${fullMonthName}.xlsx`;
-    if (fs.existsSync(filePath)) {
-      res.download(filePath, (err) => {
-        if (err) {
-          CLG(`ERR = ${err}`);
-        } else {
-          CLG('Download OK');
-        }
-      });
-    } else {
+
+    if ( ! fs.existsSync(filePath)) {
       res.set('Content-Type', 'text/html');
       res.write('<html><body>');
       res.write(`</br>Processing JSON : ${fullMonthName}`);
@@ -179,10 +172,22 @@ export default async (req, res) => {
       // const invoices = require(jsonPath).map(x => x.value);
       // eslint-disable-line no-unused-vars, global-require, import/no-dynamic-require, max-len
       const workbook = generateXlsxFromJson(invoices, defMonth);
-      XLSX.writeFile(workbook, `${reportsLocation}/Facturacion_${fullMonthName}.xlsx`, { type: 'file' });
+      XLSX.writeFile(workbook, filePath, { type: 'file' });
 
       res.write('</body></html>');
       res.end();
+    }
+
+    if ( fs.existsSync(filePath)) {
+      res.download(filePath, (err) => {
+        if (err) {
+          CLG(`ERR = ${err}`);
+        } else {
+          CLG('Download OK');
+        }
+      });
+    } else {
+      CLG(`Unable to provide ${filePath} for download.`);
     }
   } else {
     listReports(req, res);

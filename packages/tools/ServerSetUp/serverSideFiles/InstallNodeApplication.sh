@@ -148,35 +148,15 @@ installNodeApplication ()
         git checkout ${PRODUCTION_BRANCH};
       popd >/dev/null;
 
-
     popd >/dev/null;
+
 
   popd >/dev/null;
 
+  export LAMBDA_APP="lambdaSrv";
+  export NODEJS_APP_SERVER="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/${LAMBDA_APP}";
+  ln -s ${NODEJS_APP_SERVER} ${LAMBDA_APP};
 
-  # declare INITIAL_DATABASE_ZIP=$(echo ${NODEJS_APP} | jq -r .INITIAL_DATABASE_ZIP);
-  # declare INITIAL_DATABASE_ZIP_FILE_NAME=$(echo ${NODEJS_APP} | jq -r .INITIAL_DATABASE_ZIP_FILE_NAME);
-  # pushd ${SCRIPT_DIR}/SecretsCollector >/dev/null;
-  #   echo -e "Get database initializations files...";
-  #   INITIAL_DATABASE_ZIP_FILE_NAME=$(node collectSecret.js ${INITIAL_DATABASE_ZIP} "${INITIAL_DATABASE_ZIP_FILE_NAME}" ${XDG_RUNTIME_DIR});
-  # popd >/dev/null;
-
-  # declare TEMP_DIR=${HOME}/temp;
-  # mkdir -p ${TEMP_DIR};
-
-  # pushd ${TEMP_DIR} >/dev/null;
-  #   mv ${XDG_RUNTIME_DIR}/${INITIAL_DATABASE_ZIP_FILE_NAME} .;
-  #   echo -e "Placing database initializations files at '${TEMP_DIR}'.";
-  #   base64 -d ${INITIAL_DATABASE_ZIP_FILE_NAME} | tar -zxv;
-  # popd >/dev/null;
-
-  # export DATABASE_INIT_SCRIPTS_DIR="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/database/couchDB/shell_scripts";
-  # pushd ${DATABASE_INIT_SCRIPTS_DIR} >/dev/null;
-  #   echo -e "Initializing database at '${DATABASE_INIT_SCRIPTS_DIR}'.";
-  #   ./LoadDatabase.sh yes;
-  # popd >/dev/null;
-
-  export NODEJS_APP_SERVER="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/lambdaSrv";
   export NODEJS_APP_WATCHDOG="${NODEJS_APP_SERVER}/watchdog.sh";
   ${NODEJS_APP_WATCHDOG};
   configureCronJob;
