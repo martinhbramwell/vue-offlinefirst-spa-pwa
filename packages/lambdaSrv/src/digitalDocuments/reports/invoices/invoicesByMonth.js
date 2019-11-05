@@ -42,16 +42,24 @@ function defineMonth(monthCode) {
   };
 }
 
+const reply = (res, message) => {
+  res.set('Content-Type', 'text/html');
+  res.write('<html><body text="lightyellow" bgcolor="#000007"><font face="Arial, Helvetica, sans-serif">');
+  res.write(`</br>${message}`);
+  res.write('</body></html>');
+  res.end();
+}
+
 const listReports = (req, res) => {
   const url = `${req.protocol}://${req.headers.host}${req.url}`;
   res.set('Content-Type', 'text/html');
-  res.write('<html><body>');
+  res.write('<html><body text="lightyellow" bgcolor="#000007" link="#C0C0C0" vlink="#808080" alink="#FF0000">');
+  res.write('<font face="Arial, Helvetica, sans-serif" size="10">');
 
-  res.write('</br><h1>Reportes de facturación por mes</h1>');
-  res.write('</br>');
+  res.write('</br><h2>Reportes de facturación por mes</h2><hr />');
   res.write('<ul>');
   res.write('   <li>');
-  res.write('     <h2>2019</h2>');
+  res.write('     <h3>2019</h3>');
   res.write('     <ul>');
   res.write(`       <li><a href="${url}?mes=ago19">Agosto</a></li>`);
   res.write(`       <li><a href="${url}?mes=sep19">Septiembre</a></li>`);
@@ -61,7 +69,7 @@ const listReports = (req, res) => {
   res.write('     </ul>');
   res.write('   </li>');
   res.write('   <li>');
-  res.write('     <h2>2020</h2>');
+  res.write('     <h3>2020</h3>');
   res.write('     <ul>');
   res.write(`       <li><a href="${url}?mes=ene20">Enero</a></li>`);
   res.write(`       <li><a href="${url}?mes=feb20">Febrero</a></li>`);
@@ -106,10 +114,15 @@ const generateXlsxFromJson = (invoices, month) => {
   XLSX.utils.sheet_add_json(ws, invoices, { origin: `A${titlesRow}` });
   for (let cc = startCol; cc < startCol + numberOfCols; cc += 1) {
     for (let rr = startRow; rr < startRow + numberOfRows; rr += 1) {
-      // CLG(`Alter ${colName[cc]}${rr}`);
-      ws[`${colName[cc]}${rr}`].t = 'n';
-      ws[`${colName[cc]}${rr}`].z = '#,##0.00;[Red](#,##0.00)';
-      // CDR(ws[`${colName[cc]}${rr}`]);
+      const cell = `${colName[cc]}${rr}`;
+      // CLG(`Alter ${cell}`);
+      if (ws[cell].v.includes('?')) {
+        ws[cell].t = 's';
+      } else {
+        ws[cell].t = 'n';
+        ws[cell].z = '#,##0.00;[Red](#,##0.00)';
+      }
+      CDR(ws[cell]);
     }
   }
   ws['!merges'] = [{ s: { r: 0, c: 6 }, e: { r: 0, c: 7 } }];
@@ -127,17 +140,17 @@ const generateXlsxFromJson = (invoices, month) => {
 export default async (req, res) => {
   CLG(`invoicesByMonth.js ${JSON.stringify(req.query, null, 2)}`);
   const reportsLocation = '/opt/ibReports/invoices';
+
   if (req.query.mes) {
     const defMonth = defineMonth(req.query.mes);
     const fullMonthName = `${defMonth.fullName}_${defMonth.fullYear}`;
+
+
     CLG(`defMonth = ${JSON.stringify(defMonth, null, 2)}`);
-    const filePath = `${reportsLocation}/Facturacion_${fullMonthName}.xlsx`;
+    const excelFile = `Facturacion_${fullMonthName}.xlsx`
+    const filePath = `${reportsLocation}/${excelFile}`;
 
-    if ( ! fs.existsSync(filePath)) {
-      res.set('Content-Type', 'text/html');
-      res.write('<html><body>');
-      res.write(`</br>Processing JSON : ${fullMonthName}`);
-
+    if (!fs.existsSync(filePath)) {
       let invoices = null;
       try {
         const result = await db.allDocs({
@@ -153,41 +166,42 @@ export default async (req, res) => {
         // CDR(invoiceRecords);
         invoices = invoiceRecords.map((rec) => {
           const { data: d } = rec.doc;
+          let subTotal = d.subTotal;
+          let totalImpuesto = d.totalImpuesto;
+          let total = d.total;
+          if (d.codigo.includes('?')) {
+            subTotal = `?${d.subTotal}?`;
+            totalImpuesto = `?${d.totalImpuesto}?`;
+            total = `?${d.total}?`;
+          }
           return {
             'Nº FACTURA ELECTRÓNICA': d.codigo,
             CLIENTE: d.nombreCliente,
             FECHA: d.fecha,
             'RUC/CI': d.legalId,
-            SUBTOTAL: d.subTotal,
-            IVA: d.totalImpuesto,
-            TOTAL: d.total,
+            SUBTOTAL: subTotal,
+            IVA: totalImpuesto,
+            TOTAL: total,
           };
         });
         CDR(invoices[0]);
       } catch (err) {
         CDR(err);
       }
-
-      // const jsonPath = `${reportsLocation}/Facturacion_${fullMonthName}`;
-      // const invoices = require(jsonPath).map(x => x.value);
-      // eslint-disable-line no-unused-vars, global-require, import/no-dynamic-require, max-len
       const workbook = generateXlsxFromJson(invoices, defMonth);
       XLSX.writeFile(workbook, filePath, { type: 'file' });
-
-      res.write('</body></html>');
-      res.end();
     }
 
-    if ( fs.existsSync(filePath)) {
+    if (fs.existsSync(filePath)) {
       res.download(filePath, (err) => {
         if (err) {
-          CLG(`ERR = ${err}`);
-        } else {
-          CLG('Download OK');
+          reply(res, `La descarga de '${excelFile}' falló con el error '${err}'.<hr /><a href='javascript:history.back()'>Retroceder</a>`);
+        // } else {
+        // reply(res, `Descarga del archivo '${excelFile}' completada con éxito.`);
         }
       });
     } else {
-      CLG(`Unable to provide ${filePath} for download.`);
+      reply(res, `No se puede proporcionar '${excelFile}' para descargar.<hr /><a href='javascript:history.back()'>Retroceder</a>`);
     }
   } else {
     listReports(req, res);
