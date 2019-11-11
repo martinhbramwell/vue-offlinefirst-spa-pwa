@@ -66,6 +66,7 @@ const send = async (args) => {
     try {
       LG.verbose(`Upload response for invoice #${inv.data.codigo} : ${jsonResponse}`);
       const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+      delete fresh.returned;
       fresh[jsonResponse.flag] = true; // eslint-disable-line no-param-reassign, max-len
       if (jsonResponse.flag !== 'accepted') {
         fresh.reason = jsonResponse.reason; // eslint-disable-line no-param-reassign, max-len
@@ -83,7 +84,7 @@ const send = async (args) => {
       const attachment = (Buffer.from(xmlAttachment, 'utf-8')).toString('base64');
 
       const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
-      LG.verbose(`Will save reception response invoice as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
+      LG.verbose(`Will save reception response as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
       const attch = await db.putAttachment(fresh._id, 'respuestaSRI', fresh._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
       LG.verbose(`Saved reception response as attachment ${JSON.stringify(attch, null, 2)}`);
     } catch (errAttch) {
