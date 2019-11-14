@@ -1,0 +1,48 @@
+# this is read by the standalone daemon and embedded servers
+[server]
+
+[mysql]
+default-character-set = utf8mb4
+
+[mysqld]
+user		= mysql
+pid-file	= /var/run/mysqld/mysqld.pid
+socket		= /var/run/mysqld/mysqld.sock
+port		= 3306
+basedir		= /usr
+datadir		= /var/lib/mysql
+tmpdir		= /tmp
+lc-messages-dir	= /usr/share/mysql
+skip-external-locking
+
+bind-address		= 127.0.0.1
+
+key_buffer_size		= 16M
+max_allowed_packet	= 16M
+thread_stack		= 192K
+thread_cache_size       = 8
+
+myisam_recover_options  = BACKUP
+
+query_cache_limit	= 1M
+query_cache_size        = 16M
+
+log_error = /var/log/mysql/error.log
+
+expire_logs_days	= 10
+max_binlog_size   = 100M
+
+innodb-file-format = barracuda
+innodb-file-per-table = 1
+innodb-large-prefix = 1
+character-set-client-handshake = FALSE
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+[embedded]
+
+[mariadb]
+
+[mariadb-10.1]
+plugin_load_add = auth_ed25519
+

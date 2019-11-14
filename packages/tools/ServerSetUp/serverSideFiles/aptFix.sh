@@ -38,12 +38,6 @@ apt_wait () {
   fi
 }
 
-
-########
-say () {
-  echo "'${1}'${MSG}";
-}
-
 upgrade_jq () {
   export JQ_VRSN=$(jq --version)
   if [[ "${JQ_VRSN}" < "jq-1.6" ]]; then
