@@ -621,6 +621,17 @@ initializeCouchDB () {
 
 
 ########
+prepareErpNext () {
+  declare ERPNEXT_SETUP_FILE="InstallErpNext.sh";
+
+  echo -e "\n\n\nSet up ErpNext";
+  ERPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${ERPNEXT_SETUP_FILE};";
+  ssh -t ${NEW_HOST_NAME} ${ERPCMD};
+};
+
+
+
+########
 qTst () {
   echo -e "Quick test...";
   pushd serverSideFiles/SecretsCollector >/dev/null;
@@ -676,11 +687,11 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "Logged in. Building server now";
   importSecretFiles;
   uploadServerSideFiles;
-  protectSecrets;
   prepareAPT;
   prepareUFW;
   prepareTimeZone;
   prepareNodeJS;
+  protectSecrets;
   prepareCouchDB;
   prepareLetsEncrypt;
   prepareNginx;
@@ -688,6 +699,7 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   prepareClientSSH;
   prepareNodeApp;
   initializeCouchDB;
+  prepareErpNext
 else
   echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;

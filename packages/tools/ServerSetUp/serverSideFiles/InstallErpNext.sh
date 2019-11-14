@@ -6,7 +6,7 @@ export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-source ./utils.sh;
+source ${SCRIPT_DIR}/utils.sh;
 
 prepareErpNextUser () {
   cat /etc/passwd | grep ${ERPNEXT_USR} >/dev/null \
@@ -60,7 +60,7 @@ preparePythonDependencies () {
 prepareMariaDb () {
   declare READY=$(mysql --defaults-extra-file=${MARIA_CLIENT_CONF} -sN --execute="SELECT 2+2;" 2>/dev/null;);
 
-  if [[ ${READY} -eq 4 ]]; then
+  if [[ ${READY} -eq 5 ]]; then
     echo -e "\n\nMariaDb is ready already.";
   else
     echo -e "\n\nPreparing :: MariaDb";
@@ -69,7 +69,7 @@ prepareMariaDb () {
     declare MARIA_SRVR_CONF="50-server.cnf";
     declare MARIA_SRVR_CONF_DIR="/etc/mysql/mariadb.conf.d";
     sudo -A mkdir -p ${MARIA_SRVR_CONF_DIR};
-    sudo -A cp ${MARIA_SRVR_CONF} ${MARIA_SRVR_CONF_DIR};
+    sudo -A cp ${SCRIPT_DIR}/${MARIA_SRVR_CONF} ${MARIA_SRVR_CONF_DIR};
 
     sudo -A systemctl restart mariadb;
     sudo -A systemctl enable mariadb;
@@ -87,36 +87,42 @@ DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 DROP FUNCTION IF EXISTS ed25519_password;
 CREATE FUNCTION ed25519_password RETURNS STRING SONAME "auth_ed25519.so";
 EOF
-    echo -e " pwd :: ${MYSQL_PWD}";
+    # echo -e " pwd :: ${MYSQL_PWD}";
     sudo -A mysql -u root -p${MYSQL_PWD} < /dev/shm/mysql_secure_installation.sql;
 
 
     echo -e "Correcting MariaDb Root Password";
-    declare PWD_HASH=$(sudo -A mysql -sN -u root -p${MYSQL_PWD} --execute="SELECT ed25519_password('${ERPNEXT_DB_PWD}');");
-    echo -e " Hash :: ${PWD_HASH}";
+    # declare PWD_HASH=$(sudo -A mysql -sN -u root -p${MYSQL_PWD} --execute="SELECT ed25519_password('${ERPNEXT_DB_PWD}');");
+    # echo -e " Hash :: ${PWD_HASH}";
 
     sudo -A mysql -sN -u root -p${MYSQL_PWD} \
-      --execute="update mysql.user set Password = '', plugin = 'ed25519', authentication_string = '${PWD_HASH}' where User = 'root' and Host = 'localhost'";
+      --execute="update mysql.user set Password = password('${ERPNEXT_DB_PWD}'),
+                                         plugin = 'mysql_native_password',
+                          authentication_string = ''
+                 where User = 'root' and Host = 'localhost';";
     sudo -A mysql -sN -u root -p${MYSQL_PWD} --execute="flush privileges";
 
-    sudo -A mysql -u root -p${MYSQL_PWD} --execute="SELECT Host, User, Password, plugin, authentication_string from mysql.user;";
+    # sudo -A mysql -u root -p${MYSQL_PWD} --execute="SELECT Host, User, Password, plugin, authentication_string from mysql.user;";
     cat << CNFEOF > ${MARIA_CLIENT_CONF}
+
 [client]
 user=root
 password=${ERPNEXT_DB_PWD}
 CNFEOF
 
-  cat ${MARIA_CLIENT_CONF}
+  # cat ${MARIA_CLIENT_CONF}
   echo -e "MARIA_CLIENT_CONF :: ${MARIA_CLIENT_CONF}";
 
   fi;
 };
 
-
 installBench () {
   echo -e "Installing :: Bench ...";
   pushd ${HOME}/services >/dev/null;
+    echo -e "\n\n * * * Obtaining Bench * * * ";
     [ -d "bench-repo" ] || git clone https://github.com/frappe/bench bench-repo;
+
+    echo -e "\n\n * * * Installing Bench * * * ";
     pip install --user -e bench-repo;
 
     export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")');
@@ -126,13 +132,22 @@ installBench () {
     # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+    echo -e "\n\n * * * Initializing Frappe-Bench * * * ";
+    [ -d "frappe-bench" ] || bench init frappe-bench;
 
+    pushd frappe-bench >/dev/null;
+      echo -e "\n\n * * * Creating new site * * * ";
+      bench new-site site1.local;
 
-    # [ -d "frappe-bench" ] || bench init frappe-bench;
-    # pushd frappe-bench >/dev/null;
-    #   bench new-site site1.local;
-    #   bench get-app erpnext https://github.com/frappe/erpnext;
-    # popd >/dev/null;
+      echo -e "\n\n * * * Obtaining ErpNext * * * ";
+      bench get-app erpnext https://github.com/frappe/erpnext;
+
+      echo -e "\n\n * * * Installing ErpNext App * * * ";
+      bench --site site1.local install-app erpnext;
+
+      echo -e "\n\n * * * Launching site ... * * * ";
+      bench start;
+    popd >/dev/null;
 
   popd >/dev/null;
 };
@@ -146,8 +161,7 @@ installFrappeBench () {
   prepareNodeJsDependencies;
   prepareMariaDb;
 
-  # installBench;
-
+  installBench;
 
   echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 };
