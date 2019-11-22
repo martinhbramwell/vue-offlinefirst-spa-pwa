@@ -36,6 +36,7 @@ installSslCertificates()
 
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo -e "\n\n*** Installing Letsencrypt SSL certificates ***";
   declare PARMS="${SECRETS_FILE_DIR}/virtualHostsConfigParameters.json";
   declare CERTS_BACKUP_FILE=$(cat ${PARMS} | jq -r .SSL_PARMS.CERTS_BACKUP_FILE);
   declare BACKUP=${SECRETS_FILE_DIR}/${CERTS_BACKUP_FILE};

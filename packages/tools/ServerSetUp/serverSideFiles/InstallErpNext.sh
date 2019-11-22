@@ -2,174 +2,189 @@
 #
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
-# export NVM_DIR="$HOME/.nvm";
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
 source ${SCRIPT_DIR}/utils.sh;
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
-prepareErpNextUser () {
-  cat /etc/passwd | grep ${ERPNEXT_USR} >/dev/null \
-    && echo -e "User '${ERPNEXT_USR}' already exists" \
-    || sudo -A useradd -m -s /bin/bash ${ERPNEXT_USR};
-  echo -e "Setting password for user '${ERPNEXT_USR}'";
-  echo "${ERPNEXT_USR}:${ERPNEXT_PWD}" | sudo -A chpasswd;
-  echo -e "Setting sudo privileges for user '${ERPNEXT_USR}'";
-  sudo -A usermod -aG sudo ${ERPNEXT_USR};
-
-  pushd /home/${ERPNEXT_USR} >/dev/null;
-    declare PATHFIX="PATH=\$PATH:~/.local/bin/";
-    cat .bashrc | grep ${PATHFIX} >/dev/null \
-      && echo -e "The '.bashrc' file was already patched" \
-      || echo -e "\n\n${PATHFIX}" | sudo -A tee -a .bashrc;
-  popd >/dev/null;
-};
-
-prepareSystemDependencies () {
+prepareDependencies () {
   echo -e "\nInstalling :: System Dependencies ...";
-  X="libffi-dev"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="wkhtmltopdf"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="libssl-dev"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="python-dev"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="python-pip"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  # X="chalk"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="gcc"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="g++"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="make"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="python3-setuptools"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="python3-minimal"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  # X="python3-virtualenv"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="build-essential"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="redis-server"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-
-  X="mariadb-server"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-  X="libmariadbclient18"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
-
+  X="inotify-tools"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
+  X="tree"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
 };
 
-prepareNodeJsDependencies () {
-  export NVM_DIR="$HOME/.nvm";
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-  npm --version;
-  npm install -g chalk;
-  npm install -g yarn;
-};
-
-preparePythonDependencies () {
-  echo -e "\nPreparing :: Python stuff ...";
-};
-
-prepareMariaDb () {
-  declare READY=$(mysql --defaults-extra-file=${MARIA_CLIENT_CONF} -sN --execute="SELECT 2+2;" 2>/dev/null;);
-
-  if [[ ${READY} -eq 5 ]]; then
-    echo -e "\n\nMariaDb is ready already.";
+createErpNextUser () {
+  echo -e "Ready to create new user '${PRD_ERPHOST_USR}'.";
+  if ! id -u ${PRD_ERPHOST_USR} &>/dev/null; then
+    echo -e "Creating new user '${PRD_ERPHOST_USR}'.";
+    sudo -A adduser --disabled-password --gecos "${PRD_ERPHOST_USR_NAME}" ${PRD_ERPHOST_USR};
+    echo -e "${PRD_ERPHOST_PWD}\n${PRD_ERPHOST_PWD}" | sudo -A passwd -q ${PRD_ERPHOST_USR};
+    sudo -A usermod -aG sudo ${PRD_ERPHOST_USR};
   else
-    echo -e "\n\nPreparing :: MariaDb";
-
-    echo -e "Reconfiguring MariaDb";
-    declare MARIA_SRVR_CONF="50-server.cnf";
-    declare MARIA_SRVR_CONF_DIR="/etc/mysql/mariadb.conf.d";
-    sudo -A mkdir -p ${MARIA_SRVR_CONF_DIR};
-    sudo -A cp ${SCRIPT_DIR}/${MARIA_SRVR_CONF} ${MARIA_SRVR_CONF_DIR};
-
-    sudo -A systemctl restart mariadb;
-    sudo -A systemctl enable mariadb;
-
-
-    echo -e "Securing MariaDb";
-    export MYSQL_PWD="${ERPNEXT_DB_PWD}";
-
-    cat << EOF > /dev/shm/mysql_secure_installation.sql
-UPDATE mysql.user SET Password=PASSWORD('${ERPNEXT_DB_PWD}') WHERE User='root';
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-DROP FUNCTION IF EXISTS ed25519_password;
-CREATE FUNCTION ed25519_password RETURNS STRING SONAME "auth_ed25519.so";
-EOF
-    # echo -e " pwd :: ${MYSQL_PWD}";
-    sudo -A mysql -u root -p${MYSQL_PWD} < /dev/shm/mysql_secure_installation.sql;
-
-
-    echo -e "Correcting MariaDb Root Password";
-    # declare PWD_HASH=$(sudo -A mysql -sN -u root -p${MYSQL_PWD} --execute="SELECT ed25519_password('${ERPNEXT_DB_PWD}');");
-    # echo -e " Hash :: ${PWD_HASH}";
-
-    sudo -A mysql -sN -u root -p${MYSQL_PWD} \
-      --execute="update mysql.user set Password = password('${ERPNEXT_DB_PWD}'),
-                                         plugin = 'mysql_native_password',
-                          authentication_string = ''
-                 where User = 'root' and Host = 'localhost';";
-    sudo -A mysql -sN -u root -p${MYSQL_PWD} --execute="flush privileges";
-
-    # sudo -A mysql -u root -p${MYSQL_PWD} --execute="SELECT Host, User, Password, plugin, authentication_string from mysql.user;";
-    cat << CNFEOF > ${MARIA_CLIENT_CONF}
-
-[client]
-user=root
-password=${ERPNEXT_DB_PWD}
-CNFEOF
-
-  # cat ${MARIA_CLIENT_CONF}
-  echo -e "MARIA_CLIENT_CONF :: ${MARIA_CLIENT_CONF}";
-
+    echo -e "User '${PRD_ERPHOST_USR}' exists already.";
   fi;
+
+  # ls -la ${HOME}/setupScripts;
+  declare KEY_NAME=${PRD_ERPHOST_USR}_$(echo ${PRD_ERPNEXT_HOST} | tr . _);
+  echo -e "Finalizing SSH for '${KEY_NAME}'.";
+  sudo -A mkdir -p /home/${PRD_ERPHOST_USR}/.ssh;
+  sudo -A cp ${HOME}/setupScripts/${KEY_NAME}.pub /home/${PRD_ERPHOST_USR}/.ssh/authorized_keys;
+  sudo -A chown -R ${PRD_ERPHOST_USR}:${PRD_ERPHOST_USR} /home/${PRD_ERPHOST_USR}/.ssh;
+  sudo -A chmod 700 /home/${PRD_ERPHOST_USR}/.ssh;
+  sudo -A chmod 640 /home/${PRD_ERPHOST_USR}/.ssh/authorized_keys;
+
 };
 
-installBench () {
-  echo -e "Installing :: Bench ...";
-  pushd ${HOME}/services >/dev/null;
-    echo -e "\n\n * * * Obtaining Bench * * * ";
-    [ -d "bench-repo" ] || git clone https://github.com/frappe/bench bench-repo;
+installErpNext () {
+  echo -e "\nInstalling :: ErpNext ...";
 
-    echo -e "\n\n * * * Installing Bench * * * ";
-    pip install --user -e bench-repo;
+  declare ERP_DIR="/home/${PRD_ERPHOST_USR}";
+  declare SERVICE_DIR="${ERP_DIR}/services";
+  declare CONFIG_DIR="${ERP_DIR}/.bench/bench/config";
 
-    export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")');
-    export PATH=$PY_USER_BIN:$PATH;
+  sudo -Au ${PRD_ERPHOST_USR} mkdir -p ${SERVICE_DIR};
+  pushd ${SERVICE_DIR} >/dev/null;
 
-    # export NVM_DIR="$HOME/.nvm";
-    # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-    # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    echo -e "Obtaining 'install.py' (${HOME})...";
 
-    echo -e "\n\n * * * Initializing Frappe-Bench * * * ";
-    [ -d "frappe-bench" ] || bench init frappe-bench;
+    sudo -Au ${PRD_ERPHOST_USR} wget -nc https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py;
+    echo -e "Production install:
+        --site ${PRD_ERPNEXT_SITE}
+        --user ${PRD_ERPHOST_USR}
+        --mysql-root-password ***********
+        --admin-password **********
+        --bench-name ${NEWBENCH}
 
-    pushd frappe-bench >/dev/null;
-      echo -e "\n\n * * * Creating new site * * * ";
-      bench new-site site1.local;
+     ...";
+    sudo -AH python3 install.py --production \
+        --site ${PRD_ERPNEXT_SITE} \
+        --user ${PRD_ERPHOST_USR} \
+        --mysql-root-password ${PRD_ERPHOST_PWD} \
+        --admin-password ${PRD_ERPHOST_PWD} \
+        --bench-name ${NEWBENCH}
 
-      echo -e "\n\n * * * Obtaining ErpNext * * * ";
-      bench get-app erpnext https://github.com/frappe/erpnext;
+    # sudo -A ufw allow 80
+  #   cd ${NEWBENCH}
 
-      echo -e "\n\n * * * Installing ErpNext App * * * ";
-      bench --site site1.local install-app erpnext;
-
-      echo -e "\n\n * * * Launching site ... * * * ";
-      bench start;
-    popd >/dev/null;
+  #   bench update
+  #   # bench start
 
   popd >/dev/null;
 };
 
-installFrappeBench () {
-  echo -e "Preparing :: Frappe Bench ...";
+patchErpNext () {
+  echo -e "\nPatching :: ErpNext NGinx 'unicode' bug...";
 
-  prepareErpNextUser;
-  prepareSystemDependencies;
-  preparePythonDependencies;
-  prepareNodeJsDependencies;
-  prepareMariaDb;
+  declare CONFIG_DIR="${ERP_DIR}/.bench/bench/config";
 
-  installBench;
+  pushd ${CONFIG_DIR}/ >/dev/null;     # Got to bench config directory
+    sudo -Au ${PRD_ERPHOST_USR} cp nginx.py nginx_BACKUP.py;                      # Back up your config file
 
-  echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+    # Set variables
+    declare PATTERN="isinstance(domain, unicode)";
+    declare REPLACEMENT="\t\t\t\tif isinstance(domain, str) or isinstance(domain, bytes):";
+
+    sudo -Au ${PRD_ERPHOST_USR} sed -i "/${PATTERN}/c\\${REPLACEMENT}" nginx.py;  # Do the replacement
+    # diff nginx_BACKUP.py nginx.py;
+  popd;
 };
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  export ERPNEXT_USR=erpnext;
-  export ERPNEXT_PWD=plokplok.0.0.0;
-  export ERPNEXT_DB_PWD=plokplok.0.0.0;
-  export MARIA_CLIENT_CONF="${HOME}/.ssh/secrets/mariadb.cnf";
-  installFrappeBench;
+configureErpNextSSL () {
+  echo -e "\nConfiguring :: ErpNext Secure Sockets Layer...";
+
+  declare BENCH_DIR="${ERP_DIR}/${NEWBENCH}";
+
+  declare NGINX="/etc/nginx";
+  declare CNF="nginx.conf";
+  declare SITES_ENABLED="${NGINX}/sites-enabled";
+
+  pushd ${BENCH_DIR} >/dev/null;
+    if grep -ic ssl_ciphers ./config/nginx.conf >/dev/null; then
+      echo -e "ErpNext SSL has already been installed...";
+    else
+      echo -e "Protecting old config file... $(date +"%Y%m%d_%H%M")";
+      pushd config >/dev/null;
+        # pwd;
+        sudo -Au ${PRD_ERPHOST_USR} mv ${CNF} ${CNF}_bk$(date +"%Y%m%d_%H%M");
+        # ls -la;
+      popd >/dev/null;
+
+      echo -e "Turning on multitenant...";
+      sudo -Au ${PRD_ERPHOST_USR} bench config dns_multitenant on;
+      echo -e "Adding our domain: '${PRD_ERPNEXT_HOST}' ...";
+      sudo -Au ${PRD_ERPHOST_USR} bench setup add-domain --site ${PRD_ERPNEXT_SITE} ${PRD_ERPNEXT_HOST};
+      echo -e "Mapping our domain: '${PRD_ERPNEXT_HOST}' to virtual host '${PRD_ERPNEXT_SITE}' ...";
+      sudo -A -H bench setup lets-encrypt  --custom-domain ${PRD_ERPNEXT_HOST} --non-interactive ${PRD_ERPNEXT_SITE};
+      echo -e "Enable scheduler...";
+      sudo -Au ${PRD_ERPHOST_USR} bench --site ${PRD_ERPNEXT_SITE} enable-scheduler;
+
+      pushd config >/dev/null;
+        echo -e "Patching '${CNF}'";
+        sudo -Au ${PRD_ERPHOST_USR} sed -i '/ssl_dhparam/d' ${CNF};
+        sudo -Au ${PRD_ERPHOST_USR} sed -i '/Strict-Transport-Security/d' ${CNF};
+        declare PATTERN="ssl_protocols";
+        declare REPLACEMENT="        ssl_protocols TLSv1.2 TLSv1.3;\n        ssl_dhparam /etc/ssl/private/dhparams_4096.pem;";
+        sudo -Au ${PRD_ERPHOST_USR} sed -i "/${PATTERN}/c\\${REPLACEMENT}" ${CNF};
+        # cat ${CNF} | grep -B 5 -A 5 ssl_protocols;
+
+        declare PATTERN="X-Frame-Options";
+        declare REPLACEMENT='        add_header X-Frame-Options "SAMEORIGIN";\n        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";';
+        sudo -Au ${PRD_ERPHOST_USR} sed -i "/${PATTERN}/c\\${REPLACEMENT}" ${CNF};
+        # cat ${CNF} | grep -B 5 -A 5 X-Frame-Options;
+      popd >/dev/null;
+    fi;
+  popd >/dev/null;
+
+  pushd ${NGINX} >/dev/null;
+    if grep enabled ${CNF} >/dev/null; then
+      echo "${CNF} has already been patched";
+    else
+      sudo -A cp ${CNF} ${CNF}_bk$(date +"%Y%m%d_%H%M");
+
+      cat << EOFNG > /tmp/${CNF}_patch
+--- nginx.conf_bk20191122_1039  2019-11-22 10:39:03.765168975 -0500
++++ nginx.conf  2019-11-22 11:08:23.253779028 -0500
+@@ -73,4 +73,5 @@
+     proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=web-cache:8m max_size=1000m inactive=600m;
+
+     include /etc/nginx/conf.d/*.conf;
++    include /etc/nginx/sites-enabled/*;
+ }
+EOFNG
+      echo -e "Enabling wanted sites...";
+      sudo -A patch ${CNF} /tmp/${CNF}_patch;
+    fi;
+
+  popd >/dev/null;
+
+  echo -e "Disabling unwanted sites...";
+  sudo -A rm -f ${SITES_ENABLED}/default;
+  sudo -A rm -f ${SITES_ENABLED}/ErpNext;
+
+  sudo -A service nginx restart;
+  sudo -A service nginx status;
+
+};
+
+export ERP_DIR="/home/${PRD_ERPHOST_USR}";
+export NEWBENCH="frappe-bench";
+
+prepareDependencies;
+createErpNextUser;
+
+installErpNext;
+
+patchErpNext;
+configureErpNextSSL;
+
+if [[ 0 -eq 1 ]]; then
+
+  su ${NEWUSER}
+
+
 fi;
+
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";

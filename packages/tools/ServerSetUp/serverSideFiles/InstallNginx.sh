@@ -102,6 +102,7 @@ installNginx()
 
 
   pushd ${SCRIPT_DIR} >/dev/null;
+    echo -e "\n\n*** Installing NGinx ***";
     declare PARMS="${SECRETS_FILE_DIR}/virtualHostsConfigParameters.json";
 
     export HTTPD_SERVER="/etc/nginx";

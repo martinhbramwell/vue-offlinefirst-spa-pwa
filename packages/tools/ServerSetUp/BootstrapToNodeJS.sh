@@ -66,19 +66,26 @@ createNewUser () {
 
 ########
 patchSSHConfigFile () {
+
+  declare NEW_REMOTE_USER="$1";
+  declare NEW_REMOTE_HOST="$2";
+  declare NEW_REMOTE_HOST_NAME="$3";
+  declare NEW_REMOTE_HOST_PWD="$4";
+
   declare SSHPTH="/home/${USER}/.ssh";
-  declare KEY_NAME=${NEW_HOST_ADMIN}_$(echo ${NEW_HOST} | tr . _);
+  declare KEY_NAME=${NEW_REMOTE_USER}_$(echo ${NEW_REMOTE_HOST} | tr . _);
 
   echo -e "Check for public key '${KEY_NAME}.pub'";
+
   if ls -la ${SSHPTH} | grep -v grep | grep "${KEY_NAME}.pub" &> /dev/null; then
     echo "Found it.";
   else
     echo "Not found.  Generating new key for '${KEY_NAME}'";
-    ssh-keygen -b 4096 -C ${NEW_HOST_ADMIN}@$(hostname) -t rsa -N "" -f ${SSHPTH}/${KEY_NAME};
+    ssh-keygen -b 4096 -C ${NEW_REMOTE_USER}@$(hostname) -t rsa -N "" -f ${SSHPTH}/${KEY_NAME};
   fi;
 
-  echo "Patching SSH config file with alias for '${NEW_HOST_ADMIN}@${NEW_HOST}'";
-  export PTRN="# Alias configuration: '${NEW_HOST_NAME}'";
+  echo "Patching SSH config file with alias for '${NEW_REMOTE_USER}@${NEW_REMOTE_HOST}'";
+  export PTRN="# Alias configuration: '${NEW_REMOTE_HOST_NAME}'";
   export PTRNB="${PTRN} «begins»";
   export PTRNE="${PTRN} «ends»";
 
@@ -87,10 +94,10 @@ patchSSHConfigFile () {
   sed -i "/${PTRNB}/,/${PTRNE}/d" ${SSHCFG_FILE};
 
   echo -e "${PTRNB}
-# Alias '${NEW_HOST_NAME}'' binds to remote user '${NEW_HOST_ADMIN}@${NEW_HOST}'.'
-Host ${NEW_HOST_NAME}
-  User ${NEW_HOST_ADMIN}
-  HostName ${NEW_HOST}
+# Alias '${NEW_REMOTE_HOST_NAME}'' binds to remote user '${NEW_REMOTE_USER}@${NEW_REMOTE_HOST}'.'
+Host ${NEW_REMOTE_HOST_NAME}
+  User ${NEW_REMOTE_USER}
+  HostName ${NEW_REMOTE_HOST}
   IdentityFile ${SSHPTH}/${KEY_NAME}
 ${PTRNE}
 " >> ${SSHCFG_FILE}
@@ -98,19 +105,21 @@ ${PTRNE}
   sed -i "s/ *$//" ${SSHCFG_FILE}; # trim whitespace to EOL
   sed -i "/^$/N;/^\n$/D" ${SSHCFG_FILE}; # blank lines to 1 line
 
-  echo "Pushing SSH public key to account '${NEW_HOST_ADMIN}@${NEW_HOST}'";
-  # echo "sshpass -p ${NEW_HOST_PWD} ssh-copy-id -f -i ${SSHPTH}/${KEY_NAME} ${NEW_HOST_ADMIN}@${NEW_HOST}";
-  sshpass -p ${NEW_HOST_PWD} ssh-copy-id -f -i ${SSHPTH}/${KEY_NAME} ${NEW_HOST_ADMIN}@${NEW_HOST};
+  if ! ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
+    echo "Pushing SSH public key to account '${NEW_REMOTE_USER}@${NEW_REMOTE_HOST}'"; # " identified by '${NEW_REMOTE_HOST_PWD}'";
+    # echo "sshpass -p ${NEW_REMOTE_HOST_PWD} ssh-copy-id -f -i ${SSHPTH}/${KEY_NAME} ${NEW_REMOTE_USER}@${NEW_REMOTE_HOST}";
+    sshpass -p ${NEW_REMOTE_HOST_PWD} ssh-copy-id -f -i ${SSHPTH}/${KEY_NAME} ${NEW_REMOTE_USER}@${NEW_REMOTE_HOST};
+  fi;
 
 }
 
 
 ########
 pushNewUserPublicKey () {
-  echo "Pushing public key for user : '${NEW_HOST_ADMIN}@${NEW_HOST}'.";
+  echo "Pushing public key for user : '${NEW_HOST_ADMIN}@${NEW_HOST}' identified by '${NEW_HOST_PWD}'.";
   sshpass -p ${NEW_HOST_PWD} ssh -t ${NEW_HOST_ADMIN}@${NEW_HOST} "pwd";
   echo "!";
-  patchSSHConfigFile;
+  patchSSHConfigFile ${NEW_HOST_ADMIN} ${NEW_HOST} ${NEW_HOST_NAME} ${NEW_HOST_PWD};
 };
 
 
@@ -176,6 +185,10 @@ importSecretFiles () {
   curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L ${BITLY_LINK} > tmp.json;
   # curl -sH "${HDR}" -d '{"type":"virtualHostsCfgPrms","scrt":"'"${SECRET}"'"}' --post301 -X POST -L http://bit.ly/vue-offlinefirst-spa-pwa > tmp.json;
   mv tmp.json ./serverSideFiles/virtualHostsConfigParameters.json;
+
+  curl -sH "${HDR}" -d '{"type":"token","scrt":"'"${SECRET}"'"}' --post301 -X POST -L ${BITLY_LINK} > tmp.json;
+  mv tmp.json ./serverSideFiles/token.json;
+
   echo -e "Imported secret files.";
 };
 
@@ -614,7 +627,9 @@ initializeCouchDB () {
   replicationBuilder "${NAME}" "${SOURCE_URL}" "${SOURCE_AUTH}" "${TARGET_URL}" "${TARGET_AUTH}";
   replicator ${REPLICATOR} ${MASTER_CRED_URL}/_replicator/$(uriencode "${NAME}");
 
-
+  echo -e "Finally -- updating 'locate' search database...";
+  sudo -A updatedb;
+  echo -e "Updated 'locate' search database.";
 
 };
 
@@ -622,9 +637,14 @@ initializeCouchDB () {
 
 ########
 prepareErpNext () {
-  declare ERPNEXT_SETUP_FILE="InstallErpNext.sh";
-
   echo -e "\n\n\nSet up ErpNext";
+  patchSSHConfigFile ${PRD_ERPHOST_USR} ${PRD_ERPNEXT_HOST} ${PRD_ERPHOST_NAME} ${NEW_HOST_PWD};
+  declare KEY_NAME=${PRD_ERPHOST_USR}_$(echo ${PRD_ERPNEXT_HOST} | tr . _);
+
+  echo -e "Push '${KEY_NAME}.pub' to target '${PRD_NEW_HOST_NAME}:${HOME}/setupScripts'";
+  scp ${HOME}/.ssh/${KEY_NAME}.pub ${PRD_NEW_HOST_NAME}:${HOME}/setupScripts;
+
+  declare ERPNEXT_SETUP_FILE="InstallErpNext.sh";
   ERPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${ERPNEXT_SETUP_FILE};";
   ssh -t ${NEW_HOST_NAME} ${ERPCMD};
 };
@@ -679,12 +699,21 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 # # # # prepareCouchDB;
 # # # # pushAndRunAskPassServiceMaker;
 # prepareNodeApp;
+
+#   source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
+#   prepareErpNext;
 # echo -e "
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 # exit;
+
 echo -e "Attempting to connect to host alias ${NEW_HOST_NAME} as admin user '${NEW_HOST_ADMIN}:${NEW_HOST}'.";
+if ! ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
+  echo -e "Cannot log in yet. Preparing for key based logins";
+  prepareHostForKeyBasedLogins;
+fi;
+
 if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
-  echo -e "Logged in. Building server now";
+  echo -e "\n\nLogged in. Building server now";
   importSecretFiles;
   uploadServerSideFiles;
   prepareAPT;
@@ -699,12 +728,10 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   prepareClientSSH;
   prepareNodeApp;
   initializeCouchDB;
-  prepareErpNext
+  prepareErpNext;
 else
-  echo -e "Cannot log in yet. Preparing for key based logins";
-  prepareHostForKeyBasedLogins;
+  echo -e "\n\nCannot log in yet. Installation failed.";
 fi;
-
 
 echo -e "";
 echo -e "   DONE    ";

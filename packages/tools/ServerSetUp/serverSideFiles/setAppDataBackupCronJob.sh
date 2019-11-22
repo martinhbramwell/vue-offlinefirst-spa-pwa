@@ -28,7 +28,7 @@ fi;
 sed -i "/${START_ALIAS}/,/${END_ALIAS}/d" ${CRONJOB_PATH};
 echo -e "
 ${START_ALIAS}
-0 */1 * * * /home/you/services/vue-offlinefirst-spa-pwa/packages/lambdaSrv/backUpToGoogleDrive.sh > /dev/null
+ 34 12 * * * /home/you/services/vue-offlinefirst-spa-pwa/packages/lambdaSrv/backUpToGoogleDrive.sh > /dev/null
 ${END_ALIAS}
 " >> ${CRONJOB_PATH};
 

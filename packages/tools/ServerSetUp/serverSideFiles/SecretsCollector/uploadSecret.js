@@ -10,6 +10,35 @@ const targetPath = process.env.XDG_RUNTIME_DIR;
 
 const DRIVE_URL = 'https://drive.google.com/open';
 
+if (process.argv.length < 6) {
+  console.log(`Error: Too few arguments.
+
+    Usage :
+
+export SECRETS_FILE_PATH=".ssh/secrets";
+export GOOGLE_CREDS_FILE="credentials.json";
+export FILEDIR="/tmp";
+export FILENAME="";
+export MIME="text/plain";
+export PARENT="19lh-dZyrbEpyVJP0semQ9fVNlSxrUjUo";
+
+node uploadSecret \${FILEDIR} \${FILENAME} "\${MIME}" "\${PARENT}";
+
+      FILEDIR = where the file is kept
+      FILENAME = the file's name
+      MIME = typically 'text/plain' *
+      PARENT = google drive parent folder ID eg: '19lh-dZyrbEpyVJP0semQ9fVNlSxrUjUo'
+
+* https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+    `);
+  // const directory = process.argv[2];
+  // const fileName = process.argv[3];
+  // const mimeType = process.argv[4];
+  // const parent = process.argv[5];
+
+  return;
+};
+
 console.log("********************* Uploading *****************************");
 
 /**
@@ -18,7 +47,7 @@ console.log("********************* Uploading *****************************");
  */
 function putFile(auth, parms) {
   const { filePath, fileName, mimeType, parent } = parms;
-  // console.log(`Parms are : ${filePath}, ${fileName}, ${mimeType}, ${parent}`);
+  console.log(`Parms are : ${filePath}, ${fileName}, ${mimeType}, ${parent}`);
 
   const drive = google.drive({ version: 'v3', auth });
 

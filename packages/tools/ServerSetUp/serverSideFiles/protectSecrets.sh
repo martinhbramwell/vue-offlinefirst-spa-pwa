@@ -6,6 +6,7 @@ export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 declare PARMS="virtualHostsConfigParameters.json";
 
 declare GOOGLE_CREDS_FILE="credentials.json";
+declare GOOGLE_WIB_TOKEN="token.json";
 declare COLLECTOR_DIR="SecretsCollector";
 
 declare SECRETS_FILE_PATH=".ssh/secrets";
@@ -48,6 +49,18 @@ pushd ${SCRIPT_DIR} >/dev/null;
     else
       FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ./${COLLECTOR_DIR}/${GOOGLE_CREDS_FILE} does not exist.\n";
       FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ${SECRETS_FILE_DIR}/${GOOGLE_CREDS_FILE} does not exist.\n";
+      declare FAILED=true;
+    fi
+  fi
+
+  if [[ -f "${SECRETS_FILE_DIR}/${GOOGLE_WIB_TOKEN}" ]]; then
+      rm -f ./${GOOGLE_WIB_TOKEN};
+  else
+    if [[ -f "./${GOOGLE_WIB_TOKEN}" ]]; then
+      mv ./${GOOGLE_WIB_TOKEN} ${SECRETS_FILE_DIR};
+    else
+      FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ./${GOOGLE_WIB_TOKEN} does not exist.\n";
+      FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ${SECRETS_FILE_DIR}/${GOOGLE_WIB_TOKEN} does not exist.\n";
       declare FAILED=true;
     fi
   fi
