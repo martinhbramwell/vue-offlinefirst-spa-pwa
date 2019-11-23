@@ -3,11 +3,38 @@ const { google } = require('googleapis');
 
 const { authorize, loadToken, credentials } = require('./auth');
 
+if (process.argv.length < 5) {
+  console.log(`Error: Too few arguments.
+
+    Usage :
+
+export SECRETS_FILE_PATH=".ssh/secrets";
+export GOOGLE_CREDS_FILE="credentials.json";
+
+export FILEID="19lh-dZyrbEpyVJcoKsckersemQ9fVNlSxrUjUo";
+export FILENAME="";
+export FILEDIR="/tmp";
+
+node collectSecret \${FILEID} \${FILENAME} "\${FILEDIR}";
+
+      FILEID = google drive file ID eg: '19lh-dZyrbEpfuCkoFfQ9fVNlSxrUjUo'
+      FILENAME = the name to give to the file when writing
+      FILEDIR = where the file is to be kept
+    `);
+  // const directory = process.argv[2];
+  // const fileName = process.argv[3];
+  // const mimeType = process.argv[4];
+  // const parent = process.argv[5];
+
+  return;
+};
+
+
 const fileId = process.argv[2];
 const fileName = process.argv[3];
 const targetPath = process.argv[4];
 
-// process.stdout.write(`Parameters --  fileId:'${fileId}' fileName:'${fileName}' targetPath:'${targetPath}'\n`);
+console.log(`********* Downloading '${fileName}' *****************`);
 
 
 /**

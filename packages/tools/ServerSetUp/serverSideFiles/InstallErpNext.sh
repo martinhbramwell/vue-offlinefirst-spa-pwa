@@ -7,6 +7,8 @@ source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 prepareDependencies () {
   echo -e "\nInstalling :: System Dependencies ...";
+  ${HOME}/aptFix.sh;
+
   X="python3-setuptools"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   X="python3-minimal"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
   # X="python3-virtualenv"; if aptNotYetInstalled "${X}"; then sudo -A apt-get -y install "${X}"; else say ${X}; fi;
@@ -169,6 +171,75 @@ EOFNG
 
 };
 
+restoreSiteBackup () {
+
+  export FILEDIR="${XDG_RUNTIME_DIR}";
+
+  echo -e "\nConfiguring :: Restoring initial database and files... ";
+
+  declare FILE_TIMESTAMP="";
+  declare LATEST=$(curl --silent "https://docs.google.com/spreadsheets/d/19fkZoWrbeGlNyRbf5Mku2fELh4dy0e4VxL8-KoXmNpI/export?format=csv");
+  declare FILEID=$(echo ${LATEST} | cut -d "," -f 1);
+  declare FILENAME=$(echo ${LATEST} | cut -d "," -f 2);
+
+  declare SITE_ID=${PRD_ERPNEXT_SITE%.local};
+
+  echo -e "For site '${SITE_ID}':  ${FILENAME} has ID ${FILEID}";
+
+  pushd ${SCRIPT_DIR}/SecretsCollector >/dev/null;
+    test -f "node_modules/axios/package.json" || npm install;
+    node collectSecret "${FILEID}" "${FILENAME}" "${FILEDIR}";
+    echo -e "";
+  popd >/dev/null;
+
+  declare BKUP_DIR="${PRD_ERPNEXT_SITE}/private/backups";
+  declare HLDR="latest_backup";
+  declare DBSFX="-database.sql.gz";
+  declare PUSFX="-files.tar";
+  declare PRSFX="-private-files.tar";
+  pushd ${FILEDIR} >/dev/null;
+    base64 -d ${FILENAME} > ${HLDR}.tar.gz
+    mkdir -p ${HLDR};
+    pushd ${HLDR} >/dev/null;
+      tar zxvf ../${HLDR}.tar.gz >/dev/null;
+
+      declare BK=( ./*.sql.gz );
+      # echo -e "BK :: ${BK}";
+      declare TL=${BK#"./"};
+      # echo -e "TL :: ${TL}";
+      FILE_TIMESTAMP=${TL%-${SITE_ID}${DBSFX}};
+
+      sudo -A chown ${PRD_ERPHOST_USR}:${PRD_ERPHOST_USR} *.*;
+      sudo -A mv *.* /home/${PRD_ERPHOST_USR}/frappe-bench/sites/${BKUP_DIR};
+    popd >/dev/null;
+    # tree;
+
+    echo -e "The file unique identifier is : ${FILE_TIMESTAMP}";
+
+  popd >/dev/null;
+
+
+  pushd /home/${PRD_ERPHOST_USR}/frappe-bench  >/dev/null;
+    # sudo -Au ${PRD_ERPHOST_USR} pwd;
+    declare BK_DB="${BKUP_DIR}/${FILE_TIMESTAMP}-${SITE_ID}${DBSFX}";
+    declare BK_PU="${BKUP_DIR}/${FILE_TIMESTAMP}-${SITE_ID}${PUSFX}";
+    declare BK_PR="${BKUP_DIR}/${FILE_TIMESTAMP}-${SITE_ID}${PRSFX}";
+    ls -la ./sites/${BK_DB};
+    ls -la ./sites/${BK_PU};
+    ls -la ./sites/${BK_PR};
+
+    sudo -Au ${PRD_ERPHOST_USR} bench \
+        --site ${PRD_ERPNEXT_SITE} \
+        --force restore ${BK_DB} \
+        --with-private-files ${BK_PR} \
+        --with-public-files ${BK_PU} \
+        --mariadb-root-password ${PRD_ERPHOST_PWD};
+  popd >/dev/null;
+    # cat ${FILEDIR}/${FILENAME} | jq -r .;
+
+};
+
+
 export ERP_DIR="/home/${PRD_ERPHOST_USR}";
 export NEWBENCH="frappe-bench";
 
@@ -180,6 +251,8 @@ installErpNext;
 patchErpNext;
 configureErpNextSSL;
 
+restoreSiteBackup;
+
 if [[ 0 -eq 1 ]]; then
 
   su ${NEWUSER}
@@ -187,4 +260,4 @@ if [[ 0 -eq 1 ]]; then
 
 fi;
 
-echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+echo -e "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
