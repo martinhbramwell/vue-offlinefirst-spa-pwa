@@ -634,7 +634,6 @@ initializeCouchDB () {
 };
 
 
-
 ########
 prepareErpNext () {
   echo -e "\n\n\nSet up ErpNext";
@@ -648,6 +647,17 @@ prepareErpNext () {
   ERPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${ERPNEXT_SETUP_FILE};";
   ssh -t ${NEW_HOST_NAME} ${ERPCMD};
 };
+
+########
+initializeErpNext () {
+  echo -e "\n\n\nInitialize ErpNext";
+  pushd ${SCRIPT_DIR}/ErpNextInitialData > /dev/null;
+    ./processBulkInserts.sh;
+  popd > /dev/null;
+
+};
+
+
 
 
 
@@ -729,6 +739,7 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   prepareNodeApp;
   initializeCouchDB;
   prepareErpNext;
+#  initializeErpNext;
 else
   echo -e "\n\nCannot log in yet. Installation failed.";
 fi;
