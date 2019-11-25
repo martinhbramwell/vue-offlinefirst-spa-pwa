@@ -7,8 +7,39 @@ funcTitle () {
 }
 
 getProducts () { funcTitle ${FUNCNAME[0]};
-  export FILEDIR="${XDG_RUNTIME_DIR}";
-  cat products.json | jq -r '.[] | ("\"\", \"`IB_00" + .id + "`\", \"IB_00" + .id + "\", \"Consumer\", \"Litre\", \"" + .text + "\", 1, 1, " + .product_price + ", \"" + .product_description + "\", 365, \"Manufacture\", \"Litre\", 1" + ", \"\", \"\", \"\", \"\", \"\", \"`27ba96373e`\"" + ", " + "\"Iridium Blue\", " + "\"Stores - IB\"")' | tee ${FILEDIR}/Products.csv >/dev/null;
+  declare ACCUM="${XDG_RUNTIME_DIR}/products.sql";
+
+  echo -e "
+DELETE FROM tabItem;
+
+INSERT INTO
+  tabItem
+  (
+    name,
+    item_code,
+    item_group,
+    stock_uom,
+    item_name,
+    is_stock_item,
+    include_item_in_manufacturing,
+    valuation_rate,
+    description,
+    shelf_life_in_days,
+    default_material_request_type,
+    weight_uom,
+    has_batch_no
+  )
+VALUES" > ${ACCUM};
+
+  # cat products.json | jq -r '.[] | ("( \"`IB_00" + .id + "`\", \"IB_00" + .id + "\", \"Consumer\", \"Litre\",  \"" + .text + "\",  1,  1, " + .product_price + ",  \"" + .product_description + "\", 365, \"Manufacture\", \"Litre\",   1" + ", \"\", \"\", \"\", \"\", \"\", \"`27ba96373e`\"" + ", " + "\"Iridium Blue\", " + "\"Stores - IB\" ),")' \
+  cat products.json | jq -r '.[] | ("  ( \"`IB_00" + .id + "`\", \"IB_00" + .id + "\", \"Consumer\", \"Litre\", \"" + .text + "\", 1, 1, " + .product_price + ", \"" + .product_description + "\", 365, \"Manufacture\", \"Litre\", 1" + " ),")' \
+    | tee -a ${ACCUM} >/dev/null;
+
+  sed -i '$s/\(.*\),/\1 /' ${ACCUM};
+
+  echo -e ";" >> ${ACCUM};
+
+  cat ${ACCUM} >> ${BULKS};
 };
 
 ensureConn () { funcTitle ${FUNCNAME[0]};
@@ -46,18 +77,21 @@ getErpNextDatabaseName () { funcTitle ${FUNCNAME[0]};
 processAllBulkInserts () { funcTitle ${FUNCNAME[0]};
   declare DATABASE="--database ${ERP_DB}";
   OPTS="${SWHOST} ${SWPORT} ${SWUSER} ${SWPASS} ${DATABASE}";
-  mysql -A ${OPTS} < ./bulkInserts.sql;
+  # cat ${BULKS};
+  mysql -A ${OPTS} < ${BULKS};
+  # echo -e "SELECT * FROM tabItem;" | mysql -A ${OPTS};
+
 };
 
+export BULKS="./bulkInserts.sql";
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo -e "\n+ ~~~~~~ GetBAPUProducts.sh ~~~~~~ +";
   source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
-  # export NVM_DIR="$HOME/.nvm";
-  # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh";  # This loads nvm
-  # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion";  # This loads nvm bash_completion
+  echo -e "/* Bulk inserts from BAPU to ErpNext */" > ${BULKS};
 
   getProducts;
+  # exit;
 
   export KILLME=-1;
   export SWITCHES="-A --database _a7a7e96ba1644fd9 --host=127.0.0.1 --port=3333 -u root -pplokplok.0.0.0";
@@ -69,7 +103,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   export ERP_DB="";
   startUpSSHTunnel;
   getErpNextDatabaseName;
-  echo -e "Found database :: '${ERP_DB}'"
+  echo -e "Found database :: '${ERP_DB}'";
   processAllBulkInserts;
   # sleep 5;
 

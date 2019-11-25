@@ -1,2 +1,3 @@
 bulkInserts.sql
 fragments/*
+*.json
