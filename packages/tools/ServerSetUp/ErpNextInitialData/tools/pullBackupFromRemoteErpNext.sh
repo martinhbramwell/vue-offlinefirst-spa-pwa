@@ -24,10 +24,10 @@ runRemoteErpNextBackup () { funcTitle ${FUNCNAME[0]};
 export BKPS=/opt/backupErpNext;
 pullBackupFromRemoteErpNext () { funcTitle ${FUNCNAME[0]};
   pushd ${BKPS} >/dev/null;
-    # scp ${PRD_ERPHOST_NAME}:${LATEST} . >/dev/null;
-    # declare LT=$(cat ${LTS});
-    # echo -e "Will pull ${PRD_ERPHOST_NAME}:~/${BENCH_BKPS}/${LT}*";
-    # scp ${PRD_ERPHOST_NAME}:~/${BENCH_BKPS}/${LT}* . >/dev/null;
+    scp ${PRD_ERPHOST_NAME}:${LATEST} . >/dev/null;
+    declare LT=$(cat ${LTS});
+    echo -e "Will pull ${PRD_ERPHOST_NAME}:~/${BENCH_BKPS}/${LT}*";
+    scp ${PRD_ERPHOST_NAME}:~/${BENCH_BKPS}/${LT}* . >/dev/null;
     echo -e "To clean up, you can run...
       ssh ${PRD_ERPHOST_NAME}
 
@@ -44,7 +44,7 @@ Or, locally ...
 };
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  # runRemoteErpNextBackup;
+  runRemoteErpNextBackup;
   pullBackupFromRemoteErpNext;
   cp purge.sh ${BKPS};
 
