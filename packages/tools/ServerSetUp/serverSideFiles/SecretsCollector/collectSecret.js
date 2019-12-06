@@ -34,7 +34,7 @@ const fileId = process.argv[2];
 const fileName = process.argv[3];
 const targetPath = process.argv[4];
 
-console.log(`********* Downloading '${fileName}' *****************`);
+// console.log(`********* Downloading '${fileName}' *****************`);
 
 
 /**

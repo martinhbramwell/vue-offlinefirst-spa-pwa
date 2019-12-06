@@ -2,8 +2,20 @@
 #
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 
-echo -e "${SCRIPT_DIR}/setupScripts/utils.sh";
-source ${SCRIPT_DIR}/setupScripts/utils.sh;
+# echo -e "${SCRIPT_DIR}/setupScripts/utils.sh";
+# source ${SCRIPT_DIR}/setupScripts/utils.sh;
+
+aptNotYetInstalled() {
+  set -e;
+  return $(dpkg-query -W --showformat='${Status}\n' $1 2>/dev/null | grep -c "install ok installed");
+}
+
+
+
+########
+say () {
+  echo "'${1}'${MSG}";
+}
 
 
 ########

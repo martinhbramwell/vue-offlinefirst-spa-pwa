@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 #
 set -e;
+
+export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
+
 source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 funcTitle () {
@@ -46,7 +49,7 @@ Or, locally ...
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   runRemoteErpNextBackup;
   pullBackupFromRemoteErpNext;
-  cp purge.sh ${BKPS};
+  cp ${SCRIPT_DIR}/purge.sh ${BKPS};
 
   echo -e "-----------  Done  -----------\n\n"
 fi;

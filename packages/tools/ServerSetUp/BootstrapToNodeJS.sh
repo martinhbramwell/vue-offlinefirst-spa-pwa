@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 #
+set -e;
+
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
+
+source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
+
+funcTitle () {
+  mx=16; ttl=$1;
+  let spcs="$mx - (${#ttl} / 2)"; str=$(printf "%${spcs}s");
+  echo -e "\n~~~~~~${str// /' '} ${ttl}() ${str// /' '}~~~~~~";
+}
 
 # export CONFIG_FILE="${HOME}/.ssh/secrets/local.config";
 export SECRETS_DIR="${HOME}/.ssh/secrets";
@@ -648,18 +658,14 @@ prepareErpNext () {
   ssh -t ${NEW_HOST_NAME} ${ERPCMD};
 };
 
+
 ########
-initializeErpNext () {
-  echo -e "\n\n\nInitialize ErpNext";
+initializeErpNext () { funcTitle ${FUNCNAME[0]};
   pushd ${SCRIPT_DIR}/ErpNextInitialData > /dev/null;
-    ./processBulkInserts.sh;
+    ./restoreWizardInitialState.sh;
+    # ./processBulkInserts.sh;
   popd > /dev/null;
-
 };
-
-
-
-
 
 ########
 qTst () {
@@ -712,9 +718,10 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 
 #   source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 #   prepareErpNext;
-# echo -e "
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-# exit;
+initializeErpNext;
+echo -e "
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+exit;
 
 echo -e "Attempting to connect to host alias ${NEW_HOST_NAME} as admin user '${NEW_HOST_ADMIN}:${NEW_HOST}'.";
 if ! ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
@@ -738,8 +745,9 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   prepareClientSSH;
   prepareNodeApp;
   initializeCouchDB;
+
   prepareErpNext;
-#  initializeErpNext;
+  initializeErpNext;
 else
   echo -e "\n\nCannot log in yet. Installation failed.";
 fi;

@@ -5,6 +5,12 @@ export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 source ${SCRIPT_DIR}/utils.sh;
 source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
+funcTitle () {
+  mx=16; ttl=$1;
+  let spcs="$mx - (${#ttl} / 2)"; str=$(printf "%${spcs}s");
+  echo -e "\n~~~~~~${str// /' '} ${ttl}() ${str// /' '}~~~~~~";
+};
+
 prepareDependencies () {
   echo -e "\nInstalling :: System Dependencies ...";
   ${HOME}/aptFix.sh;
@@ -77,7 +83,12 @@ installErpNext () {
   popd >/dev/null;
 };
 
-patchErpNext () {
+openFirewallForEmail () { funcTitle ${FUNCNAME[0]};
+  sudo -A ufw allow out 993;
+  sudo -A ufw allow out 587;
+};
+
+patchErpNext_NGinx () {
   echo -e "\nPatching :: ErpNext NGinx 'unicode' bug...";
 
   declare CONFIG_DIR="${ERP_DIR}/.bench/bench/config";
@@ -248,16 +259,10 @@ createErpNextUser;
 
 installErpNext;
 
-patchErpNext;
+patchErpNext_NGinx;
 configureErpNextSSL;
+openFirewallForEmail;
 
-restoreSiteBackup;
-
-if [[ 0 -eq 1 ]]; then
-
-  su ${NEWUSER}
-
-
-fi;
+# restoreSiteBackup;
 
 echo -e "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
