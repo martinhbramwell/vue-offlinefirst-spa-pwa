@@ -12,6 +12,7 @@ declare COLLECTOR_DIR="SecretsCollector";
 declare SECRETS_FILE_PATH=".ssh/secrets";
 declare SECRETS_FILE_DIR="${HOME}/${SECRETS_FILE_PATH}";
 declare LETSENCRYPT_ARCHIVE="LetsEncrypt.tar.gz";
+declare ERPNEXT_LETSENCRYPT_ARCHIVE="LetsEncrypt_erpnext.tar.gz";
 
 unset FAILED;
 pushd ${SCRIPT_DIR} >/dev/null;
@@ -37,6 +38,18 @@ pushd ${SCRIPT_DIR} >/dev/null;
     else
       FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ./${LETSENCRYPT_ARCHIVE} does not exist.\n";
       FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ${SECRETS_FILE_DIR}/${LETSENCRYPT_ARCHIVE} does not exist.\n";
+      declare FAILED=true;
+    fi
+  fi
+
+  if [[ -f "${SECRETS_FILE_DIR}/${ERPNEXT_LETSENCRYPT_ARCHIVE}" ]]; then
+      rm -f ./${ERPNEXT_LETSENCRYPT_ARCHIVE};
+  else
+    if [[ -f "./${ERPNEXT_LETSENCRYPT_ARCHIVE}" ]]; then
+      mv ./${ERPNEXT_LETSENCRYPT_ARCHIVE} ${SECRETS_FILE_DIR};
+    else
+      FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ./${ERPNEXT_LETSENCRYPT_ARCHIVE} does not exist.\n";
+      FAILURE_MESSAGES="${FAILURE_MESSAGES} ==> ${SECRETS_FILE_DIR}/${ERPNEXT_LETSENCRYPT_ARCHIVE} does not exist.\n";
       declare FAILED=true;
     fi
   fi

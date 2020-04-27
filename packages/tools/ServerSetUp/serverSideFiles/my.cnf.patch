@@ -1,0 +1,23 @@
+--- my.cnf_old	2020-02-13 19:49:27.384000000 -0500
++++ my.cnf	2020-02-13 19:53:26.956000000 -0500
+@@ -29,6 +29,12 @@
+ 
+ [mysqld]
+ #
++# * ErpNext Settings
++#
++character-set-client-handshake = FALSE
++character-set-server = utf8mb4
++collation-server = utf8mb4_unicode_ci
++#
+ # * Basic Settings
+ #
+ user		= mysql
+@@ -175,6 +181,7 @@
+ max_allowed_packet	= 16M
+ 
+ [mysql]
++default-character-set = utf8mb4
+ #no-auto-rehash	# faster start of mysql but no tab completion
+ 
+ [isamchk]

@@ -64,13 +64,17 @@ const send = async (args) => {
     if (jsonResponse.reason && jsonResponse.reason.code === 43) jsonResponse.flag = 'accepted'; // eslint-disable-line max-len
 
     try {
-      LG.verbose(`Upload response for invoice #${inv.data.codigo} : ${jsonResponse}`);
+      LG.verbose(`Upload response for invoice #${inv.data.codigo} : ${jsonResponse.flag}`);
       const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+        CLG("Got fresh invoice record copy...");
+        CDR(fresh);
       delete fresh.returned;
       fresh[jsonResponse.flag] = true; // eslint-disable-line no-param-reassign, max-len
       if (jsonResponse.flag !== 'accepted') {
         fresh.reason = jsonResponse.reason; // eslint-disable-line no-param-reassign, max-len
       }
+        CLG("Putting acceptance result...");
+        CDR(fresh);
       const pt = await db.put(fresh);
       LG.verbose(`Put acceptance result : ${JSON.stringify(pt, null, 2)}`);
     } catch (errResult) {

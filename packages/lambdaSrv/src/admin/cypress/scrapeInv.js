@@ -50,7 +50,11 @@ export default async (req, res) => {
     /* eslint-disable max-len */
 
     setScraperControl({ _id: controlRecord, clientes: [], facturas: [], skim: true }); // eslint-disable-line object-curly-newline
+    console.log(`${path}/${scrapeInvoices}`);
     const resultClientsList = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
+    console.log('resultInvoices');
+    console.dir(resultInvoices);
+
     LG.info(`Invoices listing results:\n${JSON.stringify(resultClientsList.config.env, null, 3)}`);
     res.write(', "type": "PersonsList"');
 

@@ -27,6 +27,7 @@ module.exports = (on, config) => {
     },
     getCouchLists () {
       console.log(`getCouchLists`);
+      console.log(`Using : ${process.env.CYPRESS_CH_SCRAPERCONTROL}`);
       const res = couchTools.get(process.env.CYPRESS_CH_SCRAPERCONTROL);
       console.log(`\n<------------------->\n`);
       return res;

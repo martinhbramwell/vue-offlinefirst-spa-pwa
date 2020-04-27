@@ -8,9 +8,29 @@ source ${SCRIPT_DIR}/ListVMSnapShots.sh;
 export REVERT_JOB_NAME="startVM.json";
 export REVERT_JOB_PATH=${XDG_RUNTIME_DIR}/${REVERT_JOB_NAME};
 
-revertVMSnapShot () {
+declare REVERT_STS_RSLT=".reverttovmsnapshotresponse.jobid";
 
-  declare -A SNAPSHOTS;
+revertVMSnapShot () {
+  declare SNAPSHOT=${1};
+  # echo "CHOICE :: '${CHOICE}' VS ${SNAPSHOT}";
+  declare VMSSID="${SNAPSHOTS[${SNAPSHOT}]}";
+
+  echo "Reverting with VM Id '${SNAPSHOTS[${CHOICE}]}'";
+  declare RVRT_BODY="{ \"command\": \"revertToVMSnapshot\", \"vmsnapshotid\": \"${VMSSID}\" }";
+  # echo "Reversion '${RVRT_BODY}'";
+  echo ${RVRT_BODY} > ${REVERT_JOB_PATH};
+
+  # echo "Sending reversion request";
+  declare asyncJobId=$(./iwstackCmd.py ${REVERT_JOB_PATH} | jq -r ${REVERT_STS_RSLT});
+
+  # echo "Awaiting job '${asyncJobId}'";
+  ./WaitForJobEnd.sh ${asyncJobId};
+
+  echo "Done waiting";
+}
+
+
+loadSnapShotList () {
   readarray -t LINES < ${VM_PAIRS_PATH};
   for LINE in "${LINES[@]}"; do
     KY=${LINE%%|*};
@@ -19,29 +39,41 @@ revertVMSnapShot () {
     SNAPSHOTS[${KY}]=${VAL};
   done
 
-  KEYS=("${!SNAPSHOTS[@]}");
+}
 
-  declare REVERT_STS_RSLT=".reverttovmsnapshotresponse.jobid";
+
+generateKeysList () {
+  for (( I=0; $I < ${#SNAPSHOTS[@]}; I+=1 )); do
+    KEY="${KEYS[$I]}";  echo "$I) $KEY";
+    # KEY="${KEYS[$I]}";  echo "$I) $KEY  ==> [${SNAPSHOTS[${KEY}]}]";
+  done
+}
+
+
+revertChosenVMSnapShot () {
+
   declare JOB_STS_RSLT=".queryasyncjobresultresponse.jobstatus";
 
+  # loadSnapShotList;
+
+  # KEYS=("${!SNAPSHOTS[@]}");
   while [ -z $DONE ]; do
-    for (( I=0; $I < ${#SNAPSHOTS[@]}; I+=1 )); do
-      KEY="${KEYS[$I]}";  echo "$I) $KEY";
-    done
+    # generateKeysList;
     read -p "Pick a number: " count;
-    if [[ $count == [01234567] ]]; then
+    if [[ $count == [0123456789] ]]; then
       declare CHOICE=${KEYS[$count]};
       read -p "   Revert VM to snapshot '${CHOICE}'? " confirm;
       if [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]; then
-        declare VMSSID="${SNAPSHOTS[${CHOICE}]}";
+        revertVMSnapShot "${CHOICE}";
+        # declare VMSSID="${SNAPSHOTS[${CHOICE}]}";
         # echo "Reverting with VM Id '${SNAPSHOTS[${CHOICE}]}'";
-        declare RVRT_BODY="{ \"command\": \"revertToVMSnapshot\", \"vmsnapshotid\": \"${VMSSID}\" }";
+        # declare RVRT_BODY="{ \"command\": \"revertToVMSnapshot\", \"vmsnapshotid\": \"${VMSSID}\" }";
         # echo "Reversion '${RVRT_BODY}'";
-        echo ${RVRT_BODY} > ${REVERT_JOB_PATH};
+        # echo ${RVRT_BODY} > ${REVERT_JOB_PATH};
 
-        declare asyncJobId=$(./iwstackCmd.py ${REVERT_JOB_PATH} | jq -r ${REVERT_STS_RSLT});
+        # declare asyncJobId=$(./iwstackCmd.py ${REVERT_JOB_PATH} | jq -r ${REVERT_STS_RSLT});
 
-        ./WaitForJobEnd.sh ${asyncJobId};
+        # ./WaitForJobEnd.sh ${asyncJobId};
 
         DONE=true;
       elif [[ $confirm == [qQ] || $confirm == [qQ][uU][iI][T] ]]; then
@@ -55,12 +87,27 @@ revertVMSnapShot () {
 }
 
 
+declare -A SNAPSHOTS;
+declare KEYS;
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
   pushd ${SCRIPT_DIR} >/dev/null;
 
     getVMSnapShots;
-    revertVMSnapShot;
+    loadSnapShotList;
+    KEYS=("${!SNAPSHOTS[@]}");
+    generateKeysList;
+    if [[ -z $1 ]]; then
+      echo -e "Choose from list...";
+      revertChosenVMSnapShot;
+    elif [[ $1 == [01234567] ]]; then
+      echo -e "Using supplied choice '${1}'";
+      declare CHOICE=${KEYS[${1}]};
+      echo -e "Reverting '${CHOICE}'";
+      revertVMSnapShot "${CHOICE}";
+    else
+      echo -e "Choice '${1}' is not a number in range '01234567'";
+    fi;
 
   popd >/dev/null;
 

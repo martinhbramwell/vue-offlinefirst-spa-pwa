@@ -32,8 +32,9 @@ ${START_ALIAS}
 ${END_ALIAS}
 " >> ${CRONJOB_PATH};
 
-cat -s ${CRONJOB_PATH} | tee "${CRONJOB_PATH}" >/dev/null;
-cat ${CRONJOB_PATH};
+
+# cat -s ${CRONJOB_PATH} | tee "${CRONJOB_PATH}" >/dev/null;
+# cat ${CRONJOB_PATH};
 
 crontab ${CRONJOB_PATH};
 echo -e "~~~~ Updated crontab file ~~~~";

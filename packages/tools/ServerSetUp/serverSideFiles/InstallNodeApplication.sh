@@ -76,6 +76,7 @@ ${START_ALIAS}
 */5 * * * * ${NODEJS_APP_WATCHDOG} > /dev/null
 ${END_ALIAS}
 ";
+  echo -e "Configuring cronjob";
 
   export TEMP_FILE="${XDG_RUNTIME_DIR}/crontab.txt";
   crontab -l >${TEMP_FILE} 2>/dev/null;
@@ -89,7 +90,11 @@ ${END_ALIAS}
     touch ${TEMP_FILE};
   fi;
   echo -e "${PATCH}" >> ${TEMP_FILE}
-  crontab ${TEMP_FILE}
+  # echo -e "Cronjob :: ";
+  # cat ${TEMP_FILE};
+  crontab ${TEMP_FILE};
+
+  echo -e "Configured cronjob";
 
 }
 
@@ -136,7 +141,7 @@ installNodeApplication ()
     mkdir -p ${PROJECT_CONTAINER_DIR};
     pushd ${PROJECT_CONTAINER_DIR} >/dev/null;
       if [ ! -d "${FOLDER_NAME}" ] ; then
-        echo -e "Cloning project...";
+        echo -e "Cloning project from ${CLONING_URL} ...";
         git clone ${CLONING_URL} ${FOLDER_NAME};
       else
         pushd "${FOLDER_NAME}" >/dev/null;
@@ -144,7 +149,7 @@ installNodeApplication ()
         popd >/dev/null;
       fi
       pushd "${FOLDER_NAME}" >/dev/null;
-        echo -e "Switching to production branch...";
+        echo -e "Switching to production branch '${PRODUCTION_BRANCH}'...";
         git checkout ${PRODUCTION_BRANCH};
       popd >/dev/null;
 
@@ -153,17 +158,41 @@ installNodeApplication ()
 
   popd >/dev/null;
 
-  export LAMBDA_APP="lambdaSrv";
-  export NODEJS_APP_SERVER="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/${LAMBDA_APP}";
-  ln -s ${NODEJS_APP_SERVER} ${LAMBDA_APP};
+  pushd "${HOME}" >/dev/null;
+    # echo -e "
+    #   ####################
 
-  export NODEJS_APP_WATCHDOG="${NODEJS_APP_SERVER}/watchdog.sh";
-  ${NODEJS_APP_WATCHDOG};
-  configureCronJob;
+    #     Setting cronjob
 
-  ${SCRIPT_DIR}/setAppDataBackupCronJob.sh;
+    #   ####################
 
-  echo -e "Installed Node app.";
+    # ";
+
+    export LAMBDA_APP="lambdaSrv";
+    export NODEJS_APP_SERVER="${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}/packages/${LAMBDA_APP}";
+    # echo -e "
+    # ln -s ${NODEJS_APP_SERVER} ${LAMBDA_APP};";
+    rm ${LAMBDA_APP};
+    ln -s ${NODEJS_APP_SERVER} ${LAMBDA_APP};
+
+    export NODEJS_APP_WATCHDOG="${NODEJS_APP_SERVER}/watchdog.sh";
+    ${NODEJS_APP_WATCHDOG};
+    # echo -e "NODEJS_APP_WATCHDOG:
+    # ${NODEJS_APP_WATCHDOG};";
+    configureCronJob;
+
+    ${SCRIPT_DIR}/setAppDataBackupCronJob.sh;
+
+    echo -e "
+      Cron Tab set as ::
+      ";
+    crontab -l;
+
+
+    echo -e "
+      Installed Node app.
+      ";
+  popd >/dev/null;
 
     # echo -e "|..............  prepareNodeApp";
     # echo -e "${PROJECT_CONTAINER_DIR}/${FOLDER_NAME}";

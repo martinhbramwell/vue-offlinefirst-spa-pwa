@@ -7,8 +7,8 @@ source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
   pushd ${SCRIPT_DIR} >/dev/null;
-    ./StopVM.sh;
-    ./RevertToSnapShot.sh;
+    ./KillVM.sh;
+    ./RevertToSnapShot.sh ${1};
     ./StartVM.sh;
   popd >/dev/null;
 

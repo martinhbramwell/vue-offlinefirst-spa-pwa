@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+declare SITE="erpn2.iridium.blue";
+declare YEAR=$(date +"%Y");
+declare BACKUPS_PATH="./sites/${SITE}/private/backups";
+declare LATEST="";
+declare BKTMP="${XDG_RUNTIME_DIR}/BKTMP";
+
+if [[ -z ${PRD_ERPHOST_PWD} ]]; then
+  echo -e "Must supply mariadb-root-password environment variable 'PRD_ERPHOST_PWD'
+  export PRD_ERPHOST_PWD='';";
+else
+  pushd ${HOME}/frappe-bench >/dev/null;
+    echo -e "/* ~~~~~~~~  Restoring ~~~~~~~~~ */";
+    pushd ${BACKUPS_PATH} >/dev/null;
+      declare TS=$(ls -1 ${YEAR}* | tail -n 1);
+      echo ${TS%-${SITE//./_}*} > LATEST.txt;
+      LATEST="$(cat LATEST.txt)";
+      mkdir -p ${BKTMP};
+      rm -f ${BKTMP}/*.*;
+      cp ${LATEST}* ${BKTMP};
+    popd >/dev/null;
+
+    ls -l ${BKTMP};
+    echo -e "---";
+    declare BUPR="${BKTMP}/${LATEST}-erpn2_iridium_blue-private-files.tar";
+    declare BUPU="${BKTMP}/${LATEST}-erpn2_iridium_blue-files.tar";
+    declare BUSQ="${BKTMP}/${LATEST}-erpn2_iridium_blue-database.sql.gz";
+    # ls -la ${BUPR};
+    # ls -la ${BUPU};
+    # ls -la ${BUSQ};
+
+    declare PASS=" --mariadb-root-password ${PRD_ERPHOST_PWD}";
+    declare DATA=" ${BUSQ}";
+    declare FILE=" --with-public-files ${BUPU}";
+    declare PRIV=" --with-private-files ${BUPR}";
+
+    bench --site ${SITE} --force restore ${PASS} ${DATA} ${FILE} ${PRIV};
+    echo -e "/* ~~~~~~~~ Done Restore ~~~~~~~~~ */\n\n";
+  popd >/dev/null;
+fi;

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#
+declare SITE="erpn2.iridium.blue";
+
+pushd ${HOME}/frappe-bench >/dev/null;
+  echo -e "/* ~~~~~~~~  Backing Up ~~~~~~~~~ */";
+  bench --site ${SITE} backup --with-files;
+  echo -e "/* ~~~~~~~~ Done Backing Up ~~~~~~~~~ */\n\n";
+popd >/dev/null;

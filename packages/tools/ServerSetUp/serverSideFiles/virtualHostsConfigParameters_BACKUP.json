@@ -1,0 +1,40 @@
+{
+  "SSL_PARMS": {
+    "CERTIFICATE_OWNER_EMAIL": "water.iridium.blue@gmail.com",
+    "SSL_DFH_ID": "1gT4cOCZzNUJEuriUkzQqR3cceHu7PcH-",
+    "CERTS_BACKUP_FILE": "LetsEncrypt.tar.gz"
+  },
+  "VHOSTS": [
+    {
+      "SYMLINK_NAME": "CouchDB",
+      "GDRIVE_FILE_ID": "1FJ6Az9n68IByS9F5LXR9d0qrZSC3Lnmm",
+      "GDRIVE_FILE_NAME": "CouchDB_ReverseProxy_WITHCERT.sh",
+      "VHOST_NAME": "chdb1.iridium.blue"
+    },
+    {
+      "SYMLINK_NAME": "NodeJS",
+      "GDRIVE_FILE_ID": "1KvedJxa2XHtKdbmoEyCDzyq1Attmmdpe",
+      "GDRIVE_FILE_NAME": "NodeJS_ReverseProxy_WITHCERT.sh",
+      "VHOST_NAME": "spvr1.iridium.blue"
+    },
+    {
+      "SYMLINK_NAME": "ErpNext",
+      "GDRIVE_FILE_ID": "1pjVYHUCpHfVAPL9Q0QNaTdVlo7rmHiBk",
+      "GDRIVE_FILE_NAME": "ErpNext_ReverseProxy_WITHCERT.sh",
+      "VHOST_NAME": "erpn1.iridium.blue"
+    }
+  ],
+  "NODEJS_APP": {
+    "SSH_KEY": "1-1j9NPnZnazIYjOFflDAmkxnIwLCMLEH",
+    "SSH_KEY_PUB": "1m_6vKD1kaiFU1NhX1oNlnJ2GPjuq7ire",
+    "SSH_ALIAS": "vuesppwa",
+    "CLONING_URL": "git@vuesppwa.github.com:martinhbramwell/vue-offlinefirst-spa-pwa.git",
+    "FOLDER_NAME": "vue-offlinefirst-spa-pwa",
+    "PRODUCTION_BRANCH": "invoices",
+    "SECRETS_FILE_PATH": ".ssh/secrets",
+    "SECRETS_FILE_NAME": "vue-offlinefirst-spa-pwa.config",
+    "INITIAL_DATABASE_ZIP": "1HJ9SMMg1WLT4a2127EebEkL25YRER2ky",
+    "INITIAL_DATABASE_ZIP_FILE_NAME": "CouchInitialization_IridiumBlue.tar.gz.b64",
+    "GIT_USER_NAME": "Iridium Blue"
+  }
+}

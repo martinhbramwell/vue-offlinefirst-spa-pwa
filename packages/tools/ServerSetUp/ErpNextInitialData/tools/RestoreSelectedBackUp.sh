@@ -23,32 +23,11 @@ declare DATABASE_PKG="${DATABASE_FILE}.gz";
 declare PUBLIC_PKG="files.tar";
 declare PRIVATE_PKG="private-files.tar";
 
-# loadPermanentDevBackup () { funcTitle ${FUNCNAME[0]};
-#   pushd ${PERMANENT_DEV_BACKUP_DIR} >/dev/null;
-#     # pwd;
-#     # ls -la;
-#     declare LATEST="$(cat LATEST.txt)";
-#     declare SITE_NAME="$(echo ${PRD_ERPNEXT_SITE//./_})";
-
-#     declare TGT="${ERPNEXT_BACKUP_DIR}/${INITIAL_STATE_FILES_NAME}";
-#     # echo -e "${LATEST}";
-
-#     cp ${LATEST}-${SITE_NAME}-${DATABASE_PKG}  ${TGT}-${DATABASE_PKG};
-#     cp ${LATEST}-${SITE_NAME}-${PRIVATE_PKG}  ${TGT}-${PRIVATE_PKG};
-#     cp ${LATEST}-${SITE_NAME}-${PUBLIC_PKG}  ${TGT}-${PUBLIC_PKG};
-#     echo -e "Moved back up files from ...
-#     ${PERMANENT_DEV_BACKUP_DIR}/${LATEST}-${SITE_NAME}.*
-#         ... to ...
-#     ${TGT}.*";
-#   popd >/dev/null;
-# };
-
-loadPermanentDevBackup () { funcTitle ${FUNCNAME[0]};
+loadSelectedBackup () { funcTitle ${FUNCNAME[0]};
   pushd ${XDG_RUNTIME_DIR} >/dev/null;
-    rm -f ${PERMANENT_DEV_BACKUP_FILE};
-    rm -f ${INITIAL_STATE_FILES_NAME}*.*;
+    rm -f ${SELECTED_BACKUP_BUNDLE};
   popd >/dev/null;
-  cp ${PERMANENT_DEV_BACKUP} ${XDG_RUNTIME_DIR};
+  cp ${SELECTED_BACKUP} ${XDG_RUNTIME_DIR};
   # ls -ls ${XDG_RUNTIME_DIR};
 };
 
@@ -66,8 +45,8 @@ pushBackUpFileToTarget () { funcTitle ${FUNCNAME[0]};
   pushd ${ERPNEXT_BACKUP_DIR} >/dev/null;
     # pwd;
     # ls -la ${INITIAL_STATE_FILES_NAME}.tar.gz;
-    scp ${PERMANENT_DEV_BACKUP_FILE} ${PRD_ERPHOST_NAME}:~ >/dev/null;
-    echo -e "Pushed ${PERMANENT_DEV_BACKUP_FILE} to ${PRD_ERPHOST_NAME}";
+    scp ${SELECTED_BACKUP_BUNDLE} ${PRD_ERPHOST_NAME}:~ >/dev/null;
+    echo -e "Pushed ${SELECTED_BACKUP_BUNDLE} to ${PRD_ERPHOST_NAME}";
   popd >/dev/null;
 };
 
@@ -87,24 +66,27 @@ set -e;
 declare BKUP_DIR=\${HOME}/bkps;
 mkdir -p \${BKUP_DIR};
 rm -fr \${BKUP_DIR}/*;
-tar zxvf ./${PERMANENT_DEV_BACKUP_FILE} >/dev/null;
-mv ${PERMANENT_DEV_BACKUP_DIR}/* \${BKUP_DIR};
-rm -fr ${PERMANENT_DEV_BACKUP_DIR};
+  echo -e "Unpacking '${SELECTED_BACKUP_BUNDLE}' ...";
+tar zxvf ./${SELECTED_BACKUP_BUNDLE} >/dev/null;
+mv ${SELECTED_BACKUP_DIR}/* \${BKUP_DIR};
+rm -fr ${SELECTED_BACKUP_DIR};
 pushd \${BKUP_DIR} >/dev/null;
-  echo -e "Unpacking '${PERMANENT_DEV_BACKUP_FILE}' ...";
+  echo -e "Unpacking '${SITE_DB}.gz' ...";
   gunzip -f ${SITE_DB}.gz;
   echo -e "Unpacked files. Restoring from backup now ...";
   # ls -la;
 popd >/dev/null;
-# ls -la;
 
-rm -f ${PERMANENT_DEV_BACKUP_FILE};
+rm -f ${SELECTED_BACKUP_BUNDLE};
+
 
 declare FILE_SW=" --with-public-files ${FILE}";
 declare PRIV_SW=" --with-private-files ${PRIV}";
 pushd \${HOME}/frappe-bench >/dev/null;
   bench --site ${PRD_ERPNEXT_SITE} --force restore ${PASS} ${DATA} \${FILE_SW} \${PRIV_SW};
   # echo bench --site ${PRD_ERPNEXT_SITE} --force restore ${PASS} ${DATA} \${FILE_SW} \${PRIV_SW};
+  # echo -e "\n\n~~~~~~~~ \${0} curtailed ~~~~~~~";
+  # exit;
   echo -e "\nRestored from backup."
   pushd sites/${PRD_ERPNEXT_SITE} >/dev/null;
     declare SCJ="site_config.json";
@@ -120,10 +102,10 @@ pushd \${HOME}/frappe-bench >/dev/null;
     echo -e "Symlinked \${SCJ} to \${SCJ_PATH}/\${SCJ}."
   popd >/dev/null;
 popd >/dev/null;
-# ls -la;
-# pwd;
 rm -f restoreBkUp.sh;
 rm -f \${BKUP_DIR}/*;
+
+echo -e "\n\n~~~~~~~~ \${0} terminated ~~~~~~~";
 exit;
 
 EOFPAK
@@ -197,30 +179,38 @@ compressSQL () { funcTitle ${FUNCNAME[0]};
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
-  declare PERMANENT_DEV_BACKUP_DIR="ErpNext_WIZARD_backup";
-  declare PERMANENT_DEV_BACKUP_FILE="${PERMANENT_DEV_BACKUP_DIR}.tar.gz";
-  declare PERMANENT_DEV_BACKUP_HOME="${HOME}/Desktop";
-  declare PERMANENT_DEV_BACKUP="${PERMANENT_DEV_BACKUP_HOME}/${PERMANENT_DEV_BACKUP_FILE}";
+  if [[ -z ${1} ]]; then
+    echo -e "You must supply the directory from which the selected backup file will be taken.";
+    exit;
+  else
+    if [[ -z ${2} ]]; then
+      echo -e "You must supply the name of the selected backup file.";
+      exit;
+    fi;
+  fi;
+
+  echo -e "\n\n~~~~~~~~ ${0} started ~~~~~~~";
+
+  declare SELECTED_BACKUP_FILE_PARENT="${1}";
+  declare SELECTED_BACKUP_BUNDLE="${2}";
+  declare SELECTED_BACKUP_DIR="${SELECTED_BACKUP_BUNDLE%.tar.gz}";
+  declare SELECTED_BACKUP="${SELECTED_BACKUP_FILE_PARENT}/${SELECTED_BACKUP_BUNDLE}";
   pushd ${SCRIPT_DIR} > /dev/null;
-    # # deCompressBackup;
-    # # # deCompressSQL;
-    # # # patchAdministratorPasswordIntoRestoreSQL;
-    # # # patchNewCompanyNameIntoRestoreSQL;
-    # # # compressSQL;
+    # deCompressBackup;
+    # # deCompressSQL;
+    # # patchAdministratorPasswordIntoRestoreSQL;
+    # # patchNewCompanyNameIntoRestoreSQL;
+    # # compressSQL;
 
-    # # # compressBackup;
+    # # compressBackup;
 
-    loadPermanentDevBackup;
+    loadSelectedBackup;
     pushBackUpFileToTarget;
     createRestoreCommand;
     pushRestoreCommandToTarget;
     runRestoreCommandOnTarget;
 
-    echo -e "
-    ~~~~~~~~~~~~~~~~~~~~~~~  restoreWizardInitialState.sh CURTAILED  ~~~~~~~~~~~~~~~~~~~~~~~~~~";
-    exit;
-
   popd > /dev/null;
 
-  echo -e "\n\n~~~~~~~~ restoreWizardInitialState.sh terminated ~~~~~~~"
+  echo -e "\n\n~~~~~~~~ ${0} terminated ~~~~~~~"
 fi;

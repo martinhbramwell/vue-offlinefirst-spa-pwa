@@ -1,0 +1,4 @@
+echo -e "Copying required files to 'erpnext' home directory";
+sudo -A mkdir -p ../erpnext/.ssh/secrets;
+sudo -A cp -r ./.ssh/secrets/vue-offlinefirst-spa-pwa.config ../erpnext/.ssh/secrets;
+sudo -A cp -r ./setupScripts ../erpnext

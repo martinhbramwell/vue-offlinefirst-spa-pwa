@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-set -e;
+# set -e;
 
 export SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )";
 export SCRIPT_NAME=$(basename "$0");
@@ -8,7 +8,7 @@ export SCRIPT_NAME=$(basename "$0");
 source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
 
 funcTitle () {
-  mx=16; ttl=$1;
+  mx=28; ttl=$1;
   let spcs="$mx - (${#ttl} / 2)"; str=$(printf "%${spcs}s");
   echo -e "\n~~~~~~${str// /' '} ${ttl}() ${str// /' '}~~~~~~";
 }
@@ -37,6 +37,20 @@ usage () {
 
 
 ########
+secs_to_human() {
+    if [[ -z ${1} || ${1} -lt 60 ]] ;then
+        min=0 ; secs="${1}"
+    else
+        time_mins=$(echo "scale=2; ${1}/60" | bc)
+        min=$(echo ${time_mins} | cut -d'.' -f1)
+        secs="0.$(echo ${time_mins} | cut -d'.' -f2)"
+        secs=$(echo ${secs}*60|bc|awk '{print int($1+0.5)}')
+    fi
+    echo "Time Elapsed : ${min} minutes and ${secs} seconds."
+}
+
+
+########
 updateLocalKnownHostsFile () {
   echo -e "Clearing host from known_hosts.";
   ssh-keygen -R ${NEW_HOST} &> /dev/null;
@@ -62,7 +76,8 @@ createNewUser () {
     # echo ${NEW_HOST};
     declare TMP=$(echo $RANDOM)${NEW_HOST_ADMIN}${NEW_HOST};
     declare SALT=${TMP:0:16}; # echo ${SALT}
-    declare HASHPWD=$(mkpasswd -m sha-512 ${NEW_HOST_PWD} ${SALT}); # echo ${HASHPWD};
+    declare HASHPWD=$(mkpasswd -m sha-512 ${NEW_HOST_PWD} ${SALT});
+    # echo -e "NEW_HOST_PWD = ${NEW_HOST_PWD}; HASHPWD = ${HASHPWD}; ROOT_PASSWORD = ${ROOT_PASSWORD}";
 
     declare CMD="useradd -m -p '${HASHPWD}' -s /bin/bash ${NEW_HOST_ADMIN};";
     CMD="${CMD} usermod -aG sudo ${NEW_HOST_ADMIN};";
@@ -159,17 +174,17 @@ patchSSHServerConfigFile () {
 ########
 prepareHostForKeyBasedLogins () {
 
-  ssh-keygen -R ${NEW_HOST};
+  ssh-keygen -R ${NEW_HOST}; # Remove domain name keys for the host from  known_hosts
   export NEW_HOST_IP=$(ping -q -c 1 ${NEW_HOST} > tmp; cat tmp | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
   rm -f tmp;
 
-  ssh-keygen -R ${NEW_HOST_IP};
+  ssh-keygen -R ${NEW_HOST_IP}; # Remove IP address keys for the host from  known_hosts
 
   ssh-keyscan -H ${NEW_HOST} >> ~/.ssh/known_hosts
   ssh-keyscan -H ${NEW_HOST_IP} >> ~/.ssh/known_hosts
 
   echo -e "\nApparently user '${NEW_HOST_ADMIN}' does not yet exist. Creating...
-  ${NEW_HOST_ROOT}:${ROOT_PASSWORD}@${NEW_HOST}";
+  ${NEW_HOST_ADMIN}:${ROOT_PASSWORD}@${NEW_HOST}";
   [[ -z "${ROOT_PASSWORD}" ]] && usage;
   if sshpass -p ${ROOT_PASSWORD} ssh -t ${NEW_HOST_ROOT}@${NEW_HOST} "pwd" &> /dev/null; then
     createNewUser;
@@ -204,12 +219,19 @@ importSecretFiles () {
 
 ########
 uploadServerSideFiles () {
-  echo -e "Create server side script files home '${NEW_HOST_NAME}:${HOME}/${DIR_SETUP_FILES}'";
-  ssh -t ${NEW_HOST_NAME} "mkdir -p \${HOME}/${DIR_SETUP_FILES}";
+  declare TARGET_HOST=${1};
+  echo -e "Create server side script files home '${TARGET_HOST}:${HOME}/${DIR_SETUP_FILES}'";
+  ssh -t ${TARGET_HOST} "mkdir -p \${HOME}/${DIR_SETUP_FILES}";
   echo -e "Upload server side files ...
   from : '${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/*'
   to   : '~/${DIR_SETUP_FILES}'";
-  rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* ${NEW_HOST_NAME}:~/${DIR_SETUP_FILES};
+  rsync -a ${SCRIPT_DIR}/${DIR_FILES_FOR_UPLOAD}/* ${TARGET_HOST}:~/${DIR_SETUP_FILES};
+};
+
+########
+retrieveSecrets () {
+  echo -e "Get secrets from WebTask ... 'http://bit.ly/VOSP_02'";
+  ssh -t ${NEW_HOST_NAME} "\${HOME}/${DIR_SETUP_FILES}/importSecretsFile.sh \"${WEBTASK_SECRET}\"";
 };
 
 ########
@@ -446,17 +468,18 @@ prepareClientSSH () {
   echo -e "\n\n\nStart prepareClientSSH...";
   ssh ${NEW_HOST_NAME} "./setupScripts/prepareClientSSH.sh;";
 
-  declare PATCH_AUTHORIZED_KEYS="patch_authorized_keys.sh";
-  declare SSH_ALIAS=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .NODEJS_APP.SSH_ALIAS);
-  # echo ${SSH_ALIAS};
-  declare TMP_KEYS_DIR=tmp_keys_dir;
-  pushd ${XDG_RUNTIME_DIR} >/dev/null;
-    # declare REMOTE_XDG_RUNTIME_DIR=$(ssh ${MASTER_HOST_USER}@${MASTER_NAME} "cd \${XDG_RUNTIME_DIR}; pwd;");
-    echo -e "Copy ${NEW_HOST_NAME} public key to ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME}";
+  if [[ 0 -eq 1 ]]; then # Need to document this.  What does MASTER_NAME refer to??????
+    declare PATCH_AUTHORIZED_KEYS="patch_authorized_keys.sh";
+    declare SSH_ALIAS=$(cat ./serverSideFiles/virtualHostsConfigParameters.json | jq -r .NODEJS_APP.SSH_ALIAS);
+    # echo ${SSH_ALIAS};
+    declare TMP_KEYS_DIR=tmp_keys_dir;
+    pushd ${XDG_RUNTIME_DIR} >/dev/null;
+      # declare REMOTE_XDG_RUNTIME_DIR=$(ssh ${MASTER_HOST_USER}@${MASTER_NAME} "cd \${XDG_RUNTIME_DIR}; pwd;");
+      echo -e "\nCopy ${NEW_HOST_NAME} public key to ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME}";
 
-    scp -3 ${NEW_HOST_NAME}:${HOME}/.ssh/${SSH_ALIAS}.pub ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME};
+      scp -3 ${NEW_HOST_NAME}:${HOME}/.ssh/${SSH_ALIAS}.pub ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME};
 
-    cat << EOFPAK > ${PATCH_AUTHORIZED_KEYS}
+      cat << EOFPAK > ${PATCH_AUTHORIZED_KEYS}
 #!/usr/bin/env bash
 #
 declare KEYS_FILE="authorized_keys";
@@ -468,20 +491,20 @@ pushd \${HOME}/.ssh >/dev/null;
 popd >/dev/null;
 EOFPAK
 
-    chmod +x ${PATCH_AUTHORIZED_KEYS};
-    echo -e "Copy '${PATCH_AUTHORIZED_KEYS}' to '${MASTER_HOST_USER}@${MASTER_NAME}:${HOME}'";
-    scp ${PATCH_AUTHORIZED_KEYS} ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME};
+      chmod +x ${PATCH_AUTHORIZED_KEYS};
+      echo -e "\nCopy '${PATCH_AUTHORIZED_KEYS}' to '${MASTER_HOST_USER}@${MASTER_NAME}:${HOME}'";
+      scp ${PATCH_AUTHORIZED_KEYS} ${MASTER_HOST_USER}@${MASTER_NAME}:${HOME};
 
-    echo -e "Execute '${PATCH_AUTHORIZED_KEYS}' on remote host '${MASTER_NAME}'";
-    # ssh ${MASTER_HOST_USER}@${MASTER_HOST} "pwd; ls -la;";
-    ssh ${MASTER_HOST_USER}@${MASTER_NAME} "./${PATCH_AUTHORIZED_KEYS}; rm -f ./${PATCH_AUTHORIZED_KEYS}";
+      echo -e "\nExecute '${PATCH_AUTHORIZED_KEYS}' on remote host '${MASTER_NAME}'";
+      # ssh ${MASTER_HOST_USER}@${MASTER_HOST} "pwd; ls -la;";
+      ssh ${MASTER_HOST_USER}@${MASTER_NAME} "./${PATCH_AUTHORIZED_KEYS}; rm -f ./${PATCH_AUTHORIZED_KEYS}";
 
-    scp ${NEW_HOST_NAME}:~/.ssh/config .;
-    # cat config;
-    sed "/# ^^^^ HostAlias ${MASTER_NAME} ^^^^/,/# vvvv HostAlias ${MASTER_NAME} vvvv/d" config > cfg.txt;
-    sed -i '/^$/N;/^\n$/D' ./cfg.txt;
+      scp ${NEW_HOST_NAME}:~/.ssh/config .;
+      # cat config;
+      sed "/# ^^^^ HostAlias ${MASTER_NAME} ^^^^/,/# vvvv HostAlias ${MASTER_NAME} vvvv/d" config > cfg.txt;
+      sed -i '/^$/N;/^\n$/D' ./cfg.txt;
 
-    cat << EOFSCP > ssh_config_patch.txt
+      cat << EOFSCP > ssh_config_patch.txt
 
 # ^^^^ HostAlias ${MASTER_NAME} ^^^^
 Host ${MASTER_NAME}
@@ -492,15 +515,16 @@ Host ${MASTER_NAME}
 # vvvv HostAlias ${MASTER_NAME} vvvv
 EOFSCP
 
-    cat cfg.txt ssh_config_patch.txt > config;
+      cat cfg.txt ssh_config_patch.txt > config;
 
-    # echo -e "..............................";
-    # cat config;
-    # echo -e "..............................\n\n\n";
+      # echo -e "..............................";
+      # cat config;
+      # echo -e "..............................\n\n\n";
 
-    scp config ${NEW_HOST_NAME}:~/.ssh;
+      scp config ${NEW_HOST_NAME}:~/.ssh;
 
-  popd >/dev/null;
+    popd >/dev/null;
+  fi;
 
   echo -e "Done prepareClientSSH.";
   # echo -e "***************  CURTAILED **************";
@@ -645,42 +669,142 @@ initializeCouchDB () {
 
 
 ########
-prepareErpNext () {
-  echo -e "\n\n\nSet up ErpNext";
+prepareErpNextUser () { funcTitle ${FUNCNAME[0]};
   patchSSHConfigFile ${PRD_ERPHOST_USR} ${PRD_ERPNEXT_HOST} ${PRD_ERPHOST_NAME} ${NEW_HOST_PWD};
+
   declare KEY_NAME=${PRD_ERPHOST_USR}_$(echo ${PRD_ERPNEXT_HOST} | tr . _);
 
-  echo -e "Push '${KEY_NAME}.pub' to target '${PRD_NEW_HOST_NAME}:${HOME}/setupScripts'";
-  scp ${HOME}/.ssh/${KEY_NAME}.pub ${PRD_NEW_HOST_NAME}:${HOME}/setupScripts;
+  echo -e "Pushing '${KEY_NAME}.pub' to target '${NEW_HOST_NAME}:${HOME}/setupScripts'";
+  scp ${HOME}/.ssh/${KEY_NAME}.pub ${NEW_HOST_NAME}:${HOME}/setupScripts;
 
+  declare ERPNEXT_USER_SETUP_FILE="CreateErpNextUser.sh";
+  ERPUSRCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${ERPNEXT_USER_SETUP_FILE};";
+
+  echo -e "Executing '${ERPUSRCMD}' in target dir '${NEW_HOST_NAME}:${HOME}/${DIR_SETUP_FILES}'";
+  ssh -t ${NEW_HOST_NAME} ${ERPUSRCMD};
+
+  scp ./MakeAskPassService.sh ${NEW_HOST_NAME}:~;
+
+  declare PREP_FILES="prepFiles.sh";
+  export SCRTS=".ssh/secrets";
+  export SUPWD=".supwd.sh";
+  cat << EOFERP > /dev/shm/${PREP_FILES};
+echo "Copying required files to '${PRD_ERPHOST_USR}' home directory";
+sudo -Au ${PRD_ERPHOST_USR} mkdir -p ../${PRD_ERPHOST_USR}/${SCRTS};
+sudo -Au ${PRD_ERPHOST_USR} chmod go-rwx ../${PRD_ERPHOST_USR}/${SCRTS};
+echo "---------";
+sudo -A install -m 600 -o ${PRD_ERPHOST_USR} -g ${PRD_ERPHOST_USR} ./${SCRTS}/vue-offlinefirst-spa-pwa.config ../${PRD_ERPHOST_USR}/${SCRTS};
+sudo -Au ${PRD_ERPHOST_USR} ./MakeAskPassService.sh ${PRD_ERPHOST_USR} ${PRD_ERPHOST_PWD};
+rm -f ./MakeAskPassService.sh;
+EOFERP
+  echo -e "Preparing copy script";
+  chmod +x /dev/shm/${PREP_FILES};
+  scp /dev/shm/${PREP_FILES} ${NEW_HOST_NAME}:~;
+  ssh -t ${NEW_HOST_NAME} "source .bash_login; ./${PREP_FILES}; rm -fr ./${PREP_FILES}";
+};
+
+
+########
+prepareFrappe () { funcTitle ${FUNCNAME[0]};
+  declare ERPNEXT_SETUP_FILE="PrepareForFrappe.sh";
+  FRPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${ERPNEXT_SETUP_FILE};";
+  echo -e "Executing '${FRPCMD}' in target dir '${PRD_ERPHOST_NAME}:\${HOME}/${DIR_SETUP_FILES}'";
+  ssh -t ${PRD_ERPHOST_NAME} ${FRPCMD};
+};
+
+
+########
+prepareErpNext () { funcTitle ${FUNCNAME[0]};
   declare ERPNEXT_SETUP_FILE="InstallErpNext.sh";
+  # scp sudo -Au ${PRD_ERPHOST_USR} cp -r ./setupScripts ../${PRD_ERPHOST_USR};
   ERPCMD="${GET_ASK_PASS_FUNC} \${HOME}/${DIR_SETUP_FILES}/${ERPNEXT_SETUP_FILE};";
-  ssh -t ${NEW_HOST_NAME} ${ERPCMD};
+  echo -e "Executing '${ERPCMD}' in target dir '${PRD_ERPHOST_NAME}:\${HOME}/${DIR_SETUP_FILES}'";
+  ssh -t ${PRD_ERPHOST_NAME} ${ERPCMD};
 };
 
 
 ########
 initializeErpNext () { funcTitle ${FUNCNAME[0]};
   pushd ${SCRIPT_DIR}/ErpNextInitialData > /dev/null;
+    echo -e "Restoring Wizard Initial State...";
     ./restoreWizardInitialState.sh;
+    # echo -e "Processing Bulk Inserts...";
     # ./processBulkInserts.sh;
   popd > /dev/null;
 };
 
+
+
+########
+fixWordLeftRightBug () { funcTitle ${FUNCNAME[0]};
+  declare FIX_BUG="fixWordLeftRightBug";
+  pushd ${XDG_RUNTIME_DIR} > /dev/null;
+    cat << EOFLRB > ${FIX_BUG};
+#!/usr/bin/env bash
+#                            #
+[ 2 = \$(cat .bashrc | grep -c  "^ bind.*ward-word") ] ||  echo -e "bind '\"\\\\\e[1;5D\" backward-word';\nbind '\"\\\\\e[1;5C\" forward-word';" >> .bashrc;
+echo -e "Fixed left and right arrow key bug.";
+EOFLRB
+
+    chmod +x ${FIX_BUG};
+    # ls -ls ${FIX_BUG};
+    scp ${FIX_BUG} ${PRD_ERPHOST_NAME}:~  >/dev/null;
+    ssh ${PRD_ERPHOST_NAME} "./${FIX_BUG}";
+
+
+  popd > /dev/null;
+};
+
+
+########
+fixSSHPermissions () { funcTitle ${FUNCNAME[0]};
+  declare FIX_SSH="fixSSHPermissions.sh";
+  pushd ${XDG_RUNTIME_DIR} >/dev/null;
+
+    cat << EOFUPG > ${FIX_SSH};
+#!/usr/bin/env bash
+#
+chmod -R go-rwx ./.ssh;
+chmod -R g+r ./.ssh;
+chmod g+x ./.ssh;
+cat ${HOME}/.ssh/id_rsa &>/dev/null && chmod go-rwx ${HOME}/.ssh/id_rsa;
+EOFUPG
+
+    chmod +x ${FIX_SSH};
+    ls -ls ${FIX_SSH};
+    scp ${FIX_SSH} ${PRD_ERPHOST_NAME}:~  >/dev/null;
+    ssh ${PRD_ERPHOST_NAME} "./${FIX_SSH}";
+
+  popd >/dev/null;
+};
+
+
 ########
 qTst () {
   echo -e "Quick test...";
-  pushd serverSideFiles/SecretsCollector >/dev/null;
-    [ -e ./node_modules/axios/lib/axios.js ] || npm install;
-    # export VUESPPWAKEY=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey");
-    # echo "export VUESPPWAKEY=\"${VUESPPWAKEY}\"";
-    # export VUESPPWAKEY_PUB=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey.pub");
-    # echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
-    export VUESPPWAKEY_PUB=$(node collectSecret.js "1m_6vKD1kaiFU1NhX1oNlnJ2GPjuq7ire" "vuesppwaKey.pub" ${XDG_RUNTIME_DIR});
-    echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
-  popd >/dev/null;
+  if ! which expect >& /dev/null; then
+      echo "expect not found in your \$PATH"
+      exit 1
+  fi
+
+  expect -c "
+    spawn ./qiktst.sh
+    expect \"Are you sure? \" {
+      send \"y\r\"
+      exp_continue
+    }
+  "
 
   echo -e "Done quick test.";
+  # pushd serverSideFiles/SecretsCollector >/dev/null;
+  #   [ -e ./node_modules/axios/lib/axios.js ] || npm install;
+  #   # export VUESPPWAKEY=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey");
+  #   # echo "export VUESPPWAKEY=\"${VUESPPWAKEY}\"";
+  #   # export VUESPPWAKEY_PUB=$(node uploadSecret.js "${XDG_RUNTIME_DIR}/driveFiles" "vuesppwaKey.pub");
+  #   # echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
+  #   export VUESPPWAKEY_PUB=$(node collectSecret.js "1m_6vKD1kaiFU1NhX1oNlnJ2GPjuq7ire" "vuesppwaKey.pub" ${XDG_RUNTIME_DIR});
+  #   echo "export VUESPPWAKEY_PUB=\"${VUESPPWAKEY_PUB}\"";
+  # popd >/dev/null;
 };
 
 
@@ -700,59 +824,72 @@ export ROOT_PASSWORD="${1:-${NEW_HOST_PWD}}";
 ######
 ################################################################################
 
+
+# ./ErpNextInitialData/tools/WaitForSshStart.sh ${NEW_HOST_NAME};
+# echo -e "*** ${NEW_HOST_NAME} is alive. ***";
+
+declare STARTTIME=$(date +%s);
+
 export SERVER_IP=$(getent hosts ${NEW_HOST} | awk '{ print $1 }');
 echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
     ****************************************
 ";
 
-# # #qTst;
-# # prepareHostForKeyBasedLogins;
-# # importSecretFiles;
-# # uploadServerSideFiles;
-# # prepareAPT;
-# # # prepareLetsEncrypt;
-# # prepareNginx;
-# # # # prepareCouchDB;
-# # # # pushAndRunAskPassServiceMaker;
-# prepareNodeApp;
-
-#   source ${HOME}/.ssh/secrets/vue-offlinefirst-spa-pwa.config;
+#   # uploadServerSideFiles ${NEW_HOST_NAME};
+#   uploadServerSideFiles ${PRD_ERPHOST_NAME};
+#   # prepareFrappe;
 #   prepareErpNext;
-initializeErpNext;
-echo -e "
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-exit;
+# echo -e "
+# ~~~~~~~~~~~~~~~~~~~~~~~  BootStrapToNodeJS short cut completed  ~~~~~~~~~~~~~~~~~~~~~~~~~~";
+# echo -e "";
+# declare ENDTIME=$(date +%s);
+# secs_to_human $((${ENDTIME} - ${STARTTIME}));
+# exit;
+
 
 echo -e "Attempting to connect to host alias ${NEW_HOST_NAME} as admin user '${NEW_HOST_ADMIN}:${NEW_HOST}'.";
-if ! ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
+if ! ssh -o "StrictHostKeyChecking no" -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "Cannot log in yet. Preparing for key based logins";
   prepareHostForKeyBasedLogins;
 fi;
 
+# echo -e "
+# ~~~~~~~~~~~~~~~~~~~~~~~  BootStrapToNodeJS CURTAILED  ~~~~~~~~~~~~~~~~~~~~~~~~~~";
+# exit;
+
 if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "\n\nLogged in. Building server now";
   importSecretFiles;
-  uploadServerSideFiles;
-  prepareAPT;
-  prepareUFW;
-  prepareTimeZone;
-  prepareNodeJS;
+  uploadServerSideFiles ${NEW_HOST_NAME};
+  # prepareAPT;
+  retrieveSecrets;
+  # prepareUFW;
+  # prepareTimeZone;
+  # prepareNodeJS;
   protectSecrets;
-  prepareCouchDB;
-  prepareLetsEncrypt;
-  prepareNginx;
+  # prepareCouchDB;
+  # prepareLetsEncrypt;
+  # prepareNginx;
   prepareSecrets;
-  prepareClientSSH;
-  prepareNodeApp;
-  initializeCouchDB;
+  # prepareClientSSH;
+  # prepareNodeApp;
+  # initializeCouchDB;
 
+  prepareErpNextUser;
+  fixWordLeftRightBug;
+  uploadServerSideFiles ${PRD_ERPHOST_NAME};
+  prepareFrappe;
   prepareErpNext;
-  initializeErpNext;
+  fixSSHPermissions;
+  # # initializeErpNext;
 else
   echo -e "\n\nCannot log in yet. Installation failed.";
 fi;
 
+declare ENDTIME=$(date +%s);
+
 echo -e "";
 echo -e "   DONE    ";
 echo -e "";
+secs_to_human $((${ENDTIME} - ${STARTTIME}));
 echo -e "";

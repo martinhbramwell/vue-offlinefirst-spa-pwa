@@ -21,8 +21,8 @@ startVirtualMachine () {
   ./WaitForJobEnd.sh ${asyncJobId};
   echo -e "*** VM started. ***";
 
-  ./WaitForSshStart.sh ${TARGET_HOST};
-  echo -e "*** ${TARGET_HOST} is alive. ***";
+  ./WaitForSshStart.sh ${NEW_HOST_NAME};
+  echo -e "*** ${NEW_HOST_NAME} is alive. ***";
 
 
 }

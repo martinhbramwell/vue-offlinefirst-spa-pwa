@@ -44,7 +44,7 @@ const processPerson = (elem, pyld) => {
 
       let id = uniqueRequest(cols[0].innerText.toString().padStart(5, '0'));
 
-      let req = JSON.parse(JSON.stringify(template));
+      let ClientRecord = JSON.parse(JSON.stringify(template));
       let tipo_de_documento = null;
       switch(cols[2].innerText.length) {
         case 13:
@@ -61,32 +61,42 @@ const processPerson = (elem, pyld) => {
       }
 
 
-      req._id = id;
-      req.data.codigo = codigo;
-      req.data.idib = codigo;
-      req.data.id = codigo;
-      req.data.ruc_cedula = `[${cols[2].innerText}]`;
-      req.data.nombre = cols[1].innerText.replace(/\s\s+/g, ' ').trim();
-      req.data.telefono_1 = cols[4].innerText;
-      req.data.tipo_de_documento = tipo_de_documento;
-      req.data.email = cols[3].innerText;
+      ClientRecord._id = id;
+      ClientRecord.data.codigo = codigo;
+      ClientRecord.data.idib = codigo;
+      ClientRecord.data.id = codigo;
+      ClientRecord.data.ruc_cedula = `[${cols[2].innerText}]`;
+      ClientRecord.data.nombre = cols[1].innerText.replace(/\s\s+/g, ' ').trim();
+      ClientRecord.data.telefono_1 = cols[4].innerText;
+      ClientRecord.data.tipo_de_documento = tipo_de_documento;
+      ClientRecord.data.email = cols[3].innerText.trim();
 
-      req.data.updated = tStamp(new Date());
+      ClientRecord.data.updated = tStamp(new Date());
 
-      let opts = Object.assign(couchPutOpts(id), { body: req });
+      cy.log(cols[5]).debug(); //.eq(4).children().eq(0).click({ force: true });
 
-      // cy.log('-------------------');
+      // cols[5].children().eq(0).click({ force: true });
+      // cy.wait(100);
+
+
+      // cy.get('.modal-footer > .btn').click({ force: true });
+
+
+
+
+      let opts = Object.assign(couchPutOpts(id), { body: ClientRecord });
+
       cy.log(JSON.stringify(opts, null, 2));
       cy.log('-------------------');
 
 
-      cy.request(opts);
+      // cy.request(opts);
 
-      // console.log(`${JSON.stringify(req, null, 2)}`);
+      // console.log(`${JSON.stringify(ClientRecord, null, 2)}`);
 
       opts = null;
       tipo_de_documento = null;
-      req = null;
+      ClientRecord = null;
       id = null;
       codigo = null;
 
