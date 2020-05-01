@@ -17,7 +17,9 @@
     "clean": "rimraf dist",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
     "test": "jest --watch",
-    "lint": "esw -w src test"
+    "lint": "esw -w src test",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -50,7 +52,8 @@
     "queue": "^4.5.0",
     "relational-pouch": "^3.1.0",
     "rimraf": "^2.6.2",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.3",
@@ -111,5 +114,6 @@
   },
   "jest": {
     "testEnvironment": "node"
-  }
+  },
+  "snyk": true
 }
