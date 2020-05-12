@@ -1,9 +1,8 @@
+#!/usr/bin/env bash
+#
 source ./ErpNextQikInstall_0.sh;
 
-
-# sudo -A ls -la;  #  *** prime the sudo pwd ***
-
-read -n1 -r -p "Press <q>  to quit..." key
+read -n1 -r -p "Press <q>  to quit, any other to proceed..." key
 
 if [ "$key" = 'q' ]; then
   echo -e "Quitting";
@@ -19,7 +18,7 @@ elif [ "$key" = 's' ]; then
 # ####################################################################################################
   exit;
 else
-  echo -e "Working";
+  echo -e "\nCalibrating date & time...";
   sudo -A ntpdate pool.ntp.org;
 # ####################################################################################################
 
@@ -28,7 +27,7 @@ cd ${HOME}/frappe-bench/
 
 ./env/bin/pip3 install -e apps/frappe/
 # ./env/bin/pip3 install apps/frappe/
-./env/bin/pip3 install werkzeug==0.16.0
+# ./env/bin/pip3 install werkzeug==0.16.0
 bench start
 
 

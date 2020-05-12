@@ -1,9 +1,8 @@
+#!/usr/bin/env bash
+#
 source ./ErpNextQikInstall_0.sh;
 
-
-# sudo -A ls -la;  #  *** prime the sudo pwd ***
-
-read -n1 -r -p "Press <q>  to quit..." key
+read -n1 -r -p "Press <q>  to quit, any other to proceed..." key
 
 if [ "$key" = 'q' ]; then
   echo -e "Quitting";
@@ -17,7 +16,7 @@ elif [ "$key" = 's' ]; then
 # ####################################################################################################
   exit;
 else
-  echo -e "Working";
+  echo -e "\nCalibrating date & time...";
   sudo -A ntpdate pool.ntp.org;
 # ####################################################################################################
 
@@ -35,14 +34,14 @@ cat /etc/hosts;
 
 pushd ${HOME}/frappe-bench/;
 
-  source ${HOME}/.ssh/mysql_pwd.sh;
+  # source ${HOME}/.ssh/mysql_pwd.sh;
   export NEW_SITE="${THESITE}";
 
   echo -e "Creating the new '${NEW_SITE}' site in Frappe";
   # echo bench new-site --mariadb-root-password ${MYSQL_PWD} --admin-password ${ADMPWD}  ${NEW_SITE}
-  bench new-site --mariadb-root-password ${MYSQL_PWD} --admin-password ${ADMPWD}  ${NEW_SITE}
+  bench new-site --mariadb-root-password ${MYPWD} --admin-password ${ADMPWD}  ${NEW_SITE}
 
-  echo -e "Configuring the NGinx for the '${NEW_SITE}' site.";
+  echo -e "Configuring NGinx for the '${NEW_SITE}' site.";
   bench config dns_multitenant on
   echo "" > sites/currentsite.txt
   bench setup nginx
