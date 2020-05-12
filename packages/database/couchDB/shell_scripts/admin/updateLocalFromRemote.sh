@@ -10,6 +10,7 @@ echo -e "    .    .    .    .    .    .    .    .    .    .    .
 
 ";
 ${SCRIPTPATH}/pullFromRemote.sh -f;
+exit;
 
 echo -e "
 

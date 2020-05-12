@@ -71,6 +71,10 @@ EOF
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+  echo "$(date) |  Fixing XVFB bug in Cypress" | tee -a /tmp/pouchLog;
+  Xvfb :1 -screen 0 1280x800x24 &
+  export DISPLAY=:1
+
   echo "$(date) |  Starting now ..." | tee -a /tmp/pouchLog;
   node dist/index.js &
 

@@ -55,18 +55,18 @@ pushd ${DIR} >/dev/null;
   sudo chown ${COUCH_ADM}:${COUCH_ADM} ${MAIL_DIR};
   sudo chmod ugo+rwx ${MAIL_DIR};
 
-  echo "$(date) |    Trial 'npm install'" | tee -a /tmp/pouchLog;
-  export NODE_ICU_DATA='node_modules/full-icu/';
+  echo "$(date) |    Running 'npm install'" | tee -a /tmp/pouchLog;
   npm install;
-  if [ $? -ne 0 ]
-  then
-    echo "$(date) |    Full install attempt failed.  Separately installing 'full-icu'." | tee -a /tmp/pouchLog;
-    export NODE_ICU_DATA=
-    npm install full-icu;
-    export NODE_ICU_DATA='node_modules/full-icu/';
-    echo "$(date) |       ** Retrying full install **" | tee -a /tmp/pouchLog;
-    npm install;
-  fi;
+  # export NODE_ICU_DATA='node_modules/full-icu/';
+  # if [ $? -ne 0 ]
+  # then
+  #   echo "$(date) |    Full install attempt failed.  Separately installing 'full-icu'." | tee -a /tmp/pouchLog;
+  #   export NODE_ICU_DATA=
+  #   npm install full-icu;
+  #   export NODE_ICU_DATA='node_modules/full-icu/';
+  #   echo "$(date) |       ** Retrying full install **" | tee -a /tmp/pouchLog;
+  #   npm install;
+  # fi;
 
   echo "$(date) |    Running 'npm run prestart'" | tee -a /tmp/pouchLog;
   npm run prestart;

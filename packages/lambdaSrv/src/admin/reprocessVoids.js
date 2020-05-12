@@ -65,24 +65,42 @@ export const processVoids = async (voidsToProcess) => {
     // const seqPrefix = invoices[0].doc.data.sequential.toString().slice(0, 4);
   }
 
+  CLG(`Seq prefix: ${seqPrefix}`);
+  const maxSeqLen = 9;
   let subtractor = parseInt(invoices[0].doc.data.seqib.toString().slice(-5), 10) - 1;
+  const adder = parseInt(invoices[1].doc.data.sequential.toString().slice(-5), 10) - 1;
+  let lastSequenceNumber = 1;
 
   const writes = invoices.map((itm) => {
     const inv = itm;
     const seqBAPU = inv.doc.data.seqib.toString();
-    const isVoid = booleanVal(inv.doc.void);
-    if (isVoid || voidedIds.includes(seqBAPU)) {
-      inv.doc.void = true;
-      subtractor += 1;
-      inv.doc.data.sequential = 0;
-      inv.doc.data.codigo = '???-???-?????????';
-    } else {
-      inv.doc.void = false;
-      const seq = parseInt(seqBAPU.slice(-7), 10);
-      const maxSeqLen = 9;
-      const strSequential = `${seqPrefix}${(seq - subtractor).toString().padStart(maxSeqLen - seqPrefix.toString().length, '0')}`;
+    const { accessKey, authorizationStatus } = inv.doc;
+    if (authorizationStatus === 'AUTORIZADO') {
+      lastSequenceNumber = parseInt(accessKey.substring(30, 39), 10);
+      const strSequential = `${seqPrefix}${(lastSequenceNumber).toString().padStart(maxSeqLen - seqPrefix.toString().length, '0')}`;
       inv.doc.data.sequential = strSequential;
       inv.doc.data.codigo = `001-002-${strSequential}`;
+    // } else if (authorizationStatus !== 'FLAGGED') {
+    } else {
+      const isVoid = booleanVal(inv.doc.void);
+      if (isVoid || voidedIds.includes(seqBAPU)) {
+        inv.doc.void = true;
+        subtractor += 1;
+        inv.doc.data.sequential = 0;
+        inv.doc.data.codigo = '???-???-?????????';
+      } else {
+        inv.doc.void = false;
+        const seq = parseInt(seqBAPU.slice(-7), 10);
+        const strSequential = `${seqPrefix}${(seq - subtractor + adder).toString().padStart(maxSeqLen - seqPrefix.toString().length, '0')}`;
+        if (seqBAPU > '13130' && seqBAPU < '13139') {
+          CLG(`Resequence : ${strSequential} ${seq} ${subtractor} ${lastSequenceNumber} ${adder}`);
+        }
+        inv.doc.data.sequential = strSequential;
+        inv.doc.data.codigo = `001-002-${strSequential}`;
+        if (seqBAPU > '13130' && seqBAPU < '13139') {
+          CLG(`Seq: ${inv.doc.data.sequential} Void? :${isVoid}`);
+        }
+      }
     }
     return inv.doc;
   });

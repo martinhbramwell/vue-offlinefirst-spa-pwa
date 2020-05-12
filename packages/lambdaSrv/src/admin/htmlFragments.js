@@ -91,12 +91,12 @@ const frags = {
   </div>
 `,
 
-//   taskButtons: `
-//   <button class="button" type="button" onclick="firmar()">Firmar Facturas</button>
-//   <button class="button" type="button" onclick="enviar()">Enviar Facturas</button>
-//   <button class="button" type="button" onclick="verificar()">Verificar Facturas</button>
-//   <button class="button" type="button" onclick="mail()">Mail Facturas</button>
-// `,
+  //   taskButtons: `
+  //   <button class="button" type="button" onclick="firmar()">Firmar Facturas</button>
+  //   <button class="button" type="button" onclick="enviar()">Enviar Facturas</button>
+  //   <button class="button" type="button" onclick="verificar()">Verificar Facturas</button>
+  //   <button class="button" type="button" onclick="mail()">Mail Facturas</button>
+  // `,
 
   filterFields: `
   &nbsp; &nbsp; <span class="spanBox">

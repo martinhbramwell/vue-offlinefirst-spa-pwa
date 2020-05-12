@@ -58,7 +58,7 @@ const reply = (res, message) => {
   res.write(`</br>${message}`);
   res.write('</body></html>');
   res.end();
-}
+};
 
 const listReports = (req, res) => {
   const url = `${req.protocol}://${req.headers.host}${req.url}`;
@@ -160,7 +160,7 @@ export default async (req, res) => {
 
 
     CLG(`defMonth = ${JSON.stringify(defMonth, null, 2)}`);
-    const excelFile = `Facturacion_${fullMonthName}.xlsx`
+    const excelFile = `Facturacion_${fullMonthName}.xlsx`;
     const filePath = `${reportsLocation}/${excelFile}`;
 
     if (!fs.existsSync(filePath)) {
@@ -177,6 +177,7 @@ export default async (req, res) => {
           return fecha > defMonth.monthStart && fecha < defMonth.nextMonthStart;
         });
         // CDR(invoiceRecords);
+        /* eslint-disable prefer-destructuring */
         invoices = invoiceRecords.map((rec) => {
           const { data: d } = rec.doc;
           let subTotal = d.subTotal;
@@ -197,6 +198,7 @@ export default async (req, res) => {
             TOTAL: total,
           };
         });
+        /* eslint-enable prefer-destructuring */
         // CDR(invoices[0]);
       } catch (err) {
         CDR(err);

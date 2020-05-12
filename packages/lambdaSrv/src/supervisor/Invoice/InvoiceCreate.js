@@ -114,26 +114,23 @@ export default class {
 
         const previousPeriodEndSequenceNumber = process.env.CYPRESS_CH_FIRSTINVOICE_SEQ;
 
-        // const randy = 100300000;
-        // const randy = 100000 * (Math.floor(Math.random() * 1000) + 1000);
-        const randy = 0;
-        // const idem = new Date();
-        // const dy = idem.getDate().toString().padStart(2, '4');
-        // const hr = idem.getHours().toString().padStart(2, '3');
-        // const randy = parseInt(`${dy}${hr}00000`, 10);
+        const numberOfArchivedRecords = process.env.NUMBER_OF_ARCHIVED_RECORDS;
 
-        const seqib = newRecord.data.sequential + randy;
-        newRecord.data.seqib = seqib;
-        const newSeq = (seqib - previousPeriodEndSequenceNumber).toString().padStart(9, '0');
+        newRecord.data.seqib = newRecord.data.sequential;
+        const seq = newRecord.data.sequential + numberOfArchivedRecords;
+        const newSeq = (seq - previousPeriodEndSequenceNumber).toString().padStart(9, '0');
         newRecord.data.sequential = newSeq;
 
+        LG.info(`newRecord.data.sequential : ${newRecord.data.sequential}`);
+        LG.info(`previousPeriodEndSequenceNumber : ${previousPeriodEndSequenceNumber}`);
+        LG.info(`seq : ${seq}`);
         // newRecord.data.codigo = `001-002-${newRecord.data.sequential.toString().padStart(9, '0')}`;
         newRecord.data.codigo = `001-002-${newSeq}`;
         // LG.info(`(Invoice ${newRecord.data.sequential} has codigo ${newRecord.data.codigo}`);
         newRecord.data.pdv = 2;
 
         newRecord.hold = true;
-        newRecord.void = newRecord.data.sequential === randy;
+        newRecord.void = newRecord.data.sequential === numberOfArchivedRecords;
       } else {
         LG.warn(`\n\nAssuming we are loading a VueSPPWA invoice request. PK ${newRecord.data.idib} Serial ${newRecord.data.codigo}\n`);
         const maxRow = (await findMaxRow(this.lclDB, serialIndex));

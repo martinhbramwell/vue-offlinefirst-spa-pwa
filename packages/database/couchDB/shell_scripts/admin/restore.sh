@@ -6,6 +6,11 @@ initializeLocalConstants;
 
 export DATABASE_NAME="${PRD_COUCH_DATABASE_NAME}_${PRD_VERSION}";
 
+echo cat "${BACKUPS_DIR}/|${BACKUP_NAME_HOLDER_start}|${DATABASE_NAME}|${BACKUP_NAME_HOLDER_end}|";
+cat "${BACKUPS_DIR}/${BACKUP_NAME_HOLDER_start}${DATABASE_NAME}${BACKUP_NAME_HOLDER_end}";
+
+exit;
+
 export LATEST=$(cat "${BACKUPS_DIR}/${BACKUP_NAME_HOLDER_start}${DATABASE_NAME}${BACKUP_NAME_HOLDER_end}");
 
 echo "Will overwrite ${POUCH_DIR}/${DATABASE_NAME} from ${BACKUPS_DIR}/${LATEST}"

@@ -52,6 +52,31 @@ const sha1Base64 = (txt, codificacion = '') => {
   return Buffer.from(md.digest().toHex(), 'hex').toString('base64');
 };
 
+const extractVerificationCertificate = (p12) => {
+  const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
+  let result = null;
+  certBags[forge.oids.certBag].forEach((certBag) => {
+    if (certBag.attributes.friendlyName) {
+      if (certBag.attributes.friendlyName[0].includes('Verification Certificate')) {
+        result = certBag.cert;
+      }
+    }
+  });
+  return result;
+};
+
+const extractSigningKey = (p12) => {
+  const pkcs8bags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+  let result = null;
+  pkcs8bags[forge.oids.pkcs8ShroudedKeyBag].forEach((pkcs8bag) => {
+    if (pkcs8bag.attributes.friendlyName) {
+      if (pkcs8bag.attributes.friendlyName[0].includes('Signing Key')) {
+        result = pkcs8bag.key;
+      }
+    }
+  });
+  return result;
+};
 function firmarComprobante(p12cert, p12pwd, comprobante) {
   const arrayUint8 = new Uint8Array(p12cert);
   const p12B64 = forge.util.binary.base64.encode(arrayUint8);
@@ -60,15 +85,18 @@ function firmarComprobante(p12cert, p12pwd, comprobante) {
 
   const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, p12pwd);
 
-  const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
-  const { cert } = certBags[forge.oids.certBag][1];
-  const pkcs8bags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
-  const pkcs8 = pkcs8bags[forge.oids.pkcs8ShroudedKeyBag][1];
-  let { key } = pkcs8;
+  // const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
+  // const { cert } = certBags[forge.oids.certBag][1];
+  // const pkcs8bags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+  // const pkcs8 = pkcs8bags[forge.oids.pkcs8ShroudedKeyBag][1];
+  // let { key } = pkcs8;
 
-  if (key == null) {
-    key = pkcs8.asn1;
-  }
+  // if (key == null) {
+  //   key = pkcs8.asn1;
+  // }
+
+  const cert = extractVerificationCertificate(p12);
+  const key = extractSigningKey(p12);
 
   const certificateX509pem = forge.pki.certificateToPem(cert);
 

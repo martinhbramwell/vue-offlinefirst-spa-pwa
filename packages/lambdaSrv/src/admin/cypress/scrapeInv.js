@@ -50,7 +50,9 @@ export default async (req, res) => {
     /* eslint-disable max-len */
 
     setScraperControl({ _id: controlRecord, clientes: [], facturas: [], skim: true }); // eslint-disable-line object-curly-newline
+    // LG.info(`Running cypress spec ... ${path}/${scrapeInvoices}`);
     const resultClientsList = await cypress.run({ spec: `${path}/${scrapeInvoices}` });
+    // LG.info(`resultClientsList ... ${JSON.stringify(resultClientsList, null, 3)}`);
     LG.info(`Invoices listing results:\n${JSON.stringify(resultClientsList.config.env, null, 3)}`);
     res.write(', "type": "PersonsList"');
 
@@ -114,12 +116,15 @@ export default async (req, res) => {
     const count = rows.length;
     // LG.info(JSON.stringify(rows[0].doc.data.seqib, null, 2));
     const first = parseInt(rows[0].doc.data.seqib.toString().substr(-5), 10);
+    // const start = parseInt(rows[0].doc.data.sequential.toString().substr(-5), 10);
     // LG.info(JSON.stringify(rows[count - 1].doc.data.seqib, null, 2));
     const last = parseInt(rows[count - 1].doc.data.seqib.toString().substr(-5), 10);
     const expected = last - first + 1;
+    // const expected = last - first + start + 1;
     const missing = count - expected;
 
     LG.info(`Got ${count} docs. First ${first}. Last ${last}.`);
+    // LG.info(`Got ${count} docs. First ${first}. Last ${last}. Sequence start ${start}`);
     LG.info(`Expected count ${expected}. Diffrence? ${missing}`);
 
     if (missing) {
@@ -144,6 +149,7 @@ export default async (req, res) => {
           number: previous + 1,
         });
       });
+      LG.info('\n\n***********  RETRYING MISSED INVOICES ********** \n');
       LG.info(JSON.stringify(missed, null, 2));
 
       setScraperControl({ _id: controlRecord, invoices: missed });

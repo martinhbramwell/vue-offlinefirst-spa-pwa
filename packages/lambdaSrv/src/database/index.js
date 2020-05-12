@@ -31,6 +31,7 @@ PouchDB.plugin(adptrMemory);
 
 const userId = process.env.COUCH_ADMIN;
 
+LG.info(` *** Starting remote db *** ${rmtDb}`);
 export const databaseRemote = new PouchDB(rmtDb);
 export const databaseLocal = new PouchDB(lclDb, { adapter });
 
