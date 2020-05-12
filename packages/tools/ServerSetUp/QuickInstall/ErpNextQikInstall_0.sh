@@ -1,39 +1,48 @@
 #!/usr/bin/env bash
 #
-export MYPWD="";
-export ADMPWD="";
-export THESITE="my site";
+export MYPWD="plokplok.0.0.0";
+export ADMPWD="plokplok";
+export THESITE="einvoice";
 
 
 
 
 if [ "${BASH_SOURCE[0]}" -ef "$0" ]
 then
-	echo -e "
-  Steps from a completely raw install
-  ...................................
+	# echo -e "
+ #  Steps from a completely raw install
+ #  ...................................
 
-  1. SSH stuff
+ #  1. SSH stuff
+ #        # Create directory and keys file
+ #        mkdir ${HOME}/.ssh;
+ #        chmod u+x,go-rwx ${HOME}/.ssh;
 
-  2. APT house cleaning
-        echo -e "\n    ********* Updating ********* \n\n";
-        sudo -A apt -y update;
+ #        # Place pub keys of workstations
+ #        cat > ${HOME}/.ssh/authorized_keys
 
-        echo -e "\n    ********* Upgrading ********* \n\n";
-        sudo -A DEBIAN_FRONTEND=noninteractive apt -y upgrade;
-
-        echo -e "\n ********* Dist Upgrading ********* \n\n";
-        sudo -A apt -y dist-upgrade;
-
-        echo -e "\n    ********* Cleaning ********* \n\n";
-        sudo -A apt -y clean;
-
-        echo -e "\n    ********* Removing ********* \n\n";
-        sudo -A apt -y autoremove;
+ #        <ctrl>-d
 
 
+ #  2. APT house cleaning
+ #        echo -e "\n    ********* Updating ********* \n\n";
+ #        sudo -A apt -y update;
 
-  ";
+ #        echo -e "\n    ********* Upgrading ********* \n\n";
+ #        sudo -A DEBIAN_FRONTEND=noninteractive apt -y upgrade;
+
+ #        echo -e "\n ********* Dist Upgrading ********* \n\n";
+ #        sudo -A apt -y dist-upgrade;
+
+ #        echo -e "\n    ********* Cleaning ********* \n\n";
+ #        sudo -A apt -y clean;
+
+ #        echo -e "\n    ********* Removing ********* \n\n";
+ #        sudo -A apt -y autoremove;
+
+
+
+ #  ";
 
   echo -e "
 

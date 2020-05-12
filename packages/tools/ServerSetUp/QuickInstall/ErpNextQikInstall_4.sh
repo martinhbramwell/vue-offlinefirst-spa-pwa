@@ -74,7 +74,35 @@ pushd ${HOME}/frappe-bench/;
   bench --site ${NEW_SITE} install-app erpnext
 popd
 
+echo -e "
 
+
+The last two tasks will fail if the 'bench' is not running
+
+Check back to the other console to restart bench if it failed, executing:
+
+cd \${HOME}/frappe-bench
+bench start
+
+
+When bench has finished starting...";
+
+read -n1 -r -p "...press any key to proceed (or q to quit)..." key
+
+if [ "$key" != 'q' ]; then
+  echo -e "
+  Continuing...";
+  pushd ${HOME}/frappe-bench >/dev/null;
+    echo -e "\nClearing cache...";
+    bench --site ${THESITE} clear-cache;
+
+    echo -e "\nMigrating changes ...";
+    bench --site ${THESITE} migrate
+  popd >/dev/null;
+else
+  echo -e "
+  Skipped 'clear-cache' and 'migrate' ...";
+fi;
 
 
 # ####################################################################################################
@@ -85,20 +113,3 @@ Done
 ==========================================
 ";
 exit;
-
-
-
-
-
-# ####################################################################################################
-# ####################################################################################################
-
-
-if [ "${EUID:-0}" -ne 0 ]; then
-  echo "Please run as root, eg ==> sudo ./patchMyCnf.sh";
-  exit
-# else
-#   echo "Please do not run as root"
-#   exit
-fi
-
