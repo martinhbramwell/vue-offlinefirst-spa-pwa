@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-export MYPWD="plokplok.0.0.0";
-export ADMPWD="plokplok";
-export THESITE="einvoice";
+export MYPWD="";			# MySQL password
+export ADMPWD="";			# Administrator password
+export THESITE="my site";	# Site name
 
-
-
+export USERCTX=".profile";
+source ${HOME}/${USERCTX};
 
 if [ "${BASH_SOURCE[0]}" -ef "$0" ]
 then
@@ -39,9 +39,6 @@ then
 
  #        echo -e "\n    ********* Removing ********* \n\n";
  #        sudo -A apt -y autoremove;
-
-
-
  #  ";
 
   echo -e "
@@ -70,30 +67,36 @@ then
         sudo usermod -aG sudo erpdev;
 
         # Create directory and keys file
-        mkdir ${HOME}/.ssh;
-        chmod u+x,go-rwx ${HOME}/.ssh;
+        sudo mkdir /home/erpdev/.ssh;
 
         # Place pub keys of workstations
-        cat > ${HOME}/.ssh/authorized_keys
-
+        cat > /home/erpdev/.ssh/authorized_keys
+                  ** paste the text of your id_rsa.pub file here the hit '<ctrl>-d' to save and exit
         <ctrl>-d
-	 2. Put these files in that user's home directory, and run the command
+
+        # Fix permissions
+        sudo chmod    go-rwx /home/erpdev/.ssh;
+        sudo chmod -R  o-rwx /home/erpdev/.ssh;
+        sudo chmod     g-rwx /home/erpdev/.ssh/id_rsa;
+        sudo chown -R erpdev:erpdev /home/erpdev/.ssh;
+	 2. Logout as yourself.  Log back in as user 'erpdev'.
+	 3. Put these installation script files in erpdev's home directory, and run the command
 	       # Make scripts executable
 	       chmod +x ErpNextQikInstall*;
-	 3. The scripts use 'sudo -A' so you'll need to set up 'SUDO_ASKPASS' (see below)
-	 4. Execute script #0 to test if 'sudo -A' is working
+	 4. The scripts use 'sudo -A' so you'll need to set up 'SUDO_ASKPASS' (see below)
+	 5. Execute script #0 to test if 'sudo -A' is working
 	       ./ErpNextQikInstall_0.sh;
-	 5. Execute script #1 to set up all of ERPNext's dependencies and install the 'bench' installer
+	 6. Execute script #1 to set up all of ERPNext's dependencies and install the 'bench' installer
 	       ./ErpNextQikInstall_1.sh;
-	 6. Log out and log back in again
-	 7. Execute script #2 to set up your 'frappe-bench' directory
+	 7. Log out and log back in again
+	 8. Execute script #2 to set up your 'frappe-bench' directory
 	       ./ErpNextQikInstall_2.sh;
-	 8. Reboot the virtual machine
-	 9. Execute script #3 to install the full 'frappe' application
+	 9. Reboot the virtual machine
+	10. Execute script #3 to install the full 'frappe' application
 	       ./ErpNextQikInstall_3.sh;
-	10. Open up a second command line connection to your VM.
-	11. Execute script #4 to create a new site install into it the 'ERPNext' application
-	12. In the machine running the browser you'll use to work with ERPNext, be sure you have can reference it by name
+	11. Open up a second command line connection to your VM.
+	12. Execute script #4 to create a new site install into it the 'ERPNext' application
+	13. In the machine running the browser you'll use to work with ERPNext, be sure you have can reference it by name
 	       Edit your file '/etc/hosts' to include the IP address and name of the machine where you installed everything.
 	       192.168.122.99  mysite # ** EXAMPLE ***
 
@@ -107,7 +110,7 @@ then
 
 
 	*** SUDO_ASKPASS set up ***
-	1. Append this text to your ${HOME}/.bashrc
+	1. Append this text to your ${HOME}/.profile
 	       export SUDO_ASKPASS=${HOME}/.ssh/.supwd.sh;
 
 	2. Ensure you have a directory '${HOME}/.ssh'
@@ -140,7 +143,7 @@ then
 	chmod u+x,go-rwx ${SUPWDPATH};
 
 
-	export USERCTX=".bashrc";
+	export USERCTX=".profile";
 	export ASKPASS_ENVVAR="export SUDO_ASKPASS=\${HOME}/.ssh/.supwd.sh";
 	echo -e "
 	Ensuring the 'SUDO_ASKPASS' environment variable will be exported at log in....${ASKPASS_ENVVAR}";
