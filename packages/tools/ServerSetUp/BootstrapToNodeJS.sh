@@ -813,7 +813,6 @@ qTst () {
 echo -e "Effecting unfulfilled APT requirement installations..."
 dpkg -s sshpass &> /dev/null || sudo apt install sshpass;
 
-
 source ${CONFIG_FILE}  || exit;
 export ROOT_PASSWORD="${1:-${NEW_HOST_PWD}}";
 
@@ -847,6 +846,7 @@ echo -e "Preparing server: '${NEW_HOST}'  (${SERVER_IP}).
 # exit;
 
 
+
 echo -e "Attempting to connect to host alias ${NEW_HOST_NAME} as admin user '${NEW_HOST_ADMIN}:${NEW_HOST}'.";
 if ! ssh -o "StrictHostKeyChecking no" -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "Cannot log in yet. Preparing for key based logins";
@@ -859,6 +859,7 @@ fi;
 
 if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   echo -e "\n\nLogged in. Building server now";
+
   importSecretFiles;
   uploadServerSideFiles ${NEW_HOST_NAME};
   # prepareAPT;
@@ -874,12 +875,11 @@ if ssh -oBatchMode=yes -t ${NEW_HOST_NAME} "pwd" &> /dev/null; then
   # prepareClientSSH;
   # prepareNodeApp;
   # initializeCouchDB;
-
-  prepareErpNextUser;
+  # prepareErpNextUser;
   fixWordLeftRightBug;
-  uploadServerSideFiles ${PRD_ERPHOST_NAME};
-  prepareFrappe;
-  prepareErpNext;
+  uploadServerSideFiles ${ERPHOST_NAME};
+  # prepareFrappe;
+  # prepareErpNext;
   fixSSHPermissions;
   # # initializeErpNext;
 else

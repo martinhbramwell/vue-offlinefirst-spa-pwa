@@ -526,7 +526,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "I|Customer                                    (is backed up already)"
 
   export ORDERED_LIST_OF_DOC_TYPE_DELETES=(
-    "0|Blog_Post|Welcome"
+    # "0|Blog_Post|Welcome"
   );
 
   export ORDERED_LIST_OF_BULK_DOC_TYPES=(
@@ -540,7 +540,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "S|FiscalYear"
     # "S|WarehouseType"
     # "S|Warehouse"
-    "I|Blog_Post"
+    # "I|Blog_Post"
     # "I|Web_Page"
     # "I|Homepage_Section"
 
@@ -554,9 +554,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "I|Workstation"
     # "I|Operation"
     # "I|Routing"
-    # "I|BOM"
+    "I|BOM"
 
-    # "S|Customer"
+    "S|Customer"
   );
 
   # export ORDERED_LIST_OF_BULK_DOC_TYPES=(

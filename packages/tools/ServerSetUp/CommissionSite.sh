@@ -374,7 +374,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo -e "*** ${NEW_HOST_NAME} is alive. ***";
   # echo -e "\n${ERPNEXT_HOST}\n ${KEYS}\n ${ERPNEXT_PROTOCOL}";
 
-  # echo -e "${ERPNEXT_HOST} ${KEYS} ${ERPNEXT_PROTOCOL} ${ERPNEXT_ADMN}";
+  echo -e "${ERPNEXT_HOST} ${KEYS} ${ERPNEXT_PROTOCOL} ${ERPNEXT_ADMN}";
   ./ErpNextInitialData/tools/WaitForErpNextStart.sh ${ERPNEXT_HOST} ${KEYS} ${ERPNEXT_PROTOCOL} ${ERPNEXT_ADMN};
   echo -e "*** ERPNext is alive. ***";
 
@@ -400,11 +400,12 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
   declare finishInitializations=1;
   if [[ ${finishInitializations} = 1 ]]; then
-    getErpNextIinitialData;
-  echo -e "\n\n/* ~~~~~~~~~ Curtailed ~~~~~~~~~~~~~~~ */";
-  exit;
 
+#    getErpNextIinitialData;
     initializeErpNext;
+  # echo -e "\n\n/* ~~~~~~~~~ Curtailed ~~~~~~~~~~~~~~~ */";
+  # exit;
+
   else
     echo -e "\n\n *** ${SCRIPT_NAME} -- SKIPPED Bulk Data Operations ***\n\n";
   fi;
