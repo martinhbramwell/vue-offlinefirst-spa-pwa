@@ -530,6 +530,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   );
 
   export ORDERED_LIST_OF_BULK_DOC_TYPES=(
+    # "I|Blog_Post"
     # "S|Chart_of_Accounts_Importer"
     # "U|Company"
     # "I|Tax_Category"
@@ -540,7 +541,6 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "S|FiscalYear"
     # "S|WarehouseType"
     # "S|Warehouse"
-    # "I|Blog_Post"
     # "I|Web_Page"
     # "I|Homepage_Section"
 
@@ -554,7 +554,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "I|Workstation"
     # "I|Operation"
     # "I|Routing"
-    "I|BOM"
+    # "I|BOM"
 
     "S|Customer"
   );

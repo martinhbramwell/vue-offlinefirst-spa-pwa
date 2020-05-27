@@ -374,10 +374,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo -e "*** ${NEW_HOST_NAME} is alive. ***";
   # echo -e "\n${ERPNEXT_HOST}\n ${KEYS}\n ${ERPNEXT_PROTOCOL}";
 
-  echo -e "${ERPNEXT_HOST} ${KEYS} ${ERPNEXT_PROTOCOL} ${ERPNEXT_ADMN}";
+  echo -e "\nHost: ${ERPNEXT_HOST} Keys: ${KEYS} Protocol: ${ERPNEXT_PROTOCOL} Admin: ${ERPNEXT_ADMN}";
   ./ErpNextInitialData/tools/WaitForErpNextStart.sh ${ERPNEXT_HOST} ${KEYS} ${ERPNEXT_PROTOCOL} ${ERPNEXT_ADMN};
   echo -e "*** ERPNext is alive. ***";
-
 
   echo -e "\n\n/* ~~~~~~~~~ Commissioning Site ~~~~~~~~~~~~~~~ */";
 
@@ -398,10 +397,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo -e "*** ${SCRIPT_NAME} -- SKIPPED reverting to backup ***\n\n";
   fi;
 
+
   declare finishInitializations=1;
   if [[ ${finishInitializations} = 1 ]]; then
 
-#    getErpNextIinitialData;
+    # getErpNextIinitialData;
     initializeErpNext;
   # echo -e "\n\n/* ~~~~~~~~~ Curtailed ~~~~~~~~~~~~~~~ */";
   # exit;
