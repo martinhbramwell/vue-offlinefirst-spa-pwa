@@ -551,36 +551,20 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "I|Item_Attribute"
     # "I|Item_Group"
     # "I|Item"
-    # "I|Workstation"
-    # "I|Operation"
-    # "I|Routing"
-    # "I|BOM"
+    # "I|Item_Price"
 
-    "S|Customer"
+    "S|Naming_Series_Sales_Invoice"
+
+    # "S|Customer"
   );
 
   # export ORDERED_LIST_OF_BULK_DOC_TYPES=(
-  #   "I|Item"
-  # );
-
-
-  # export ORDERED_LIST_OF_BULK_DOC_TYPES=(
-  #   # "S|Chart_of_Accounts_Importer"
-  #   # "I|Account"
-  #   # "U|Company"
-  #   # "I|Warehouse"
-  #   # "I|UOM"
-  #   # "I|Item_Attribute"
-  #   # "I|Item_Group"
-  #   # "I|Supplier_Group"
-  #   # "I|Supplier"
+  #   # "S|Naming_Series_Sales_Invoice"
   #   # "I|Purchase_Taxes_and_Charges_Template"
   #   # "U|Mode_of_Payment"
   #   # "I|Account_Type"
-  #   # "S|WarehouseType"
   #   # "I|Bank"
   #   # "I|Bank_Account"
-  #   # "I|Item"
   #   # "I|Manufacturer"
   #   # "I|Item_Manufacturer"
   #   # "I|Workstation"

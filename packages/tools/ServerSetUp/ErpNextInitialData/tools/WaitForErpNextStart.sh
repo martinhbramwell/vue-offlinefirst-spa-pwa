@@ -39,4 +39,3 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
 fi;
 
-# curl --location --request GET 'https://erpn3.iridium.blue/api/resource/User/Administratox' \
