@@ -366,6 +366,7 @@ initializeErpNext () { funcTitle ${FUNCNAME[0]};
 };
 
 
+# export KEYS="0d1fuck179offe0:0dcd658a07bf94f";
 source ${HOME}/${SECRETS_FILE_PATH}/ErpNext_API_Keys.sh;
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
@@ -379,6 +380,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo -e "*** ERPNext is alive. ***";
 
   echo -e "\n\n/* ~~~~~~~~~ Commissioning Site ~~~~~~~~~~~~~~~ */";
+  # echo -e "\n\n/* ~~~~~~~~~ Curtailed ~~~~~~~~~~~~~~~ */";
+  # exit;
 
   export BACKUPS_DIR="${HOME}/Desktop/ErpNext_Master_Post_WIZARD_backup";
   export LATEST_BACKUP="CustomersAndAddresses.tar.gz";

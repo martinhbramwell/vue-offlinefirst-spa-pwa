@@ -526,13 +526,14 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "I|Customer                                    (is backed up already)"
 
   export ORDERED_LIST_OF_DOC_TYPE_DELETES=(
-    # "0|Blog_Post|Welcome"
+    "0|Blog_Post|Welcome"
   );
 
   export ORDERED_LIST_OF_BULK_DOC_TYPES=(
-    # "I|Blog_Post"
-    # "S|Chart_of_Accounts_Importer"
+    "I|Blog_Post"
+    # "S|Logo"
     # "U|Company"
+    # "S|Chart_of_Accounts_Importer"
     # "I|Tax_Category"
     # "I|Sales_Taxes_and_Charges_Template"
     # "I|Email_Domain"
@@ -553,7 +554,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # "I|Item"
     # "I|Item_Price"
 
-    "S|Naming_Series_Sales_Invoice"
+    # "S|Naming_Series_Sales_Invoice"
 
     # "S|Customer"
   );
