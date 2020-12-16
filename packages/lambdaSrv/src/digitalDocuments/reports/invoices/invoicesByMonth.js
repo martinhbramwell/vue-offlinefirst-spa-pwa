@@ -90,6 +90,10 @@ const listReports = (req, res) => {
   res.write(`       <li><a href="${url}?mes=may20">Mayo</a></li>`);
   res.write(`       <li><a href="${url}?mes=jun20">Junio</a></li>`);
   res.write(`       <li><a href="${url}?mes=jul20">Julio</a></li>`);
+  res.write(`       <li><a href="${url}?mes=ago20">Agosto</a></li>`);
+  res.write(`       <li><a href="${url}?mes=sep20">Septiembre</a></li>`);
+  res.write(`       <li><a href="${url}?mes=oct20">Octubre</a></li>`);
+  res.write(`       <li><a href="${url}?mes=nov20">Noviembre</a></li>`);
   res.write('    </ul>');
   res.write('  </li>');
   res.write('</ul>');

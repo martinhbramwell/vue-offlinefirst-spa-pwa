@@ -31,6 +31,8 @@ const processMonth = (pyld) => {
             const max = invoices.length;
             let ii = max  - 1;
             let sequential = -1;
+            let previous = "";
+            let codigo = "";
             do {
               const customerName = invoices[ii].children[1].children[0].innerText;
               const serialNumber = invoices[ii].children[2].innerText;
@@ -59,7 +61,10 @@ const processMonth = (pyld) => {
 
                 } else {
                   cy.task('consoleLogger', `\n###### Scrape invoice: ${JSON.stringify(invoice, null, 2)}`);
-                  scrapeInvoice(invoices[ii], pyld);
+                  codigo = invoice.data.codigo;
+                  cy.task('consoleLogger', `\n###### Previous invoice ID: ${previous}. Current: ${codigo}`);
+                  if (codigo !== previous) { scrapeInvoice(invoices[ii], pyld) }
+                  previous = codigo;
                 };
               };
               // });

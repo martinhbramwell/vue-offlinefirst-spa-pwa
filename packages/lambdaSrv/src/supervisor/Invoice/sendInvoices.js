@@ -1,3 +1,4 @@
+import process from 'process';
 import sendInvoice from './sendInvoice';
 
 import { logger as LG } from '../../utils';
@@ -22,7 +23,9 @@ const processing = async (args) => {
       Unsent invoices :: ${JSON.stringify(result.docs.length, null, 3)}\n
     `);
 
-    result.docs.forEach(async doc => sendInvoice({ doc, db }));
+    result.docs.forEach(async doc => {
+      sendInvoice({ doc, db });
+    });
   } catch (err) {
     LG.error(`Error sending invoices: ${JSON.stringify(err, null, 3)}`);
   }

@@ -32,6 +32,7 @@ const HE = CNV(20) * WA;
 const fntRegular = './public/fonts/SourceSansPro-Regular.ttf';
 const fntRegItalic = './public/fonts/SourceSansPro-RegularItalic.ttf';
 const fntBold = './public/fonts/SourceSansPro-Bold.ttf';
+const fntBoldItalic = './public/fonts/SourceSansPro-BoldItalic.ttf';
 const fntSemiBoldItalic = './public/fonts/SourceSansPro-SemiBoldItalic.ttf';
 
 const showCornerMarkers = false;
@@ -102,6 +103,11 @@ const placeVendorBox = (doc, dims) => {
       { continued: true })
     .font(fntBold, 8)
     .text('           SI');
+
+  const line6 = line5 + 13;
+  doc.font(fntRegular, 8)
+    .text('Contribuyente Régimen Microempresa', colAx, line6,
+      { width: midW, align: 'center' });
 };
 
 const placeSriBox = (doc, dims, invoice, qrcode) => {
@@ -177,9 +183,15 @@ const placeSriBox = (doc, dims, invoice, qrcode) => {
     .text(inv.authorized.replace('T', ' ').slice(0, 16), colBx, line6,
       { width: colBw, align: 'right' });
 
-  const line7 = line6 + 12;
-  doc.image(qrcode, colBx + CNV(20), line7,
+  const line7 = line6 + 18;
+  doc.image(qrcode, colBx + CNV(18), line7,
     { fit: [90, 90], align: 'center', valign: 'center' });
+
+  const line8 = line7 + 103;
+  doc.font(fntRegular, 8)
+    .text('Agente de retención · Resolución N° NAC-DNCRASC20-00000001', colAx, line8,
+    { width: midW, align: 'center' });
+
 };
 
 const placeBuyerBox = (doc, dims, invoice) => {
@@ -366,6 +378,36 @@ const prepareDataTable = (invoiceData) => {
   return table;
 };
 
+const prepareTermsTableHeader = () => [
+  [
+    'Forma de Pago',
+    'Plazo',
+    'Monto',
+  ],
+  [
+    'Formas de Pago',
+    'Plazo',
+    'Monto',
+  ],
+];
+
+const prepareTermsDataTable = (invoiceData) => {
+  const table = prepareTermsTableHeader();
+  const dataRow = [
+    ' Otros con utilizacion del Sistema Financiero ',
+    '0 días',
+    invoiceData.total,
+  ];
+  // invoiceData.itemes.forEach((item) => {
+  //   table[0].forEach((column) => {
+  //     dataRow.push(cellVal(column, item));
+  //   });
+  //   table.push(dataRow);
+  // });
+  table.push(dataRow);
+  return table;
+};
+
 const prepareWidthsList = (table, font, size, cellpad) => {
   const rows = [];
   for (let ix = 1; ix < table.length; ix += 1) {
@@ -464,7 +506,7 @@ const placeDetailsBox = (doc, dims, invoice) => {
     line += fontSize + 2;
   }
 
-  line += fontSize;
+  line += fontSize - 1;
   // doc.lineWidth(10);
   doc.moveTo(x, line).lineTo(x + w, line).stroke();
 
@@ -537,6 +579,66 @@ const placeTotalsBox = (doc, dims, invoice) => {
   });
 };
 
+
+const placeTermsBox = (doc, dims, invoice) => {
+  const { top, left, width, height } = dims; // eslint-disable-line object-curly-newline
+
+  const inv = invoice;
+  const { data: d } = inv;
+
+  const theFont = fntRegular;
+  const fontSize = 9;
+
+  const y = VE + CNV(top);
+  const x = HE + CNV(left);
+  const w = CNV(width) * WA;
+  const h = CNV(height) * HA;
+
+  // const lpad = 6;
+  const tpad = 2;
+  const cellpad = 2;
+
+  // let size = null;
+  // const lineSp = 14;
+
+  const table = prepareTermsDataTable(d);
+  // const table = prepareDataTable(d);
+  const colWidths = prepareWidthsList(table, theFont, fontSize, cellpad);
+  const adjustedColumnWidths = prepareAdjustedWidthsList(w, colWidths);
+  const columnsLeftEdges = prepareLeftEdgesList(adjustedColumnWidths, x);
+
+  doc.lineJoin('miter').roundedRect(x, y, w, h, 8).stroke();
+
+  drawColumnSeparators(doc, columnsLeftEdges, y, h);
+
+  doc.font(theFont, fontSize);
+
+  let line = y + tpad;
+
+  const headerRow = 1;
+  const itemsRow = 2;
+  for (let iy = headerRow; iy < itemsRow; iy += 1) {
+    for (let ix = 0; ix < table[headerRow].length; ix += 1) {
+      doc.text(table[iy][ix], columnsLeftEdges[ix], line,
+        { width: adjustedColumnWidths[ix], align: 'center' });
+    }
+    line += fontSize + 2;
+  }
+
+  line += fontSize;
+  // doc.lineWidth(10);
+  doc.moveTo(x, line).lineTo(x + w, line).stroke();
+
+  line += 4;
+  for (let iy = itemsRow; iy < table.length; iy += 1) {
+    for (let ix = 0; ix < table[headerRow].length; ix += 1) {
+      doc.text(table[iy][ix], columnsLeftEdges[ix], line,
+        { width: adjustedColumnWidths[ix], align: 'center' });
+    }
+    line += fontSize + 2;
+  }
+};
+
 const closeStream = stream => new Promise(resolve => stream.on('finish', resolve));
 
 const pdfgen = async (invoice, names) => {
@@ -580,8 +682,8 @@ const pdfgen = async (invoice, names) => {
   const logoDimensions = {
     top: 0,
     left: 0,
-    width: 82,
-    height: 35,
+    width: 90,
+    height: 40,
   };
   placeLogo(doc, logoDimensions);
 
@@ -592,7 +694,7 @@ const pdfgen = async (invoice, names) => {
     top: logoDimensions.top + logoDimensions.height + logoBottomMargin,
     left: logoDimensions.left,
     width: 82,
-    height: 35,
+    height: 40,
   };
   placeVendorBox(doc, vendDimensions);
 
@@ -603,7 +705,7 @@ const pdfgen = async (invoice, names) => {
     top: 0,
     left: vendDimensions.left + vendDimensions.width + vendRightMargin,
     width: 95,
-    height: vendDimensions.top + vendDimensions.height + 1,
+    height: vendDimensions.top + vendDimensions.height + 2,
   };
   const qrcode = `${mailDir}/${mailFile}.png`;
   // CLG(vendDimensions.height);
@@ -625,7 +727,7 @@ const pdfgen = async (invoice, names) => {
     top: buyerDimensions.top + buyerDimensions.height + 2,
     left: buyerDimensions.left,
     width: buyerDimensions.width,
-    height: 60,
+    height: 50,
   };
   placeDetailsBox(doc, detailsDimensions, invoice);
 
@@ -639,6 +741,36 @@ const pdfgen = async (invoice, names) => {
   };
   placeTotalsBox(doc, totalsDimensions, invoice);
 
+  /*  Terms Box */
+  const termsDimensions = {
+    top: detailsDimensions.top + detailsDimensions.height + 2,
+    left: logoDimensions.left,
+    width: vendDimensions.width,
+    height: 20,
+  };
+
+  placeTermsBox(doc, termsDimensions, invoice);
+
+  let x_extraInfo = HE + CNV(logoDimensions.left + 7);
+  let y_extraInfo = VE + CNV(termsDimensions.top + termsDimensions.height + 3);
+  // doc.moveTo(x_extraInfo, y_extraInfo);
+  doc.font(fntRegular, 12)
+      .text('Informacion Adiciónal', x_extraInfo, y_extraInfo,
+        { width: 140, align: 'left' });
+
+  y_extraInfo += 20;
+
+  doc.font(fntRegular, 10)
+      .text('Enviar retenciones a: ', x_extraInfo, y_extraInfo,
+        { width: 140, align: 'left' });
+
+  x_extraInfo += 95;
+
+  doc.font(fntBoldItalic, 10)
+      .text('logichemec@gmail.com', x_extraInfo, y_extraInfo,
+        { width: 140, align: 'left' });
+
+
   doc.info.Title = `Factura de LogiChem #${invoice.data.codigo}`;
   doc.info.Author = `${invoice.data.nombreResponsable}`;
   doc.info.Subject = `Para ${invoice.data.nombreCliente}`;
@@ -648,7 +780,8 @@ const pdfgen = async (invoice, names) => {
       `${mailDir}`,
       `${process.env.MAIL_DIR}/${fechaShort}_${d.sequential}`,
     );
-    CLG('Success writing PDF!');
+    CLG(`Success writing PDF!`);
+    // CLG(`Success writing PDF!\n${mailDir}\n${process.env.MAIL_DIR}/${fechaShort}_${d.sequential}`);
   } catch (err) {
     CER(err);
   }

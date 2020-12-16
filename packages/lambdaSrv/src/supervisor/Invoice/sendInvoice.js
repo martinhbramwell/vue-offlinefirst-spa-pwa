@@ -78,6 +78,14 @@ const send = async (args) => {
     if (jsonResponse.reason && jsonResponse.reason.code === 43) jsonResponse.flag = 'accepted'; // eslint-disable-line max-len
 
     try {
+      const fake = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
+      const pt = await db.put(fake);
+    } catch (errResult) {
+      CLG(`Faked error`);
+      LG.error(`Faked error :: ${errResult} with invoice ${inv._id}`);
+    }
+
+    try {
       LG.verbose(`Upload response for invoice #${inv.data.codigo} : ${jsonResponse.flag}`);
       const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
       // CLG("Got fresh invoice record copy...");
@@ -90,10 +98,10 @@ const send = async (args) => {
       // CLG("Putting acceptance result...");
       // CDR(fresh);
       const pt = await db.put(fresh);
-      LG.verbose(`Put acceptance result : ${JSON.stringify(pt, null, 2)}`);
+      LG.info(`Put acceptance result : ${JSON.stringify(pt, null, 2)}`);
     } catch (errResult) {
       CLG(`Error saving acceptance result for ${inv.data.codigo}`);
-      LG.error(errResult);
+      LG.error(`While saving acceptance result for ${inv.data.codigo} :: ${errResult}`);
     }
 
     try {
@@ -104,7 +112,7 @@ const send = async (args) => {
       const fresh = await db.get(inv._id); // eslint-disable-line no-underscore-dangle
       LG.verbose(`Will save reception response as attachment.  Id :: ${fresh._id}. Rev :: ${fresh._rev}`); // eslint-disable-line no-underscore-dangle
       const attch = await db.putAttachment(fresh._id, 'respuestaSRI', fresh._rev, attachment, 'text/plain'); // eslint-disable-line no-underscore-dangle
-      LG.verbose(`Saved reception response as attachment ${JSON.stringify(attch, null, 2)}`);
+      LG.info(`Saved reception response as attachment ${JSON.stringify(attch, null, 2)}`);
     } catch (errAttch) {
       CLG(`Error saving attachment for ${inv.data.codigo}`);
       LG.error(errAttch);

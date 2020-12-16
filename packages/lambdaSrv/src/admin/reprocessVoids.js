@@ -92,6 +92,7 @@ export const processVoids = async (voidsToProcess) => {
         inv.doc.void = false;
         const seq = parseInt(seqBAPU.slice(-7), 10);
         const strSequential = `${seqPrefix}${(seq - subtractor + adder).toString().padStart(maxSeqLen - seqPrefix.toString().length, '0')}`;
+        // CLG(`Processing : ${strSequential} ${seq}`);
         if (seqBAPU > '13130' && seqBAPU < '13139') {
           CLG(`Resequence : ${strSequential} ${seq} ${subtractor} ${lastSequenceNumber} ${adder}`);
         }
