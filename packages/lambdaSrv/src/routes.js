@@ -7,6 +7,7 @@ import reprocessVoids from './admin/reprocessVoids';
 import updateRange from './admin/updateRange';
 import manageInvoices from './admin/manageInvoices';
 import scrapeInv from './admin/cypress/scrapeInv';
+import checkForNewInvoices from './admin/reCheck';
 
 import inspectInvoices from './inspections/inspectInvoices';
 import inspectPersons from './inspections/inspectPersons';
@@ -106,6 +107,10 @@ routes.get('/reprocessVoids', (req, res, next) => {
 
 routes.get('/facturasPorMes', (req, res, next) => {
   invoicesByMonth(req, res, next);
+});
+
+routes.get('/recheck', (req, res, next) => {
+  checkForNewInvoices(req, res, next);
 });
 
 export default routes;
