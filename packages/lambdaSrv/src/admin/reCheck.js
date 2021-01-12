@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { logger as LG } from '../utils'; // eslint-disable-line no-unused-vars
 
+import latinise from './latinise';
+
 /* eslint-disable no-underscore-dangle */
 
 // import listRange from '../utils/listRange';
@@ -47,8 +49,12 @@ const getLegalIDType = (legalId) => {
 };
 
 const applyBapuDataToCouchPersonRecord = (aPartner, aCustomer) => {
+  // CLG(`aCustomer id ${aCustomer.idib}`);
   let cust = {};
   cust = aCustomer;
+
+  CLG('aCustomer.data.nombre');
+  CLG(`${latinise(aCustomer.data.nombre)}`)
 
   let theCustomer = {};
   try {
@@ -61,10 +67,13 @@ const applyBapuDataToCouchPersonRecord = (aPartner, aCustomer) => {
     // CLG(`Partner : ${pId} - ${pName}`);
     // CLG(`Customer : ${cId} - ${cName}`);
 
+    const fixedPName = latinise(pName);
+    const fixedCName = latinise(cName);
+
     if (cust._id === '') {
       CLG('Make new record');
       cust._id = makeNewKeyFromId(partner_id);
-    } else if (pId !== cId || pName !== cName) {
+    } else if (pId !== cId || fixedPName !== fixedCName) {
       throw new Error(`[applyBapuDataToCouchPersonRecord] ID or name mismatch: >${cId}< vs >${pId}< OR >${cName}< vs >${pName}<`);
     }
 
@@ -89,7 +98,7 @@ const applyBapuDataToCouchPersonRecord = (aPartner, aCustomer) => {
     theCustomer.data.id = pId.toString();
     theCustomer.data.direccion = aPartner.street_acc;
 
-    theCustomer.data.email = aPartner.partner_email;
+    theCustomer.data.email = aPartner.partner_email.trim();
     theCustomer.data.mobile = aPartner.partner_celular_phone;
 
     CLG(`Customer record loaded with BAPU data :: ${theCustomer._id}`);
@@ -180,12 +189,19 @@ const getLastInvoiceFromCouch = async () => {
   try {
     const response = await axios(lastOpts);
     // CDR(response.data);
-    rslt.idBAPU = response.data.rows[0].doc.data.idib;
-    rslt.seqSRI = response.data.rows[0].doc.data.sequential;
-    CLG(`Retrieved last invoice. Id = '${JSON.stringify(rslt, null, 2)}'`);
+    const {
+      idib,
+      sequential,
+      seqib,
+      codigo,
+    } = response.data.rows[0].doc.data;
+    rslt.idBAPU = idib;
+    rslt.seqSRI = sequential;
+
+    CLG(`Last Gestor invoice. Series: '${codigo}'. Old PDV: '001-001-${seqib.toString().padStart(9, 0)}'. BAPU Id: '${idib}'. `);
     return rslt;
-  } catch (error) {
-    throw new NoMoreData(`[getLastInvoiceFromCouch] Couldn't retrieve last invoice view.  Cause ${error}`);
+  } catch (e) {
+    throw new Error(`[getLastInvoiceFromCouch] Couldn't retrieve last invoice view.  Cause ${e}`);
   }
 };
 
@@ -194,13 +210,21 @@ const getNextInvoiceFromBAPU = async (idNext) => {
   const invoiceOpts = bapuGetOpts(`${invoiceByID}=${idNext}`);
   try {
     const response = await axios(invoiceOpts);
+    const { data } = response;
+    if (data.error) {
+      throw new NoMoreData(`No data for BAPU invoice : ${idNext}.`);
+    }
     rslt = response.data.invoice_head;
-    rslt.items = response.data.invoice_lines;
     // CDR(rslt);
+    rslt.items = response.data.invoice_lines;
     CLG(`Retrieved next BAPU invoice :: '${rslt.invoice_id}'`);
     return rslt;
-  } catch (error) {
-    throw new Error(`[getNextInvoiceFromBAPU] Couldn't retrieve next invoice : ${idNext}.  Cause ${error}`);
+  } catch (e) {
+    if (e instanceof NoMoreData) {
+      throw e;
+    } else {
+      throw new Error(`[getNextInvoiceFromBAPU] Couldn't retrieve next invoice : ${idNext}.  Cause ${e}`);
+    }
   }
 };
 
@@ -208,8 +232,8 @@ const reindexCouchByPersonId = async () => {
   const indexOpts = couchPostOpts('_index');
   indexOpts.data = { index: { fields: ['data.id'] }, name: 'personId', type: 'json' };
   try {
-    const response = await axios(indexOpts);
-    CLG(`Created CouchDb index :: '${response.data.name}'`);
+    await axios(indexOpts);
+    // CLG(`Created CouchDb index :: '${response.data.name}'`);
   } catch (error) {
     throw new Error(`[reindexCouchByPersonId] Can't create CouchDb index: ${indexOpts.data.index.name}`);
   }
@@ -219,14 +243,14 @@ const retrieveCouchPersonById = async (idPerson) => {
   let rslt = {};
   const findOpts = couchPostOpts('_find');
   findOpts.data = { selector: { 'data.id': { $eq: idPerson.toString() } } };
-  CLG('Find with ...');
-  CDR(findOpts.data);
+  // CLG('Find with ...');
+  // CDR(findOpts.data);
   try {
     const response = await axios(findOpts);
-    CDR(response.data);
+    // CDR(response.data);
     const { docs } = response.data;
     if (docs.length < 1) {
-      rslt = template;
+      rslt = Object.assign({}, template);
       delete rslt._rev;
       CLG('Will insert new person from template');
     } else if (docs.length < 2) {
@@ -237,6 +261,8 @@ const retrieveCouchPersonById = async (idPerson) => {
       rslt = first._id.startsWith('A_Person') ? first : second;
       CLG(`Will update EXISTING person :: '${rslt.data.nombre}'`);
     }
+    // CLG('Returning template');
+    // CDR(rslt);
     return rslt;
   } catch (e) {
     throw new Error(`[retrieveCouchPersonById] Couldn't retrieve person: ${idPerson}.  Cause : ${e.message}`);
@@ -263,12 +289,12 @@ const writePersonRecordToCouch = async (person) => {
   const customerOpts = couchPutOpts(pers._id);
   if (pers._rev === 'NONE') delete pers._rev;
   customerOpts.data = pers;
-  CDR(customerOpts);
+  // CDR(customerOpts);
   try {
     const response = await axios(customerOpts);
     rslt = response.data;
     CLG('Customer record written to CouchDb.');
-    CDR(rslt);
+    // CDR(rslt);
   } catch (e) {
     throw new Error(`[writePersonRecordToCouch] Couldn't upsert customer : ${pers._id}.  Cause : ${e.message}`);
   }
@@ -277,7 +303,7 @@ const writePersonRecordToCouch = async (person) => {
 
 
 const applyBapuDataToCouchInvoiceRecord = (previousSequential, invoice) => {
-  CDR(invoice);
+  // CDR(invoice);
 
   CLG(`Previous sequential = '${previousSequential}'`);
   const sequential = (parseInt(previousSequential, 10) + 1).toString().padStart(9, 0);
@@ -318,7 +344,7 @@ const applyBapuDataToCouchInvoiceRecord = (previousSequential, invoice) => {
       count,
       itemes,
 
-      nombreCliente: invoice.partner_name,
+      nombreCliente: invoice.partner_name.trim(),
       fecha: invoice.invoice_creation_date,
       estado: `${invoice.invoice_status === 'P' ? '' : 'NO '}PAGADA`,
       nombreResponsable: `Facturado por: ${invoice.username}`,
@@ -326,7 +352,7 @@ const applyBapuDataToCouchInvoiceRecord = (previousSequential, invoice) => {
       pdv: 2,
 
       sequential,
-      idib: parseInt(idib),
+      idib: parseInt(idib, 10),
 
       subTotalConImpuesto: twoCents(invoice.invoice_subtotal_tax_amount),
       subTotalSinImpuesto: twoCents(invoice.invoice_subtotal_iva_cero_amount),
@@ -336,11 +362,11 @@ const applyBapuDataToCouchInvoiceRecord = (previousSequential, invoice) => {
       totalImpuesto: twoCents(totalImpuesto),
       total,
 
-      email: invoice.partner_email,
+      email: invoice.partner_email.trim(),
       direccion: invoice.street_acc,
       legalId: `[${invoice.partner_legal_id}]`,
       telefono: invoice.partner_telf_primary,
-      telefono_2: invoice.partner_telf_secundary == '' ? 'nulo' : invoice.partner_telf_secundary,
+      telefono_2: invoice.partner_telf_secundary === '' ? 'nulo' : invoice.partner_telf_secundary,
       mobile: invoice.partner_celular_phone,
       seqib: parseInt(invoice.invoice_number.split('-')[2], 10),
     },
@@ -359,7 +385,7 @@ const writeInvoiceRecordToCouch = async (inv) => {
 
   const invoiceOpts = couchPutOpts(invoice._id);
   invoiceOpts.data = invoice;
-  CDR(invoiceOpts);
+  // CDR(invoiceOpts);
   try {
     const response = await axios(invoiceOpts);
     rslt = response.data;
@@ -372,9 +398,7 @@ const writeInvoiceRecordToCouch = async (inv) => {
 };
 
 export default async (req, res) => {
-  CLG(`
-
-      ========================`);
+  CLG('========================`');
 
   try {
     reindexCouchByPersonId();
@@ -383,13 +407,17 @@ export default async (req, res) => {
     const nextInvoiceId = lastInvoiceId + 1;
 
     const nextInvoice = await getNextInvoiceFromBAPU(nextInvoiceId);
+    const {
+      invoice_id: invoiceId,
+      partner_id: customerId,
+      invoice_number: oldPdvSeq,
+    } = nextInvoice;
 
-    const { invoice_id: invoiceId, partner_id: customerId } = nextInvoice;
     CLG(`Got invoice '${invoiceId}' of customer :: '${customerId}'`);
 
     const fakeNoSuchPerson = false;
     const nextInvoiceCustomer = await retrieveCouchPersonById(fakeNoSuchPerson ? 2345 : customerId);
-    CDR(nextInvoiceCustomer);
+    // CDR(nextInvoiceCustomer);
 
     const bapuCustomer = await retrieveBapuPartnerById(customerId);
     CLG(`Got BAPU customer :: '${bapuCustomer.partner_name}'`);
@@ -405,7 +433,7 @@ export default async (req, res) => {
     const couchInvoice = applyBapuDataToCouchInvoiceRecord(lastSequential, nextInvoice);
     const { codigo: sriSequential } = couchInvoice.data;
     // CDR(couchInvoice);
-    CDR(couchInvoice.data);
+    // CDR(couchInvoice.data);
     // CLG(`${JSON.stringify(couchInvoice,_id null, 2)}`);
 
     const { id: invoiceRecordId } = await writeInvoiceRecordToCouch(couchInvoice);
@@ -413,12 +441,18 @@ export default async (req, res) => {
     // CLG(`${JSON.stringify(writeResult, null, 2)}`);
 
     CLG(`sriSequential : ${sriSequential}`);
-    res.send({ Result: `Completed data updates successfully for invoice '${invoiceId}'.`, invoiceRecordId, sriSequential, personRecordId });
+    res.send({
+      Result: `Completed data updates successfully for invoice '${invoiceId}'.`,
+      invoiceRecordId,
+      sriSequential,
+      personRecordId,
+      oldPdvSeq,
+    });
 
     CLG('--------------------|||----------------------');
   } catch (e) {
     if (e instanceof NoMoreData) {
-      // statements to handle TypeError exceptions
+      res.send({ Result: e.message });
     } else {
       const msg = `${e.name}: ${e.message}`;
       CLG(msg);
@@ -431,6 +465,6 @@ export default async (req, res) => {
     CLG('hidden');
   }
 
-  CLG(`reCheck.js  
-      ========================\n\n`);
+  CLG(`=====  reCheck.js  =====
+  `);
 };
