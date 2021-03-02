@@ -46,7 +46,7 @@
     "pouchdb": "^7.0.0",
     "pouchdb-adapter-memory": "^7.0.0",
     "pouchdb-find": "^7.0.0",
-    "pug": "^2.0.0-beta11",
+    "pug": "^3.0.1",
     "queue": "^4.5.0",
     "relational-pouch": "^3.1.0",
     "rimraf": "^2.6.2",
