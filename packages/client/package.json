@@ -13,9 +13,9 @@
   "dependencies": {
     "@casl/ability": "^2.5.0",
     "@casl/vue": "^0.4.3",
-    "@cypress/webpack-preprocessor": "^3.0.0",
+    "@cypress/webpack-preprocessor": "^4.0.0",
     "@movilizame/relational-pouch": "^3.0.1",
-    "@vue/cli-service": "^3.0.5",
+    "@vue/cli-service": "^5.0.1",
     "awesomplete": "^1.1.2",
     "axios": "^0.18.0",
     "bavaria-ipsum": "^1.0.3",
