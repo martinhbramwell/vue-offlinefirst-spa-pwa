@@ -20,7 +20,7 @@
     "axios": "^0.18.0",
     "bavaria-ipsum": "^1.0.3",
     "buefy": "^0.7.0",
-    "jsonwebtoken": "^8.3.0",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.11",
     "pouchdb-browser": "^7.0.0",
     "pouchdb-debug": "^7.0.0",
