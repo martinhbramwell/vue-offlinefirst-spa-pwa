@@ -24,7 +24,7 @@
     "lodash": "^4.17.11",
     "pouchdb-browser": "^7.0.0",
     "pouchdb-debug": "^7.0.0",
-    "pouchdb-find": "^7.0.0",
+    "pouchdb-find": "^7.2.2",
     "pouchdb-live-find": "^0.4.0",
     "register-service-worker": "^1.0.0",
     "v-calendar": "^0.9.7",
