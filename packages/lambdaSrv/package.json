@@ -48,8 +48,8 @@
     "pouchdb-find": "^7.0.0",
     "pug": "^2.0.0-beta11",
     "queue": "^4.5.0",
-    "relational-pouch": "^3.1.0",
-    "rimraf": "^2.6.2",
+    "relational-pouch": "^4.0.0",
+    "rimraf": "^4.0.0",
     "winston": "^3.1.0"
   },
   "devDependencies": {
