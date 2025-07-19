@@ -42,7 +42,7 @@
     "chokidar": "^2.0.4",
     "express": "^4.16.2",
     "logform": "^1.10.0",
-    "morgan": "^1.9.0",
+    "morgan": "^1.10.1",
     "pouchdb": "^7.0.0",
     "pouchdb-adapter-memory": "^7.0.0",
     "pouchdb-find": "^7.0.0",
